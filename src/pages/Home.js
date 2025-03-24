@@ -1,5 +1,6 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Container, Button, Card, Row, Col } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
 import LogoGrande from "../assets/LogoGrande.png";
 
@@ -7,36 +8,78 @@ const HomePage = () => {
   return (
     <div className="App">
       <CustomNavbar />
-      <div className="container text-center mt-5">
+      <Container className="text-center mt-5">
         {/* Logo */}
         <div className="d-flex justify-content-center mb-4">
-          <img src={LogoGrande} alt="UniLiving Logo" className="img-fluid" style={{ maxWidth: "100%", height: "auto", maxHeight: "200px" }} />
+          <img 
+            src={LogoGrande} 
+            alt="UniLiving Logo" 
+            className="img-fluid" 
+            style={{ 
+              maxWidth: "100%", 
+              height: "auto", 
+              maxHeight: "200px" 
+            }} 
+          />
         </div>
         
         {/* Botón de explorar */}
-        <button className="btn px-4 py-2 mb-4" style={{ borderRadius: "25px", backgroundColor: "#000842", color: "white" }}>
+        <Button 
+          variant="primary"
+          size="lg"
+          className="px-5 py-3 mb-5 fw-bold"  
+          style={{
+            borderRadius: "30px",           
+            backgroundColor: "#000842",
+            borderColor: "#000842",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",  
+            transition: "all 0.3s ease",    
+            letterSpacing: "0.5px",         
+            fontSize: "1.1rem",             
+            ':hover': {
+              transform: "translateY(-2px)", 
+              boxShadow: "0 6px 12px rgba(0, 0, 0, 0.25)"
+            }
+          }}
+        >
           EXPLORAR
-        </button>
+        </Button>
         
         {/* Área de información */}
-        <div className="row">
-          <div className="col-md-4 p-2">
-            <div className="card p-4 text-center w-100" style={{ backgroundColor: "#D6EAFF", height: "200px" }}>
-              Área de información
-            </div>
-          </div>
-          <div className="col-md-4 p-2">
-            <div className="card p-4 text-center w-100" style={{ backgroundColor: "#D6EAFF", height: "200px" }}>
-              Área de información
-            </div>
-          </div>
-          <div className="col-md-4 p-2">
-            <div className="card p-4 text-center w-100" style={{ backgroundColor: "#D6EAFF", height: "200px" }}>
-              Área de información
-            </div>
-          </div>
-        </div>
-      </div>
+        <Row className="g-4">
+          <Col md={4}>
+            <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="fw-bold text-center mb-3">Área de información 1</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis hendrerit tellus vitae odio pellentesque, vel cursus urna pellentesque. Fusce vel sagittis nisl. Nulla ultricies risus sed magna euismod, vel efficitur lectus molestie. In hac habitasse platea dictumst. Sed blandit arcu.                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          <Col md={4}>
+            <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="fw-bold text-center mb-3">Área de información 2</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque metus magna, ornare a pretium eget, efficitur consectetur quam. Curabitur feugiat semper lacus, non eleifend nibh vulputate id. Etiam id nisi.
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          <Col md={4}>
+            <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="fw-bold text-center mb-3">Área de información 3</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris a augue sed dui varius eleifend vel sit amet mauris. Sed consequat enim erat, in scelerisque massa congue eu. Vestibulum fringilla purus eu tristique blandit. Suspendisse ut venenatis neque, ut faucibus odio. Sed tempor condimentum commodo. Aliquam erat volutpat. Curabitur nec egestas enim. Aenean hendrerit imperdiet lacinia. 
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };
