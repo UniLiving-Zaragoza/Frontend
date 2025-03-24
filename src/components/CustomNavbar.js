@@ -31,22 +31,27 @@ const CustomNavbar = () => {
       </Navbar.Toggle>
       
       <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="me-auto ms-4">
+        <Nav className="me-auto ms-lg-4">
+
+          <div className="d-lg-none border-top border-secondary mt-2"></div>
+          
           <Nav.Link href="#explore" className="text-white mx-2">Explorar</Nav.Link>
           <Nav.Link href="#analytics" className="text-white mx-2">Analíticas</Nav.Link>
           <Nav.Link href="#search" className="text-white mx-2">Buscar compañero</Nav.Link>
           <Nav.Link href="#chat" className="text-white mx-2">Chat</Nav.Link>
+          
+          <div className="d-lg-none border-top border-secondary mb-2"></div>
         </Nav>
         
-        <Form className="d-flex">
-          <Button 
-            variant="light" 
-            size="sm" 
-            className="text-dark fw-bold"
-            style={{ minWidth: '120px', borderRadius: "25px",}}
-          >
-            Iniciar sesión
-          </Button>
+        <Form className="d-flex ps-3 ps-lg-0">
+        <Button 
+          variant="light" 
+          size="sm" 
+          className="text-dark fw-bold mt-3 mt-lg-0 mb-2 mb-lg-0 ms-lg-2"
+          style={{ minWidth: '120px', borderRadius: "25px" }}
+        >
+          Iniciar sesión
+        </Button>
         </Form>
       </Navbar.Collapse>
     </Navbar>
