@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
 import { FcGoogle } from 'react-icons/fc';
+import { Link } from 'react-router-dom';
 import LogoGrande from "../assets/LogoGrande.png";
 
 function LoginPage() {
@@ -19,7 +20,7 @@ function LoginPage() {
     if (!email) {
         newErrors.email = 'Email es requerido';
     }
-    else if (!/\S+@\S+\.\S+/.test(email)){
+    else if (!/\S+@\S+/.test(email)){
         newErrors.email = 'Email no válido';
     }
     
@@ -130,7 +131,7 @@ function LoginPage() {
         {/* Acceso al área de registro */}
         <div className="text-center mt-3">
           <span style={{ color: '#6c757d' }}>
-            ¿Aún no tienes una cuenta? <a href="#" style={{ textDecoration: 'none' }}>Registrate</a>
+            ¿Aún no tienes una cuenta? <Link to="/registro" style={{ textDecoration: 'none' }}>Regístrate</Link>
           </span>
         </div>
       </Card>
