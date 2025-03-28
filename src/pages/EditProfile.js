@@ -70,7 +70,7 @@ const EditProfilePedad = () => {
 
                     {/* Primera línea: Nombre y Apellidos */}
                     <Row className="mb-3">
-                        <Col xs={6}>
+                        <Col xs={6} md={4}>
                             <Form.Label htmlFor="nombre">Nombre</Form.Label>
                             <Form.Control
                                 id="nombre"
@@ -80,7 +80,7 @@ const EditProfilePedad = () => {
                                 aria-label="Nombre"
                             />
                         </Col>
-                        <Col xs={6}>
+                        <Col xs={6} md={8}>
                             <Form.Label htmlFor="apellidos">Apellidos</Form.Label>
                             <Form.Control
                                 id="apellidos"
@@ -94,7 +94,7 @@ const EditProfilePedad = () => {
 
                     {/* Segunda línea: Edad, Género, País de nacimiento */}
                     <Row className="mb-3">
-                        <Col xs={4}>
+                        <Col xs={4} md={2}>
                             <Form.Label htmlFor="edad">Edad</Form.Label>
                             <Form.Control
                                 id="edad"
@@ -104,7 +104,7 @@ const EditProfilePedad = () => {
                                 aria-label="Edad"
                             />
                         </Col>
-                        <Col xs={4}>
+                        <Col xs={4} md={2}>
                             <Form.Label htmlFor="genero">Género</Form.Label>
                             <Form.Control
                                 id="genero"
@@ -114,7 +114,7 @@ const EditProfilePedad = () => {
                                 aria-label="Género"
                             />
                         </Col>
-                        <Col xs={4}>
+                        <Col xs={4} md={8}>
                             <Form.Label htmlFor="paisNacimiento">País de Nacimiento</Form.Label>
                             <Form.Control
                                 id="paisNacimiento"
@@ -262,14 +262,24 @@ const EditProfilePedad = () => {
                 </div>
 
                 {/* Botones Inferiores */}
-                <Row className="mt-4 d-flex justify-content-center mb-4">
-                    <Col xs="auto" className="d-flex justify-content-center">
-                        <Button variant="light" className="rounded-pill px-4" style={{ width: '200px', borderColor: '#000000' }} as={Link} to="/perfil" >
+                <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                    <Col xs={12} md="auto" className="d-flex justify-content-center">
+                        <Button
+                            variant="light"
+                            className="rounded-pill px-4 mx-2"
+                            style={{ width: '200px', borderColor: '#000000' }}
+                            as={Link}
+                            to="/perfil"
+                        >
                             Cancelar
                         </Button>
                     </Col>
-                    <Col xs="auto" className="d-flex justify-content-center" style={{ marginLeft: '50px', marginRight: '50px', }} onClick={handleShowModal}>
-                        <Button variant="primary" className="rounded-pill px-4" style={{ width: '200px', backgroundColor: "#000842", borderColor: '#000842' }}>
+                    <Col xs={12} md="auto" className="d-flex justify-content-center" onClick={handleShowModal}>
+                        <Button
+                            variant="primary"
+                            className="rounded-pill px-4 mx-2"
+                            style={{ width: '200px', backgroundColor: "#000842", borderColor: '#000842' }}
+                        >
                             Modificar Perfil
                         </Button>
                     </Col>

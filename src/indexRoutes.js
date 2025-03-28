@@ -6,6 +6,7 @@ import RegisterInfoPage from './pages/RegisterInfo';
 import PrincipalPage from './pages/Principal';
 import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
+import BlockedUSers from './pages/BlockedUsers';
 
 function IndexRoutes() {
   return (
@@ -17,6 +18,7 @@ function IndexRoutes() {
       <Route path="/principal" element={<PrincipalPage />} />
       <Route path="/perfil" element={<ProfilePage />} />
       <Route path="/editar-perfil" element={<EditProfilePage />} />
+      <Route path="/usuarios-bloqueados" element={<BlockedUSers />} />
     </Routes>
   );
 }

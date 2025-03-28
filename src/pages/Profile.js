@@ -7,6 +7,7 @@ import "../css/Perfil.css";
 import CustomModal from "../components/CustomModal";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const ProfilePage = () => {
 
@@ -73,7 +74,7 @@ const ProfilePage = () => {
                             className="rounded-circle img-fluid me-3"
                             style={{ width: "150px", height: "150px", objectFit: "cover" }}
                         />
-                        <div>
+                        <div className="text-start">
                             <h4>{data.nombre} {data.apellidos}</h4>
                             <p>Genero: {data.genero} | Edad: {data.edad} | Pais de nacimiento: {data.paisNacimiento}</p>
                         </div>
@@ -82,7 +83,7 @@ const ProfilePage = () => {
 
                 {/* Cuadro de Texto Central */}
                 <Row className="justify-content-center mt-4">
-                    <Col md={8}>
+                    <Col md={10}>
                         <Card className="p-3 text-center mb-4">
                             <Card.Text> {data.textoPerfil.split('\n').map((line, index) => (
                                 <span key={index}>
@@ -96,7 +97,7 @@ const ProfilePage = () => {
                 </Row>
 
                 <Row className="justify-content-center">
-                    <Col md={6}>
+                    <Col md={10}>
                         <Accordion className="mt-3">
                             <Accordion.Item eventKey="0">
                                 <Accordion.Header>Situación personal</Accordion.Header>
@@ -118,19 +119,35 @@ const ProfilePage = () => {
                 </Row>
 
                 {/* Botones Inferiores */}
-                <Row className="mt-4 d-flex justify-content-center mb-4">
-                    <Col xs="auto" className="d-flex justify-content-center">
-                        <Button variant="danger" className="rounded-pill px-4" style={{ width: '200px' }} onClick={handleShowModal}>
+                <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                    <Col xs={12} md="auto" className="d-flex justify-content-center">
+                        <Button
+                            variant="danger"
+                            className="rounded-pill px-4 mx-2"
+                            style={{ width: '200px' }}
+                            onClick={handleShowModal}
+                        >
                             Cerrar Sesión
                         </Button>
                     </Col>
-                    <Col xs="auto" className="d-flex justify-content-center" style={{ marginLeft: '50px', marginRight: '50px' }}>
-                        <Button variant="primary" className="rounded-pill px-4" style={{ width: '200px', backgroundColor: "#000842" }} onClick={handleEditClick}>
+                    <Col xs={12} md="auto" className="d-flex justify-content-center">
+                        <Button
+                            variant="primary"
+                            className="rounded-pill px-4 mx-2"
+                            style={{ width: '200px', backgroundColor: "#000842" }}
+                            onClick={handleEditClick}
+                        >
                             Modificar Perfil
                         </Button>
                     </Col>
-                    <Col xs="auto" className="d-flex justify-content-center">
-                        <Button variant="dark" className="rounded-pill px-4" style={{ width: '200px' }}>
+                    <Col xs={12} md="auto" className="d-flex justify-content-center">
+                        <Button
+                            as={Link} // Hace que el botón sea un enlace
+                            to="/usuarios-bloqueados" // Establece la ruta a la que se redirige
+                            variant="dark"
+                            className="rounded-pill px-4 mx-2"
+                            style={{ width: '200px' }}
+                        >
                             Usuarios bloqueados
                         </Button>
                     </Col>
