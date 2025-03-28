@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LogoGrande from "../assets/LogoGrande.png";
 
 function RegisterPage() {
+
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,6 +44,7 @@ function RegisterPage() {
     
     if (form.checkValidity() && Object.keys(newErrors).length === 0) {
       // LÓGICA DE AUTENTICACIÓN
+      navigate('/registro-info');
     }
     
     setValidated(true);
