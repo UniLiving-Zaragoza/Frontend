@@ -48,7 +48,7 @@ const EditProfilePedad = () => {
 
     const handleSaveChanges = () => {
         console.log("Cambios guardados"); //Aqui seria operacion update en base de datos
-        navigate("/profile");
+        navigate("/perfil");
         handleCloseModal();
     }
 
@@ -264,7 +264,7 @@ const EditProfilePedad = () => {
                 {/* Botones Inferiores */}
                 <Row className="mt-4 d-flex justify-content-center mb-4">
                     <Col xs="auto" className="d-flex justify-content-center">
-                        <Button variant="light" className="rounded-pill px-4" style={{ width: '200px', borderColor: '#000000' }} as={Link} to="/profile" >
+                        <Button variant="light" className="rounded-pill px-4" style={{ width: '200px', borderColor: '#000000' }} as={Link} to="/perfil" >
                             Cancelar
                         </Button>
                     </Col>

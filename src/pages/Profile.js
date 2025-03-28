@@ -16,16 +16,16 @@ const ProfilePage = () => {
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
 
-    const handleSaveChanges = () => {
+    const handleCloseSession = () => {
         // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
-        console.log("Cambios guardados"); //Aqui seria operacion de cerrar sesion
+        document.cookie = "session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; // Eliminar la cookie de sesión. Cambiar a cerrar sesión en el backend
         navigate("/");
         handleCloseModal();
     }
 
     const handleEditClick = () => {
         // Enviar los datos de "data" al hacer clic en "Modificar Perfil"
-        navigate("/edit-profile", {
+        navigate("/editar-perfil", {
             state: data
         });
     };
@@ -125,7 +125,7 @@ const ProfilePage = () => {
                         </Button>
                     </Col>
                     <Col xs="auto" className="d-flex justify-content-center" style={{ marginLeft: '50px', marginRight: '50px' }}>
-                        <Button variant="primary" className="rounded-pill px-4" style={{ width: '200px', backgroundColor: "#000842" }} onClick={handleEditClick} to="/edit-profile">
+                        <Button variant="primary" className="rounded-pill px-4" style={{ width: '200px', backgroundColor: "#000842" }} onClick={handleEditClick}>
                             Modificar Perfil
                         </Button>
                     </Col>
@@ -144,7 +144,7 @@ const ProfilePage = () => {
                     title="Cerrar Sesión"       // Título del modal
                     bodyText="¿Quieres cerrar sesión?"  // Cuerpo del modal
                     confirmButtonText="Cerrar Sesión"    // Texto del botón de confirmar
-                    onSave={handleSaveChanges}     // Acción que se ejecuta al guardar
+                    onSave={handleCloseSession}     // Acción que se ejecuta al guardar
                 />
             </Container>
         </div>

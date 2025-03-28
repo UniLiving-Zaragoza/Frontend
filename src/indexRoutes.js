@@ -4,7 +4,7 @@ import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import RegisterInfoPage from './pages/RegisterInfo';
 import PrincipalPage from './pages/Principal';
-import ProfilePage from './pages/Perfil';
+import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
 
 function IndexRoutes() {
@@ -15,8 +15,8 @@ function IndexRoutes() {
       <Route path="/registro" element={<RegisterPage />} />
       <Route path="/registro-info" element={<RegisterInfoPage />} />
       <Route path="/principal" element={<PrincipalPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/edit-profile" element={<EditProfilePage />} />
+      <Route path="/perfil" element={<ProfilePage />} />
+      <Route path="/editar-perfil" element={<EditProfilePage />} />
     </Routes>
   );
 }
