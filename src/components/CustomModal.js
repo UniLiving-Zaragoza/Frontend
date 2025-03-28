@@ -21,7 +21,7 @@ function CustomModal({ title, bodyText, confirmButtonText, onSave, show, onHide 
                 <Button variant="danger" onClick={onHide}>
                     Cancelar
                 </Button>
-                <Button variant="primary" onClick={handleSave}>
+                <Button variant="primary" style={{ backgroundColor: "#000842" }} onClick={handleSave}>
                     {confirmButtonText}
                 </Button>
             </Modal.Footer>
