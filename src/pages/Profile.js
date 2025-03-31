@@ -1,10 +1,12 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col, ListGroup } from "react-bootstrap";
+import { PencilSquare } from "react-bootstrap-icons";
 import CustomNavbar from "../components/CustomNavbar";
 import Accordion from 'react-bootstrap/Accordion';
 import "../css/Perfil.css";
 import CustomModal from "../components/CustomModal";
+import Newimage from "../components/CustomModalPicture";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -12,10 +14,13 @@ import { Link } from 'react-router-dom';
 const ProfilePage = () => {
 
     const [showModal, setShowModal] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
     const navigate = useNavigate();
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
+    const handleShowImageModal = () => setShowImageModal(true);
+    const handleCloseImageModal = () => setShowImageModal(false);
 
     const handleCloseSession = () => {
         // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
@@ -68,15 +73,31 @@ const ProfilePage = () => {
                 {/* Cabecera */}
                 <Row className="d-flex justify-content-center text-center">
                     <Col xs={12} md={6} className="d-flex align-items-center">
-                        <img
-                            src="https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-perfiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"
-                            alt="Perfil"
-                            className="rounded-circle img-fluid me-3"
-                            style={{ width: "150px", height: "150px", objectFit: "cover" }}
-                        />
-                        <div className="text-start">
+                        <div className="position-relative">
+                            <img
+                                src="https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"
+                                alt="Perfil"
+                                className="rounded-circle img-fluid"
+                                style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                            />
+                            {/* Icono de edición */}
+                            <PencilSquare
+                                className="position-absolute bg-light text-dark p-1 rounded-circle shadow"
+                                style={{
+                                    bottom: "10px",
+                                    right: "20px",
+                                    fontSize: "32px",
+                                    cursor: "pointer",
+                                }}
+                                onClick={handleShowImageModal}
+                                title="Editar perfil"
+                            />
+                        </div>
+                        <div className="text-start ms-3">
                             <h4>{data.nombre} {data.apellidos}</h4>
-                            <p>Genero: {data.genero} | Edad: {data.edad} | Pais de nacimiento: {data.paisNacimiento}</p>
+                            <p>
+                                Género: {data.genero} | Edad: {data.edad} | País de nacimiento: {data.paisNacimiento}
+                            </p>
                         </div>
                     </Col>
                 </Row>
@@ -162,6 +183,15 @@ const ProfilePage = () => {
                     bodyText="¿Quieres cerrar sesión?"  // Cuerpo del modal
                     confirmButtonText="Cerrar Sesión"    // Texto del botón de confirmar
                     onSave={handleCloseSession}     // Acción que se ejecuta al guardar
+                />
+
+                <Newimage
+                    show={showImageModal}               // Controlar la visibilidad
+                    onHide={handleCloseImageModal}      // Función para cerrar el modal
+                    title="Cambiar Foto de Perfil"       // Título del modal
+                    imageUrl="https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"
+                    confirmButtonText="Guardar Cambios"    // Texto del botón de confirmar
+                    onSave={(newImage) => console.log(newImage)}     // Acción que se ejecuta al guardar
                 />
             </Container>
         </div>
