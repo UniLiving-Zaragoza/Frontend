@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomModal from '../components/CustomModal';
+import Pagination from "../components/CustomPagination";
 
 const BlockedUSers = () => {
     const [showModal, setShowModal] = useState(false);
@@ -22,7 +23,6 @@ const BlockedUSers = () => {
     const handleCloseModal = () => setShowModal(false);
 
     const handleUnBlock = () => {
-        // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
         handleCloseModal();
     }
 
@@ -30,16 +30,17 @@ const BlockedUSers = () => {
         user.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const totalPages = Math.ceil(filteredData.length / usersPerPage);
+
+    const paginate = (pageNumber) => {
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+          setCurrentPage(pageNumber);
+        }
+    };
+
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
-
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-    const pageNumbers = [];
-    for (let i = 1; i <= Math.ceil(filteredData.length / usersPerPage); i++) {
-        pageNumbers.push(i);
-    }
 
     return (
         <div className="App position-relative" style={{ height: '100vh', overflow: 'auto' }}>
@@ -120,26 +121,7 @@ const BlockedUSers = () => {
                 </Row>
 
                 {/* Paginación */}
-                <Row>
-                    <Col className="d-flex justify-content-center">
-                        <div>
-                            {pageNumbers.map(number => (
-                                <Button
-                                    key={number}
-                                    onClick={() => paginate(number)}
-                                    style={{
-                                        margin: '0 5px',
-                                        backgroundColor: currentPage === number ? '#000842' : '#D6EAFF',
-                                        borderColor: '#000842',
-                                        color: currentPage === number ? 'white' : '#000842'
-                                    }}
-                                >
-                                    {number}
-                                </Button>
-                            ))}
-                        </div>
-                    </Col>
-                </Row>
+                <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
             </Container>
             {/* Usar el CustomModal */}
             <CustomModal

@@ -8,6 +8,7 @@ import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
 import BlockedUsers from './pages/BlockedUsers';
 import AdminPrincipalPage from './pages/AdminPrincipal';
+import AdminSearchUserPage from './pages/AdminSearchUser';
 
 function IndexRoutes() {
   return (
@@ -21,6 +22,7 @@ function IndexRoutes() {
       <Route path="/editar-perfil" element={<EditProfilePage />} />
       <Route path="/usuarios-bloqueados" element={<BlockedUsers />} />
       <Route path="/principal-admin" element={<AdminPrincipalPage />} />
+      <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
     </Routes>
   );
 }
