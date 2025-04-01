@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { Search } from 'react-bootstrap-icons';
+import { ImBlocked } from "react-icons/im";
 import CustomNavbar from '../components/CustomNavbar';
 import CustomModal from '../components/CustomModal';
 import Pagination from "../components/CustomPagination";
@@ -48,12 +49,12 @@ const BlockedUsers = () => {
             <Container className="mt-4 flex-grow-1 d-flex flex-column">
                 <Row className="d-flex justify-content-center text-center mb-3">
                     <Col xs={12} md={6} className="d-flex align-items-center justify-content-center">
-                        <img
-                            src="https://s3-alpha-sig.figma.com/img/d700/3764/2ff00b4c30d3ecd5d505b0c80e560e33?Expires=1743984000&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=swIy~aWw~3IX0yVkOuec9Boc0sQoVSFBRvlnuk5kiv~vKmbHoRUtz0UBTBlw964S04mFqxSYYNkJ70BjJr3gpbKrwfQx3Gm41-yOp0urq8Rv8arWI09vZB-Ih-es-fKjxOnfHklvjYx9QM358i7P7h~IHLVGrjP9xOuSuLz3VNueoCiqjqLQPfpawVHRjo1Jm4Y6~QSU2JQJAxdvtwViM-aWX8THvpuhluIG~pMe0OgyXTLixWOQjb3snIWMJNK~zRRK~NL2K9ABLiwH2XbiiZWWMzU9Iho4aQeIfzkdWmAZ6Ksegmm9Iylr~YXHFAHXDmdPu02kjWxugC-WGjejBQ__"
-                            alt="Perfil"
-                            className="rounded-circle img-fluid me-3"
-                            style={{ width: "80px", height: "80px", objectFit: "cover" }}
-                        />
+                        <div className="rounded-circle img-fluid me-3" style={{ width: "100px", height: "100px" }}>
+                            <ImBlocked
+                                size={75} 
+                                style={{ overflow: "visible" }} 
+                            />
+                        </div>
                         <div>
                             <h4 className="mb-1">Cuentas bloqueadas</h4>
                             <p className="text-muted">{filteredData.length} Cuentas</p>
