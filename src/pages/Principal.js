@@ -15,7 +15,20 @@ const pisos = [
     foto: "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg",
     descripcion: "Piso amplio con balcón y buena iluminación.",
     habitaciones: 3,
-    metros: 90
+    metros: 90,
+    galeria: [
+      "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg",
+      "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg",
+      "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg"
+    ],
+    sitiosInteres: [
+      { nombre: "Campus Río Ebro", distancia: "1.8 km" },
+      { nombre: "Ciudad Universitaria", distancia: "3.2 km" },
+      { nombre: "Estación Delicias", distancia: "3 km" },
+      { nombre: "Supermercado", distancia: "100 m" },
+      { nombre: "Casco histórico", distancia: "3 km" },
+      { nombre: "Centro de Salud Actur Norte", distancia: "443 m" }
+    ]
   },
   {
     precio: "€750",
@@ -24,7 +37,20 @@ const pisos = [
     foto: "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270",
     descripcion: "Apartamento moderno cerca del tranvía.",
     habitaciones: 2,
-    metros: 80
+    metros: 80,
+    galeria: [
+      "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270",
+      "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270",
+      "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270"
+    ],
+    sitiosInteres: [
+      { nombre: "Campus Río Ebro", distancia: "1.5 km" },
+      { nombre: "Ciudad Universitaria", distancia: "3 km" },
+      { nombre: "Estación Delicias", distancia: "2 km" },
+      { nombre: "Supermercado", distancia: "500 m" },
+      { nombre: "Casco histórico", distancia: "3 km" },
+      { nombre: "Centro de Salud Actur Norte", distancia: "500 m" }
+    ]
   },
   {
     precio: "€1100",
@@ -33,7 +59,20 @@ const pisos = [
     foto: "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270",
     descripcion: "Ático con terraza y vistas al parque.",
     habitaciones: 4,
-    metros: 120
+    metros: 120,
+    galeria: [
+      "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270",
+      "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270",
+      "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270"
+    ],
+    sitiosInteres: [
+      { nombre: "Campus Río Ebro", distancia: "2.5 km" },
+      { nombre: "Ciudad Universitaria", distancia: "3.5 km" },
+      { nombre: "Estación Delicias", distancia: "1.5 km" },
+      { nombre: "Supermercado", distancia: "230 m" },
+      { nombre: "Casco histórico", distancia: "3.7 km" },
+      { nombre: "Centro de Salud Actur Norte", distancia: "540 m" }
+    ]
   }
 ];
 
