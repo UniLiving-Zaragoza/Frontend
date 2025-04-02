@@ -7,11 +7,11 @@ import PrincipalPage from './pages/Principal';
 import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
 import BlockedUsers from './pages/BlockedUsers';
-import AdminPrincipalPage from './pages/AdminPrincipal';
-import AdminSearchUserPage from './pages/AdminSearchUser';
 import HouseInformation from './pages/HouseInformation';
 import ChatList from './pages/ChatList';
-
+import AdminPrincipalPage from './pages/AdminPrincipal';
+import AdminSearchUserPage from './pages/AdminSearchUser';
+import AdminBannedUserPage from './pages/AdminBannedUsers';
 
 function IndexRoutes() {
   return (
@@ -24,10 +24,12 @@ function IndexRoutes() {
       <Route path="/perfil" element={<ProfilePage />} />
       <Route path="/editar-perfil" element={<EditProfilePage />} />
       <Route path="/usuarios-bloqueados" element={<BlockedUsers />} />
-      <Route path="/principal-admin" element={<AdminPrincipalPage />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />
-      <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
       <Route path="/lista-chats" element={<ChatList />} />
+      {/* Páginas admin */}
+      <Route path="/principal-admin" element={<AdminPrincipalPage />} />
+      <Route path="/deshabilitados-admin" element={<AdminBannedUserPage />} />
+      <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
     </Routes>
   );
 }
