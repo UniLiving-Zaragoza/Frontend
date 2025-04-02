@@ -101,7 +101,7 @@ const BlockedUsers = () => {
                 <div className="flex-grow-1 overflow-auto p-3" 
                     style={{
                         flexGrow: 1, 
-                        minHeight: '0', 
+                        minHeight: '200px',
                         maxHeight: 'calc(100vh - 300px)', 
                         overflowY: 'auto', 
                         border: '1px solid #ddd',
