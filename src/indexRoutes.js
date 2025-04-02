@@ -21,7 +21,7 @@ function IndexRoutes() {
       <Route path="/registro" element={<RegisterPage />} />
       <Route path="/registro-info" element={<RegisterInfoPage />} />
       <Route path="/principal" element={<PrincipalPage />} />
-      <Route path="/perfil" element={<ProfilePage />} />
+      <Route path="/perfil/:id" element={<ProfilePage />} />
       <Route path="/editar-perfil" element={<EditProfilePage />} />
       <Route path="/usuarios-bloqueados" element={<BlockedUsers />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />

@@ -9,9 +9,10 @@ import CustomModal from "../components/CustomModal";
 import Newimage from "../components/CustomModalPicture";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 const ProfilePage = () => {
+    const { id } = useParams();
 
     const [showModal, setShowModal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -81,17 +82,19 @@ const ProfilePage = () => {
                                 style={{ width: "150px", height: "150px", objectFit: "cover" }}
                             />
                             {/* Icono de edición */}
-                            <PencilSquare
-                                className="position-absolute bg-light text-dark p-1 rounded-circle shadow"
-                                style={{
-                                    bottom: "10px",
-                                    right: "20px",
-                                    fontSize: "32px",
-                                    cursor: "pointer",
-                                }}
-                                onClick={handleShowImageModal}
-                                title="Editar perfil"
-                            />
+                            {id === "1" && (  //Deberia ser si Userid === ID
+                                <PencilSquare
+                                    className="position-absolute bg-light text-dark p-1 rounded-circle shadow"
+                                    style={{
+                                        bottom: "10px",
+                                        right: "20px",
+                                        fontSize: "32px",
+                                        cursor: "pointer",
+                                    }}
+                                    onClick={handleShowImageModal}
+                                    title="Editar perfil"
+                                />
+                            )}
                         </div>
                         <div className="text-start ms-3">
                             <h4>{data.nombre} {data.apellidos}</h4>
@@ -140,41 +143,45 @@ const ProfilePage = () => {
                 </Row>
 
                 {/* Botones Inferiores */}
-                <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
-                    <Col xs={12} md="auto" className="d-flex justify-content-center">
-                        <Button
-                            variant="danger"
-                            className="rounded-pill px-4 mx-2"
-                            style={{ width: '200px' }}
-                            onClick={handleShowModal}
-                        >
-                            Cerrar Sesión
-                        </Button>
-                    </Col>
-                    <Col xs={12} md="auto" className="d-flex justify-content-center">
-                        <Button
-                            variant="primary"
-                            className="rounded-pill px-4 mx-2"
-                            style={{ width: '200px', backgroundColor: "#000842" }}
-                            onClick={handleEditClick}
-                        >
-                            Modificar Perfil
-                        </Button>
-                    </Col>
-                    <Col xs={12} md="auto" className="d-flex justify-content-center">
-                        <Button
-                            as={Link} // Hace que el botón sea un enlace
-                            to="/usuarios-bloqueados" // Establece la ruta a la que se redirige
-                            variant="dark"
-                            className="rounded-pill px-4 mx-2"
-                            style={{ width: '200px' }}
-                        >
-                            Usuarios bloqueados
-                        </Button>
-                    </Col>
-                </Row>
-                <div style={{ marginBottom: '30px' }}></div>
+                {id === "1" && (   //Deberia ser si Userid === ID
+                    <>
+                        <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                            <Col xs={12} md="auto" className="d-flex justify-content-center">
+                                <Button
+                                    variant="danger"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px' }}
+                                    onClick={handleShowModal}
+                                >
+                                    Cerrar Sesión
+                                </Button>
+                            </Col>
+                            <Col xs={12} md="auto" className="d-flex justify-content-center">
+                                <Button
+                                    variant="primary"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px', backgroundColor: "#000842" }}
+                                    onClick={handleEditClick}
+                                >
+                                    Modificar Perfil
+                                </Button>
+                            </Col>
+                            <Col xs={12} md="auto" className="d-flex justify-content-center">
+                                <Button
+                                    as={Link}
+                                    to="/usuarios-bloqueados"
+                                    variant="dark"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px' }}
+                                >
+                                    Usuarios bloqueados
+                                </Button>
+                            </Col>
+                        </Row>
 
+                    </>
+                )}
+                <div style={{ marginBottom: '30px' }}></div>
                 {/* Usar el CustomModal */}
                 <CustomModal
                     show={showModal}               // Controlar la visibilidad
@@ -186,12 +193,12 @@ const ProfilePage = () => {
                 />
 
                 <Newimage
-                    show={showImageModal}               // Controlar la visibilidad
-                    onHide={handleCloseImageModal}      // Función para cerrar el modal
-                    title="Cambiar Foto de Perfil"       // Título del modal
+                    show={showImageModal}
+                    onHide={handleCloseImageModal}
+                    title="Cambiar Foto de Perfil"
                     imageUrl="https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"
-                    confirmButtonText="Guardar Cambios"    // Texto del botón de confirmar
-                    onSave={(newImage) => console.log(newImage)}     // Acción que se ejecuta al guardar
+                    confirmButtonText="Guardar Cambios"
+                    onSave={(newImage) => console.log(newImage)}
                 />
             </Container>
         </div>

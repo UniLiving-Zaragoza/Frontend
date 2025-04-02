@@ -59,7 +59,8 @@ const CustomNavbar = () => {
 
         <Form className="d-flex ps-3 ps-lg-0">
           {isLoggedIn ? (
-            <Link to="/perfil" className="d-flex align-items-center">
+            <Link to="/perfil/1" className="d-flex align-items-center" //Seria perfil/{userId}
+            >
               <img
                 src={Person}
                 alt="Perfil"
