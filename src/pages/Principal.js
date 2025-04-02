@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'leaflet/dist/leaflet.css';
-import { Filter, MessageCircle } from 'lucide-react';
+import { Filter, MessageCircle, RefreshCcw } from 'lucide-react';
 import InfoPiso from '../components/CustomModalHouse';
 import { MapContainer, TileLayer, ZoomControl, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import CustomNavbar from '../components/CustomNavbar';
+import { Accordion, Button, Form } from 'react-bootstrap';
 
 const pisos = [
   {
-    precio: "€900",
+    precio: 900,
     direccion: "Calle Pablo Ruiz Picasso, 12",
     coordenadas: [41.677, -0.886],
     foto: "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg",
     descripcion: "Piso amplio con balcón y buena iluminación.",
     habitaciones: 3,
     metros: 90,
+    barrio: "Actur",
     galeria: [
       "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg",
       "https://imagenes.heraldo.es/files/image_990_556/files/fp/uploads/imagenes/2023/06/01/asi-es-casanate-la-promocion-de-viviendas-junto-a-la-estacion-delicias-18.r_d.2911-3340.jpeg",
@@ -31,13 +33,14 @@ const pisos = [
     ]
   },
   {
-    precio: "€750",
+    precio: 750,
     direccion: "Avenida Ranillas, 25",
     coordenadas: [41.679, -0.890],
     foto: "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270",
     descripcion: "Apartamento moderno cerca del tranvía.",
     habitaciones: 2,
     metros: 80,
+    barrio: "Actur",
     galeria: [
       "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270",
       "https://static.fotocasa.es/images/anuncio/2023/06/04/178061581/3135683589.jpg?rule=web_360x270",
@@ -53,13 +56,14 @@ const pisos = [
     ]
   },
   {
-    precio: "€1100",
+    precio: 1100,
     direccion: "Calle Margarita Xirgú, 8",
     coordenadas: [41.674, -0.892],
     foto: "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270",
     descripcion: "Ático con terraza y vistas al parque.",
     habitaciones: 4,
     metros: 120,
+    barrio: "Actur",
     galeria: [
       "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270",
       "https://static.fotocasa.es/images/anuncio/2023/02/09/176740502/2832606199.jpg?rule=web_360x270",
@@ -87,7 +91,28 @@ const createIcon = (price) => {
 const Principal = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPiso, setSelectedPiso] = useState(null);
+  const [filteredPisos, setFilteredPisos] = useState(pisos);
+  const [filters, setFilters] = useState({ precio: '', tamaño: '', habitaciones: '', barrio: '' });
 
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const applyFilters = () => {
+    setFilteredPisos(
+      pisos.filter(piso =>
+        (!filters.habitaciones || piso.habitaciones === parseInt(filters.habitaciones)) &&
+        (!filters.barrio || piso.barrio === filters.barrio) &&
+        (!filters.precio || piso.precio <= parseInt(filters.precio)) &&
+        (!filters.tamaño || piso.metros >= parseInt(filters.tamaño))
+      )
+    );
+  };
+
+  const resetFilters = () => {
+    setFilters({ precio: '', tamaño: '', habitaciones: '', barrio: '' });
+    setFilteredPisos(pisos);
+  };
   return (
     <div className="App position-relative" style={{ height: '100vh', overflow: 'hidden' }}>
       <CustomNavbar />
@@ -132,14 +157,12 @@ const Principal = () => {
         <ZoomControl position="bottomleft" />
 
         {/* Marcadores de pisos */}
-        {pisos.map((piso, index) => (
+        {filteredPisos.map((piso, index) => (
           <Marker
             key={index}
             position={piso.coordenadas}
-            icon={createIcon(piso.precio)}
-            eventHandlers={{
-              click: () => setSelectedPiso(piso)
-            }}
+            icon={createIcon(piso.precio + '€')}
+            eventHandlers={{ click: () => setSelectedPiso(piso) }}
           />
         ))}
       </MapContainer>
@@ -162,25 +185,58 @@ const Principal = () => {
 
       {/* Filtros */}
       {showFilters && (
-        <div
-          className="position-absolute start-0 bg-white p-3 shadow"
-          style={{
-            zIndex: 1001,
-            top: '100px',
-            margin: '0.5rem',
-            left: '0'
-          }}
-        >
-          <p>Opciones de filtro</p>
+        <div className="position-absolute start-0 bg-white p-3 shadow" style={{ zIndex: 1001, top: '100px', margin: '0.5rem', left: '0' }}>
+          <Accordion>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Datos del Piso</Accordion.Header>
+              <Accordion.Body>
+                <Form>
+                  <Form.Group>
+                    <Form.Label>Precio</Form.Label>
+                    <Form.Control type="number" name="precio" value={filters.precio} onChange={handleFilterChange} placeholder="Precio máximo" />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Tamaño</Form.Label>
+                    <Form.Control type="number" name="tamaño" value={filters.tamaño} onChange={handleFilterChange} placeholder="Tamaño mínimo" />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Habitaciones</Form.Label>
+                    <Form.Control type="number" name="habitaciones" value={filters.habitaciones} onChange={handleFilterChange} placeholder="Número de habitaciones" />
+                  </Form.Group>
+                </Form>
+                {/* En el futuro, añadir más filtros */}
+              </Accordion.Body>
+            </Accordion.Item>
+            <Accordion.Item eventKey="1">
+              <Accordion.Header>Datos de la Ciudad</Accordion.Header>
+              <Accordion.Body>
+                <Form.Group>
+                  <Form.Label>Barrio</Form.Label>
+                  <Form.Select name="barrio" value={filters.barrio} onChange={handleFilterChange}>
+                    <option value="">Selecciona un barrio</option>
+                    <option value="Actur">Actur</option>
+                    <option value="Delicias">Delicias</option>
+                    <option value="Centro">Centro</option>
+                  </Form.Select>
+                </Form.Group>
+                {/* En el futuro, añadir más filtros */}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+          <div className="d-flex justify-content-between mt-3">
+            <Button variant="primary" style={{ backgroundColor: "#000842" }} onClick={applyFilters}>Aplicar</Button>
+            <Button variant="secondary" style={{ backgroundColor: "#000842" }} onClick={resetFilters}>
+              <RefreshCcw size={20} />
+            </Button>
+          </div>
         </div>
       )}
-      {/* Modal de piso */}
       {/* Modal de piso */}
       {selectedPiso && (
         <InfoPiso
           show={true}
           onHide={() => setSelectedPiso(null)}
-          piso={selectedPiso} // Pasa la prop 'piso' al modal
+          piso={selectedPiso}
         />
       )}
 
