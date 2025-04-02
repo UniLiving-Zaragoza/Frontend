@@ -8,6 +8,7 @@ import CustomModal from '../components/CustomModal';
 import Pagination from "../components/CustomPagination";
 
 const BlockedUsers = () => {
+    const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
@@ -24,8 +25,15 @@ const BlockedUsers = () => {
         { id: 9, nombre: "Luis Rodríguez", URL_foto_perfil: "https://upload.wikimedia.org/wikipedia/commons/5/59/4NumberFourInCircle.png" },
     ];
 
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
+    const handleShowModal = (user) => {
+        setSelectedUser(user); 
+        setShowModal(true);
+    };
+    
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedUser(null); 
+    };
 
     const filteredData = data.filter(user =>
         user.nombre.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,8 +64,8 @@ const BlockedUsers = () => {
                             />
                         </div>
                         <div>
-                            <h4 className="mb-1">Cuentas bloqueadas</h4>
-                            <p className="text-muted">{filteredData.length} Cuentas</p>
+                            <h4 className="mb-1">Usuarios bloqueados</h4>
+                            <p className="text-muted">{filteredData.length} Usuarios bloqueados</p>
                         </div>
                     </Col>
                 </Row>
@@ -121,7 +129,7 @@ const BlockedUsers = () => {
                                         <Button
                                             variant="outline-light"
                                             className="ms-3"
-                                            onClick={handleShowModal}
+                                            onClick={() => handleShowModal(user)} 
                                             style={{ backgroundColor: '#000842', color: 'white', borderRadius: '20px', padding: '6px 16px' }}
                                         >
                                             Desbloquear
@@ -136,7 +144,15 @@ const BlockedUsers = () => {
                     <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
                 </div>
             </Container>
-            <CustomModal show={showModal} onHide={handleCloseModal} title="Desbloquear Usuario" bodyText="¿Estás seguro que deseas desbloquear al usuario? Volverá a poder comunicarse contigo." confirmButtonText="Desbloquear persona" onSave={handleCloseModal} />
+            <CustomModal 
+                show={showModal} 
+                onHide={handleCloseModal} 
+                title={selectedUser ? `Desbloquear a ${selectedUser.nombre}`: "Desbloquear usuario"}
+                bodyText={selectedUser ? `¿Estás seguro que deseas desbloquear a ${selectedUser.nombre}? Volverá a poder comunicarse contigo.` 
+                    : "¿Estás seguro que deseas desbloquear al usuario? Volverá a poder comunicarse contigo."}
+                confirmButtonText="Desbloquear usuario" 
+                onSave={handleCloseModal} 
+            />
         </div>
     );
 };
