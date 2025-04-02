@@ -124,7 +124,8 @@ const BlockedUsers = () => {
                                                     border: '0.5px solid #ddd',
                                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
                                                     borderRadius: '10px', 
-                                                    marginLeft: '10px' }}>
+                                                    marginLeft: '10px',
+                                                    minHeight: '55px'  }}>
                                         <span className="ms-3">{user.nombre}</span>
                                         <Button
                                             variant="outline-light"
