@@ -50,7 +50,7 @@ const CustomNavbar = () => {
           <Nav.Link as={Link} to={isLoggedIn ? "/" : "/login"} className="text-white mx-2">
             Buscar compañero
           </Nav.Link>
-          <Nav.Link as={Link} to={isLoggedIn ? "/" : "/login"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isLoggedIn ? "/lista-chats" : "/login"} className="text-white mx-2">
             Chat
           </Nav.Link>
 

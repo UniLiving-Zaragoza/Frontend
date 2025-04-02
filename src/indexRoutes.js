@@ -10,6 +10,8 @@ import BlockedUsers from './pages/BlockedUsers';
 import AdminPrincipalPage from './pages/AdminPrincipal';
 import AdminSearchUserPage from './pages/AdminSearchUser';
 import HouseInformation from './pages/HouseInformation';
+import ChatList from './pages/ChatList';
+
 
 function IndexRoutes() {
   return (
@@ -25,6 +27,7 @@ function IndexRoutes() {
       <Route path="/principal-admin" element={<AdminPrincipalPage />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
+      <Route path="/lista-chats" element={<ChatList />} />
     </Routes>
   );
 }
