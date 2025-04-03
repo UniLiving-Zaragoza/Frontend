@@ -12,6 +12,7 @@ import ChatList from './pages/ChatList';
 import AdminPrincipalPage from './pages/AdminPrincipal';
 import AdminSearchUserPage from './pages/AdminSearchUser';
 import AdminBannedUserPage from './pages/AdminBannedUsers';
+import AnalyticsPage from './pages/Analytics'
 // import ProtectedRoute from './protectedRoutes';
 
 function IndexRoutes() {
@@ -27,6 +28,7 @@ function IndexRoutes() {
       <Route path="/usuarios-bloqueados" element={<BlockedUsers />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/lista-chats" element={<ChatList />} />
+      <Route path="/analiticas" element={<AnalyticsPage />} />
       {/* Páginas admin */}
       {/*<Route element={<ProtectedRoute />}>*/}
       <Route path="/principal-admin" element={<AdminPrincipalPage />} />
