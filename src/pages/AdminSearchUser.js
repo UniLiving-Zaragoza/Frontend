@@ -98,29 +98,40 @@ const BannedUsers = () => {
                     }}>
                     <Row>
                         {currentUsers.map(user => (
-                            <Link to={`/perfil/${user.id}`}>
-                                <Col xs={12} key={user.id} className="mb-3">
-                                    <div className="d-flex align-items-center justify-content-between">
+                            <Col xs={12} key={user.id} className="mb-3">
+                                <div className="d-flex align-items-center justify-content-between">
+                                    <Link to={`/perfil/${user.id}`} >
                                         <img
                                             src={user.URL_foto_perfil}
                                             alt={user.nombre}
                                             className="rounded-circle"
                                             style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                                         />
-                                        <div className="d-flex align-items-center justify-content-between w-100 p-2"
+                                    </Link>
+                                
+                                    <Link to={`/perfil/${user.id}`} 
+                                        style={{ 
+                                            textDecoration: 'none', 
+                                            color: 'inherit',
+                                            width: '100%', 
+                                            marginLeft: '10px' 
+                                        }}
+                                    >
+                                        <div 
+                                            className="d-flex align-items-center justify-content-between w-100 p-2"
                                             style={{
                                                 backgroundColor: '#D6EAFF',
                                                 border: '0.5px solid #ddd',
                                                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
                                                 borderRadius: '10px',
-                                                marginLeft: '10px',
                                                 minHeight: '55px'
-                                            }}>
+                                            }}
+                                            >
                                             <span className="ms-3">{user.nombre}</span>
                                         </div>
-                                    </div>
-                                </Col>
-                            </Link>
+                                    </Link>
+                                </div>
+                            </Col>
                         ))}
                     </Row>
                 </div>

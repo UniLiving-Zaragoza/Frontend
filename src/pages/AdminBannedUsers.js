@@ -131,7 +131,16 @@ const BannedUsers = () => {
                                             marginLeft: '10px',
                                             minHeight: '55px'
                                         }}>
-                                        <span className="ms-3">{user.nombre}</span>
+                                        <Link 
+                                            to={`/perfil/${user.id}`} 
+                                            style={{ 
+                                            textDecoration: 'none', 
+                                            color: 'inherit',
+                                            flexGrow: 1  
+                                            }}
+                                        >
+                                            <span className="ms-3">{user.nombre}</span>
+                                        </Link>
                                         <Button
                                             variant="outline-light"
                                             className="ms-3"
