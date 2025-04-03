@@ -13,6 +13,7 @@ import AdminPrincipalPage from './pages/AdminPrincipal';
 import AdminSearchUserPage from './pages/AdminSearchUser';
 import AdminBannedUserPage from './pages/AdminBannedUsers';
 import AnalyticsPage from './pages/Analytics'
+import AnalyticsGraphicsPage from './pages/AnalyticsGraphics'
 // import ProtectedRoute from './protectedRoutes';
 
 function IndexRoutes() {
@@ -29,6 +30,7 @@ function IndexRoutes() {
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/lista-chats" element={<ChatList />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />
+      <Route path="/analiticas-graficos" element={<AnalyticsGraphicsPage />} />
       {/* Páginas admin */}
       {/*<Route element={<ProtectedRoute />}>*/}
       <Route path="/principal-admin" element={<AdminPrincipalPage />} />
