@@ -16,8 +16,8 @@ const dataUsers = [
   { mes: "8", usuarios: 550 },
   { mes: "9", usuarios: 700 },
   { mes: "10", usuarios: 620 },
-  { mes: "10", usuarios: 620 },
-  { mes: "10", usuarios: 620 },
+  { mes: "11", usuarios: 620 },
+  { mes: "12", usuarios: 620 },
 ];
 
 const dataMessages = [
@@ -31,8 +31,8 @@ const dataMessages = [
   { mes: "8", mensajes: 550 },
   { mes: "9", mensajes: 700 },
   { mes: "10", mensajes: 620 },
-  { mes: "10", mensajes: 620 },
-  { mes: "10", mensajes: 620 },
+  { mes: "11", mensajes: 620 },
+  { mes: "12", mensajes: 620 },
 ];
 
 const dataReports = [
@@ -46,8 +46,8 @@ const dataReports = [
   { mes: "8", reportes: 550 },
   { mes: "9", reportes: 700 },
   { mes: "10", reportes: 620 },
-  { mes: "10", reportes: 620 },
-  { mes: "10", reportes: 620 },
+  { mes: "11", reportes: 620 },
+  { mes: "12", reportes: 620 },
 ];
 
 const dataComments = [
@@ -61,8 +61,8 @@ const dataComments = [
   { mes: "8", comentarios: 550 },
   { mes: "9", comentarios: 700 },
   { mes: "10", comentarios: 620 },
-  { mes: "10", comentarios: 620 },
-  { mes: "10", comentarios: 620 },
+  { mes: "11", comentarios: 620 },
+  { mes: "12", comentarios: 620 },
 ];
 
 sessionStorage.setItem("userRole", "admin"); // Simulando que el usuario es un admin. Cambiar por el valor real cuando se haga la autenticación.
@@ -71,16 +71,18 @@ const Dashboard = () => {
   return (
     <div className="App">
       <CustomAdminNavbar />
-      <Container className="mt-4">
+      <Container fluid className="mt-4">
         <Row>
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <span> Usuarios Totales <span className="fs-4 fw-bold ms-2">40,689</span></span>
-                <span className="icon-container" style={{ fontSize: "35px" }}><FaUsers /></span>
+                <span> Usuarios Totales <span  className="fs-4 fw-bold align-self-center">40,689</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                    <FaUsers className="align-middle" />
+                </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={dataUsers}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
@@ -96,11 +98,13 @@ const Dashboard = () => {
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <span> Mensajes Totales <span className="fs-4 fw-bold ms-2">10,293</span></span>
-                <span className="icon-container" style={{ fontSize: "35px" }}><FaEnvelope /></span>
+                <span> Mensajes Totales <span  className="fs-4 fw-bold align-self-center">10,293</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                    <FaEnvelope className="align-middle" />
+                </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={dataMessages}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
@@ -116,11 +120,13 @@ const Dashboard = () => {
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <span> Mensajes Reportados <span className="fs-4 fw-bold ms-2">936</span></span>
-                <span className="icon-container" style={{ fontSize: "35px" }}><FaExclamationTriangle /></span>
+                <span> Mensajes Reportados <span  className="fs-4 fw-bold align-self-center">936</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                    <FaExclamationTriangle className="align-middle" />
+                </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={dataReports}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
@@ -136,11 +142,13 @@ const Dashboard = () => {
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <span> Comentarios Totales <span className="fs-4 fw-bold ms-2">2,040</span></span>
-                <span className="icon-container" style={{ fontSize: "35px" }}><FaCommentDots /></span>
+                <span> Comentarios Totales <span  className="fs-4 fw-bold align-self-center">2,040</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                    <FaCommentDots className="align-middle" />
+                </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={dataComments}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
