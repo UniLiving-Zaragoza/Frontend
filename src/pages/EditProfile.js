@@ -48,7 +48,7 @@ const EditProfilePedad = () => {
 
     const handleSaveChanges = () => {
         console.log("Cambios guardados"); //Aqui seria operacion update en base de datos
-        navigate("/perfil");
+        navigate("/perfil/1"); // Cambia por user.id en el futuro
         handleCloseModal();
     }
 
@@ -269,7 +269,7 @@ const EditProfilePedad = () => {
                             className="rounded-pill px-4 mx-2"
                             style={{ width: '200px', borderColor: '#000000' }}
                             as={Link}
-                            to="/perfil"
+                            to="/perfil/1"  // Cambia por user.id en el futuro
                         >
                             Cancelar
                         </Button>

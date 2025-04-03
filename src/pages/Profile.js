@@ -17,13 +17,16 @@ const ProfilePage = () => {
 
     const [showModal, setShowModal] = useState(false);
     const [showDissable, setShowDissable] = useState(false);
+    const [showEnable, setShowEnable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const navigate = useNavigate();
 
     const handleShowModal = () => setShowModal(true);
     const handleShowDissable = () => setShowDissable(true);
+    const handleShowEnable = () => setShowEnable(true);
     const handleCloseModal = () => setShowModal(false);
     const handleCloseDissable = () => setShowDissable(false);
+    const handleCloseEnable = () => setShowEnable(false);
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
 
@@ -35,7 +38,12 @@ const ProfilePage = () => {
     }
 
     const handleDissableUser = () => {
-        // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
+        console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
+        navigate(-1); // Volver a la página anterior
+        handleCloseModal();
+    }
+
+    const handleEnableUser = () => {
         console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
         navigate(-1); // Volver a la página anterior
         handleCloseModal();
@@ -62,6 +70,7 @@ const ProfilePage = () => {
         zonasBusqueda: "Actur, Las fuentes",
         preferenciaConvivencia: "Poco ruido",
         interesesHobbies: "Deportes, Viajar",
+        deshabilitado: (id % 2 !== 0),
         textoPerfil: `
           Hola, soy Laura González, tengo 28 años y trabajo como diseñadora UX/UI en una startup tecnológica.
           Actualmente estoy buscando un piso en Madrid, preferiblemente en una zona bien conectada con el centro,
@@ -197,8 +206,8 @@ const ProfilePage = () => {
                     </>
                 )}
 
-                {/* Botón de deshabilitar solo si el usuario es admin */}
-                {sessionStorage.getItem("userRole") === "admin" && (
+                {/* Botón de deshabilitar o habilitar dependiendo del estado de deshabilitado */}
+                {(data.deshabilitado === false || !data.deshabilitado) && sessionStorage.getItem("userRole") === "admin" && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
                             <Button
@@ -208,6 +217,21 @@ const ProfilePage = () => {
                                 onClick={handleShowDissable}
                             >
                                 Deshabilitar cuenta
+                            </Button>
+                        </Col>
+                    </Row>
+                )}
+
+                {data.deshabilitado === true && sessionStorage.getItem("userRole") === "admin" && (
+                    <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="success"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px', backgroundColor: "#000842" }}
+                                onClick={handleShowEnable}
+                            >
+                                Habilitar cuenta
                             </Button>
                         </Col>
                     </Row>
@@ -227,9 +251,18 @@ const ProfilePage = () => {
                     show={showDissable}
                     onHide={handleCloseDissable}
                     title={`Deshabilitar la cuenta de ${data.nombre} ${data.apellidos}`}
-                    bodyText={`¿Vas a deshabilitar la cuenta de ${data.nombre} ${data.apellidos} este no podrá volver a acceder a ella ¿Continuar?`}  // Cuerpo del modal
+                    bodyText={`Vas a deshabilitar la cuenta de ${data.nombre} ${data.apellidos}, no podrá volver a acceder a ella ¿Continuar?`}  // Cuerpo del modal
                     confirmButtonText="Deshabilitar"
                     onSave={handleDissableUser}
+                />
+
+                <CustomModal
+                    show={showEnable}
+                    onHide={handleCloseEnable}
+                    title={`Habilitar la cuenta de ${data.nombre} ${data.apellidos}`}
+                    bodyText={`Vas a habilitar la cuenta de ${data.nombre} ${data.apellidos}, podrá volver a acceder a ella ¿Continuar?`}  // Cuerpo del modal
+                    confirmButtonText="Habilitar"
+                    onSave={handleEnableUser}
                 />
 
                 <Newimage
