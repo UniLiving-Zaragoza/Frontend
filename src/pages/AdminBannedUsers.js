@@ -6,6 +6,7 @@ import { ImBlocked } from "react-icons/im";
 import CustomAdminNavbar from '../components/CustomNavbarAdmin';
 import CustomModal from '../components/CustomModal';
 import Pagination from "../components/CustomPagination";
+import { Link } from 'react-router-dom';
 
 const BannedUsers = () => {
     const [selectedUser, setSelectedUser] = useState(null);
@@ -14,7 +15,7 @@ const BannedUsers = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const usersPerPage = 5;
     const data = [
-        { id: 1, nombre: "Paco González", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png" },
+        { id: 10, nombre: "Paco González", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png" },
         { id: 2, nombre: "Carlos Martínez", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png" },
         { id: 3, nombre: "María Pérez", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/8068/8068125.png" },
         { id: 4, nombre: "Luis Rodríguez", URL_foto_perfil: "https://upload.wikimedia.org/wikipedia/commons/5/59/4NumberFourInCircle.png" },
@@ -26,13 +27,13 @@ const BannedUsers = () => {
     ];
 
     const handleShowModal = (user) => {
-        setSelectedUser(user); 
+        setSelectedUser(user);
         setShowModal(true);
     };
-    
+
     const handleCloseModal = () => {
         setShowModal(false);
-        setSelectedUser(null); 
+        setSelectedUser(null);
     };
 
     const filteredData = data.filter(user =>
@@ -43,7 +44,7 @@ const BannedUsers = () => {
 
     const paginate = (pageNumber) => {
         if (pageNumber >= 1 && pageNumber <= totalPages) {
-          setCurrentPage(pageNumber);
+            setCurrentPage(pageNumber);
         }
     };
 
@@ -59,8 +60,8 @@ const BannedUsers = () => {
                     <Col xs={12} md={6} className="d-flex align-items-center justify-content-center">
                         <div className="rounded-circle img-fluid me-3" style={{ width: "100px", height: "100px" }}>
                             <ImBlocked
-                                size={75} 
-                                style={{ overflow: "visible" }} 
+                                size={75}
+                                style={{ overflow: "visible" }}
                             />
                         </div>
                         <div>
@@ -80,15 +81,15 @@ const BannedUsers = () => {
                                 style={{
                                     borderTopLeftRadius: '0.375rem',
                                     borderBottomLeftRadius: '0.375rem',
-                                    outline: 'none', 
-                                    boxShadow: 'none' 
+                                    outline: 'none',
+                                    boxShadow: 'none'
                                 }}
                             />
-                            <InputGroup.Text 
-                                style={{ 
-                                    backgroundColor: '#000842', 
-                                    color: 'white', 
-                                    borderTopRightRadius: '0.375rem', 
+                            <InputGroup.Text
+                                style={{
+                                    backgroundColor: '#000842',
+                                    color: 'white',
+                                    borderTopRightRadius: '0.375rem',
                                     borderBottomRightRadius: '0.375rem',
                                     border: '1px solid #000842'
                                 }}
@@ -98,12 +99,12 @@ const BannedUsers = () => {
                         </InputGroup>
                     </Col>
                 </Row>
-                <div className="flex-grow-1 overflow-auto p-3" 
+                <div className="flex-grow-1 overflow-auto p-3"
                     style={{
-                        flexGrow: 1, 
+                        flexGrow: 1,
                         minHeight: '200px',
-                        maxHeight: 'calc(100vh - 300px)', 
-                        overflowY: 'auto', 
+                        maxHeight: 'calc(100vh - 300px)',
+                        overflowY: 'auto',
                         border: '1px solid #ddd',
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
                         backgroundColor: 'white',
@@ -113,24 +114,28 @@ const BannedUsers = () => {
                         {currentUsers.map(user => (
                             <Col xs={12} key={user.id} className="mb-3">
                                 <div className="d-flex align-items-center justify-content-between">
-                                    <img
-                                        src={user.URL_foto_perfil}
-                                        alt={user.nombre}
-                                        className="rounded-circle"
-                                        style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                                    />
-                                    <div className="d-flex align-items-center justify-content-between w-100 p-2" 
-                                        style={{    backgroundColor: '#D6EAFF', 
-                                                    border: '0.5px solid #ddd',
-                                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
-                                                    borderRadius: '10px', 
-                                                    marginLeft: '10px',
-                                                    minHeight: '55px'  }}>
+                                    <Link to={`/perfil/${user.id}`}>
+                                        <img
+                                            src={user.URL_foto_perfil}
+                                            alt={user.nombre}
+                                            className="rounded-circle"
+                                            style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                        />
+                                    </Link>
+                                    <div className="d-flex align-items-center justify-content-between w-100 p-2"
+                                        style={{
+                                            backgroundColor: '#D6EAFF',
+                                            border: '0.5px solid #ddd',
+                                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+                                            borderRadius: '10px',
+                                            marginLeft: '10px',
+                                            minHeight: '55px'
+                                        }}>
                                         <span className="ms-3">{user.nombre}</span>
                                         <Button
                                             variant="outline-light"
                                             className="ms-3"
-                                            onClick={() => handleShowModal(user)} 
+                                            onClick={() => handleShowModal(user)}
                                             style={{ backgroundColor: '#000842', color: 'white', borderRadius: '20px', padding: '6px 16px' }}
                                         >
                                             Habilitar usuario
@@ -145,13 +150,13 @@ const BannedUsers = () => {
                     <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
                 </div>
             </Container>
-            <CustomModal 
-                show={showModal} 
-                onHide={handleCloseModal} 
-                title={selectedUser ? `Habilitar a ${selectedUser.nombre}`: "Habilitar usuario"}
+            <CustomModal
+                show={showModal}
+                onHide={handleCloseModal}
+                title={selectedUser ? `Habilitar a ${selectedUser.nombre}` : "Habilitar usuario"}
                 bodyText={selectedUser ? `¿Estás seguro que deseas volver a habilitar a ${selectedUser.nombre}?` : "¿Estás seguro que deseas volver a habilitar al usuario?"}
-                confirmButtonText="Habilitar usuario" 
-                onSave={handleCloseModal} 
+                confirmButtonText="Habilitar usuario"
+                onSave={handleCloseModal}
             />
         </div>
     );

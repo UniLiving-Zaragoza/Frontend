@@ -12,6 +12,7 @@ import ChatList from './pages/ChatList';
 import AdminPrincipalPage from './pages/AdminPrincipal';
 import AdminSearchUserPage from './pages/AdminSearchUser';
 import AdminBannedUserPage from './pages/AdminBannedUsers';
+// import ProtectedRoute from './protectedRoutes';
 
 function IndexRoutes() {
   return (
@@ -27,9 +28,11 @@ function IndexRoutes() {
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/lista-chats" element={<ChatList />} />
       {/* Páginas admin */}
+      {/*<Route element={<ProtectedRoute />}>*/}
       <Route path="/principal-admin" element={<AdminPrincipalPage />} />
       <Route path="/deshabilitados-admin" element={<AdminBannedUserPage />} />
       <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
+      {/*</Route>*/}
     </Routes>
   );
 }

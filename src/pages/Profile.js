@@ -10,16 +10,20 @@ import Newimage from "../components/CustomModalPicture";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Link, useParams } from 'react-router-dom';
+import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 
 const ProfilePage = () => {
     const { id } = useParams();
 
     const [showModal, setShowModal] = useState(false);
+    const [showDissable, setShowDissable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const navigate = useNavigate();
 
     const handleShowModal = () => setShowModal(true);
+    const handleShowDissable = () => setShowDissable(true);
     const handleCloseModal = () => setShowModal(false);
+    const handleCloseDissable = () => setShowDissable(false);
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
 
@@ -27,6 +31,13 @@ const ProfilePage = () => {
         // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
         document.cookie = "session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; // Eliminar la cookie de sesión. Cambiar a cerrar sesión en el backend
         navigate("/");
+        handleCloseModal();
+    }
+
+    const handleDissableUser = () => {
+        // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
+        console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
+        navigate(-1); // Volver a la página anterior
         handleCloseModal();
     }
 
@@ -69,7 +80,12 @@ const ProfilePage = () => {
     };
     return (
         <div className="App">
-            <CustomNavbar />
+            {sessionStorage.getItem("userRole") === "admin" && (
+                <CustomNavbarAdmin />
+            )}
+            {sessionStorage.getItem("userRole") !== "admin" && (
+                <CustomNavbar />
+            )}
             <Container className="mt-4">
                 {/* Cabecera */}
                 <Row className="d-flex justify-content-center text-center">
@@ -178,8 +194,23 @@ const ProfilePage = () => {
                                 </Button>
                             </Col>
                         </Row>
-
                     </>
+                )}
+
+                {/* Botón de deshabilitar solo si el usuario es admin */}
+                {sessionStorage.getItem("userRole") === "admin" && (
+                    <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="danger"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                                onClick={handleShowDissable}
+                            >
+                                Deshabilitar cuenta
+                            </Button>
+                        </Col>
+                    </Row>
                 )}
                 <div style={{ marginBottom: '30px' }}></div>
                 {/* Usar el CustomModal */}
@@ -190,6 +221,15 @@ const ProfilePage = () => {
                     bodyText="¿Quieres cerrar sesión?"  // Cuerpo del modal
                     confirmButtonText="Cerrar Sesión"    // Texto del botón de confirmar
                     onSave={handleCloseSession}     // Acción que se ejecuta al guardar
+                />
+
+                <CustomModal
+                    show={showDissable}
+                    onHide={handleCloseDissable}
+                    title={`Deshabilitar la cuenta de ${data.nombre} ${data.apellidos}`}
+                    bodyText={`¿Vas a deshabilitar la cuenta de ${data.nombre} ${data.apellidos} este no podrá volver a acceder a ella ¿Continuar?`}  // Cuerpo del modal
+                    confirmButtonText="Deshabilitar"
+                    onSave={handleDissableUser}
                 />
 
                 <Newimage
