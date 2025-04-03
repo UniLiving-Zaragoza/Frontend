@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col, Form } from 'react-bootstrap';
-import { FaExclamationTriangle, FaUsers, FaChartLine, FaMapMarkedAlt, FaComments } from 'react-icons/fa';
+import { FaExclamationTriangle, FaUsers, FaChartLine, FaComments } from 'react-icons/fa';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area, BarChart, Bar} from 'recharts';
 import "leaflet/dist/leaflet.css";
 import CustomNavbar from '../components/CustomNavbar';
@@ -18,17 +18,17 @@ const dataExample = [
     { mes: "10", data: 620 },
     { mes: "11", data: 620 },
     { mes: "12", data: 620 },
-  ];
+];
 
-const AnalyticsGraphicsPage = () => {
+const barriosZaragoza = [
+    "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
+    "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
+    "Centro", "Las Fuentes", "Universidad", "San José",
+    "Casablanca", "Torrero-La Paz", "Sur"
+];
 
-    const barriosZaragoza = [
-        "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
-        "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
-        "Centro", "Las Fuentes", "Universidad", "San José",
-        "Casablanca", "Torrero-La Paz", "Sur"
-    ];
 
+const AnalyticsGraphicsPage = () => {    
     return (
         <div className="App">
             <CustomNavbar />
@@ -50,7 +50,7 @@ const AnalyticsGraphicsPage = () => {
                 </div>
             </Container>
 
-            <div className="flex-grow-1 overflow-auto p-3 ms-3"
+            <div className="flex-grow-1 overflow-auto p-3 mx-3"
                 style={{
                     flexGrow: 1,
                     minHeight: '200px',

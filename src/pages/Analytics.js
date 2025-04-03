@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Button, Card, Row, Col } from 'react-bootstrap';
+import { Container, Button, Card, Row, Col, Form} from 'react-bootstrap';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import { FaChartBar, FaComments } from "react-icons/fa";
 import "leaflet/dist/leaflet.css";
@@ -12,6 +12,13 @@ const geoJsonStyle = {
     fillColor: "#D6EAFF",
     fillOpacity: 0.4,
 };
+
+const barriosZaragoza = [
+    "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
+    "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
+    "Centro", "Las Fuentes", "Universidad", "San José",
+    "Casablanca", "Torrero-La Paz", "Sur"
+];
 
 const AnalyticsPage = () => {
     const [geoData, setGeoData] = useState(null);
@@ -80,14 +87,29 @@ const AnalyticsPage = () => {
                                     Seleccione la zona a analizar
                                 </Card.Title>
                                 
-                                <Card.Text style={{ marginBottom: '4rem'}}>
+                                <Card.Text className="mb-5">
                                     Accede a información actualizada de la zona representada mediante
                                     gráficas y comentarios.
                                 </Card.Text>
 
-                                {/* Se puede poner la lista de barrios para completar */}
+                                <Container className="mb-5">
+                                    <div className="d-flex justify-content-center">
+                                        <div style={{ width: '80%', maxWidth: '700px' }}>
+                                            <Form.Select 
+                                                aria-label="Selector de barrios" 
+                                                className="mb-3 shadow-sm"
+                                                size="sm" 
+                                            >
+                                                <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
+                                                {barriosZaragoza.map((barrio, index) => (
+                                                    <option key={index} value={barrio}>{barrio}</option>
+                                                ))}
+                                            </Form.Select>
+                                        </div>
+                                    </div>
+                                </Container>
 
-                                <div className="d-flex flex-wrap justify-content-center w-100 gap-3">
+                                <div className="d-flex flex-wrap justify-content-center w-100 gap-3 mt-2">
                                     {/* Opción Gráficas */}
                                     <div className="d-flex flex-column align-items-center">
                                         <div onClick={handleChartClick} style={{ cursor: 'pointer' }}>
