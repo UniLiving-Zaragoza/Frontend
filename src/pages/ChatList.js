@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const data = [
     {
@@ -57,6 +58,7 @@ const data = [
 ];
 
 const ChatList = () => {
+    const navigate = useNavigate()
     return (
         <div className="App">
             <CustomNavbar />
@@ -66,7 +68,7 @@ const ChatList = () => {
                         <Button variant="primary" className="w-100 rounded-pill" style={{ backgroundColor: "#000842" }}>Emparejamientos</Button>
                     </Col>
                     <Col>
-                        <Button variant="light" className="w-100 border border-dark rounded-pill"> Chat General</Button>
+                        <Button variant="light" className="w-100 border border-dark rounded-pill" onClick={() => navigate("/chat-global")}> Chat General</Button>
                     </Col>
                 </Row>
                 <Card className="p-3 mb-4" style={{ height: '80vh' }}>
