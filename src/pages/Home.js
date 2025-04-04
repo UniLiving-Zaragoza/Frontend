@@ -6,6 +6,7 @@ import LogoGrande from "../assets/LogoGrande.png";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
+  sessionStorage.setItem("userRole", 0);
   return (
     <div className="App">
       <CustomNavbar />

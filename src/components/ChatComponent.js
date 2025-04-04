@@ -44,7 +44,7 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                                     {msg.sender}
                                 </div>
                                 <Card
-                                    className={`p-2 ${msg.id !== 1 ? "bg-light" : "bg-primary text-white"}`}
+                                    className={`p-2 `}
                                     style={{
                                         borderRadius: "15px",
                                         maxWidth: "75%",
@@ -52,11 +52,13 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                                         display: "inline-block",
                                         whiteSpace: "pre-wrap",
                                         wordWrap: "break-word",
-                                        position: "relative"
+                                        position: "relative",
+                                        backgroundColor: msg.id !== 1 ? "#D6EAFF" : "#0056b3",
+                                        color: msg.id !== 1 ? "#000" : "#fff"
                                     }}
                                 >
                                     <Card.Text className="mb-1">{msg.text}</Card.Text>
-                                    <small className="text-muted d-block text-start">{msg.time}</small>
+                                    <small className=" d-block text-start" style={{ color: msg.id !== 1 ? "black" : "white", opacity: 0.7 }}>{msg.time}</small>
 
                                     {/* Icono de tres puntos */}
                                     {icon && msg.id !== 1 && (
@@ -98,7 +100,7 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                     />
-                    <Button variant="primary" type="submit">Enviar</Button>
+                    <Button variant="primary" type="submit" style={{ backgroundColor: "#000842" }}>Enviar</Button>
                 </Form>
             )}
         </Container>

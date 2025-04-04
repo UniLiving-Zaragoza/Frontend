@@ -11,49 +11,56 @@ const data = [
         foto: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png",
         nombre_usuario: "Usuario1",
         Ultimo_mensaje: "Alo",
-        id: 2
+        id: 2,
+        hora: "10:30 AM"
     },
     {
         chat: "Chat 2",
         foto: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png",
         nombre_usuario: "Usuario2",
         Ultimo_mensaje: "Hola",
-        id: 3
+        id: 3,
+        hora: "10:25 AM"
     },
     {
         chat: "Chat 3",
         foto: "https://cdn-icons-png.flaticon.com/512/8068/8068125.png",
         nombre_usuario: "Usuario3",
         Ultimo_mensaje: "No me interesa",
-        id: 4
+        id: 4,
+        hora: "10:20 AM"
     },
     {
         chat: "Chat 4",
         foto: "https://upload.wikimedia.org/wikipedia/commons/5/59/4NumberFourInCircle.png",
         nombre_usuario: "Usuario4",
         Ultimo_mensaje: "Ofrezco 180 por la habitacion y me estoy arriesgando",
-        id: 5
+        id: 5,
+        hora: "10:15 AM"
     },
     {
         chat: "Chat 5",
         foto: "https://static.vecteezy.com/system/resources/previews/026/468/774/non_2x/number-5-icon-circle-illustration-on-isolated-white-background-number-five-icon-free-vector.jpg",
         nombre_usuario: "Usuario5",
         Ultimo_mensaje: "buscas compañero?",
-        id: 6
+        id: 6,
+        hora: "10:10 AM"
     },
     {
         chat: "Chat 6",
         foto: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png",
         nombre_usuario: "Usuario6",
         Ultimo_mensaje: "Te voy a bloquear",
-        id: 7
+        id: 7,
+        hora: "10:05 AM"
     },
     {
         chat: "Chat 7",
         foto: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png",
         nombre_usuario: "Usuario6",
         Ultimo_mensaje: "Barsa >> Real Madrid",
-        id: 8
+        id: 8,
+        hora: "10:00 AM"
     }
 ];
 
@@ -82,7 +89,7 @@ const ChatList = () => {
                     ) : (
                         <div style={{ maxHeight: '77vh', overflowY: 'auto' }}>
                             {data.map((chat, index) => (
-                                <Card key={index} className="mb-3 p-3 d-flex flex-row align-items-center">
+                                <Card key={index} className="mb-3 p-3 d-flex flex-row align-items-center" style={{ backgroundColor: "#D6EAFF" }}>
                                     <Link to={`/perfil/${chat.id}`}>
                                         <img
                                             src={chat.foto}
@@ -92,8 +99,11 @@ const ChatList = () => {
                                             height={50}
                                         />
                                     </Link>
-                                    <div className="d-flex flex-column text-start">
-                                        <h5 className="mb-1">{chat.nombre_usuario}</h5>
+                                    <div className="d-flex flex-column text-start w-100">
+                                        <div className="d-flex justify-content-between align-items-center w-100">
+                                            <h5 className="mb-1">{chat.nombre_usuario}</h5>
+                                            <small className="text-muted text-end">{chat.hora}</small>
+                                        </div>
                                         <p className="mb-0 text-muted">{chat.Ultimo_mensaje}</p>
                                     </div>
                                 </Card>
