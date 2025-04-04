@@ -88,7 +88,8 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                 ))}
             </Card>
 
-            {sessionStorage.getItem("userRole") === "admin" && (
+            {/* Campo de texto para enviar mensajes, admin no envia mensajes asi que no le aparece este campo */}
+            {sessionStorage.getItem("userRole") !== "admin" && (
                 <Form className="mt-3 d-flex" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
                     <Form.Control
                         type="text"
