@@ -30,7 +30,7 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
 
     return (
         <Container className="mt-4">
-            <Card className="p-3" style={{ height: "70vh", overflowY: "auto" }}>
+            <Card className="p-3" style={{ height: sessionStorage.getItem("userRole") === "admin" ? "80vh" : "70vh", overflowY: "auto" }}>
                 {messages.map((msg, index) => (
                     <Row
                         key={index}

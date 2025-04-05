@@ -89,7 +89,7 @@ const ChatIndividual = () => {
     };
 
     const handleReport = () => {
-        console.log(`Reportar cuenta de usuario ${selectedUser}`); // Cambiar a reportar en el backend
+        console.log(`Reportar comentario de ${selectedUser} con texto: "${selectedMessage}"`); // Cambiar a reportar en el backend
         handleCloseReport();
     }
 

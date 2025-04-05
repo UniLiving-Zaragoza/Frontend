@@ -2,7 +2,6 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
-import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 
 const data = [
@@ -89,26 +88,32 @@ const ChatList = () => {
                     ) : (
                         <div style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                             {data.map((chat, index) => (
-                                <Link to={`/chat-individual/${chat.id}`} key={index} style={{ textDecoration: 'none' }}>
-                                    <Card className="mb-3 p-3 d-flex flex-row align-items-center" style={{ backgroundColor: "#D6EAFF" }}>
-                                        <Link to={`/perfil/${chat.id}`} onClick={(e) => e.stopPropagation()}>
-                                            <img
-                                                src={chat.foto}
-                                                alt={chat.nombre_usuario}
-                                                className="rounded-circle me-3"
-                                                width={50}
-                                                height={50}
-                                            />
-                                        </Link>
-                                        <div className="d-flex flex-column text-start w-100">
-                                            <div className="d-flex justify-content-between align-items-center w-100">
-                                                <h5 className="mb-1">{chat.nombre_usuario}</h5>
-                                                <small className="text-muted text-end">{chat.hora}</small>
-                                            </div>
-                                            <p className="mb-0 text-muted">{chat.Ultimo_mensaje}</p>
+                                <Card
+                                    key={index}
+                                    className="mb-3 p-3 d-flex flex-row align-items-center"
+                                    style={{ backgroundColor: "#D6EAFF", cursor: "pointer" }}
+                                    onClick={() => navigate(`/chat-individual/${chat.id}`)}
+                                >
+                                    <img
+                                        src={chat.foto}
+                                        alt={chat.nombre_usuario}
+                                        className="rounded-circle me-3"
+                                        width={50}
+                                        height={50}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/perfil/${chat.id}`);
+                                        }}
+                                        style={{ cursor: "pointer" }}
+                                    />
+                                    <div className="d-flex flex-column text-start w-100">
+                                        <div className="d-flex justify-content-between align-items-center w-100">
+                                            <h5 className="mb-1">{chat.nombre_usuario}</h5>
+                                            <small className="text-muted text-end">{chat.hora}</small>
                                         </div>
-                                    </Card>
-                                </Link>
+                                        <p className="mb-0 text-muted">{chat.Ultimo_mensaje}</p>
+                                    </div>
+                                </Card>
                             ))}
                         </div>
                     )}
