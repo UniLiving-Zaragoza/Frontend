@@ -14,6 +14,7 @@ import AdminSearchUserPage from './pages/AdminSearchUser';
 import AdminBannedUserPage from './pages/AdminBannedUsers';
 import AnalyticsPage from './pages/Analytics'
 import AnalyticsGraphicsPage from './pages/AnalyticsGraphics'
+import AnalyticsCommetsPage from './pages/AnalyticsComments'
 import ChatGlobal from './pages/ChatGlobal';
 // import ProtectedRoute from './protectedRoutes';
 
@@ -32,6 +33,7 @@ function IndexRoutes() {
       <Route path="/lista-chats" element={<ChatList />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />
       <Route path="/analiticas-graficos" element={<AnalyticsGraphicsPage />} />
+      <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} />
       <Route path="/chat-global/" element={<ChatGlobal />} />
 
       {/* Páginas admin */}
