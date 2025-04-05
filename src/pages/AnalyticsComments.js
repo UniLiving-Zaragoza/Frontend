@@ -73,8 +73,8 @@ const AnalyticsCommentsPage = () => {
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
 
     const commentsContainerMaxHeight = isLogged 
-        ? 'calc(100vh - 310px)'
-        : 'calc(100vh - 255px)'; 
+        ? 'calc(100vh - 320px)'
+        : 'calc(100vh - 265px)'; 
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
@@ -91,7 +91,6 @@ const AnalyticsCommentsPage = () => {
                             <Form.Select 
                                 aria-label="Selector de barrios" 
                                 className="mb-3 shadow-sm"
-                                size="sm" 
                             >
                                 <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
                                 {barriosZaragoza.map((barrio, index) => (

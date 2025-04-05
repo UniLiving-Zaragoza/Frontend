@@ -98,7 +98,6 @@ const AnalyticsPage = () => {
                                             <Form.Select 
                                                 aria-label="Selector de barrios" 
                                                 className="mb-3 shadow-sm"
-                                                size="sm" 
                                             >
                                                 <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
                                                 {barriosZaragoza.map((barrio, index) => (

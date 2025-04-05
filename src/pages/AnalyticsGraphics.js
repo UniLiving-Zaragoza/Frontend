@@ -39,7 +39,6 @@ const AnalyticsGraphicsPage = () => {
                             <Form.Select 
                                 aria-label="Selector de barrios" 
                                 className="mb-3 shadow-sm"
-                                size="sm" 
                             >
                                 <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
                                 {barriosZaragoza.map((barrio, index) => (
@@ -54,7 +53,7 @@ const AnalyticsGraphicsPage = () => {
                     style={{
                         flexGrow: 1,
                         minHeight: '200px',
-                        maxHeight: 'calc(100vh - 200px)',
+                        maxHeight: 'calc(100vh - 210px)',
                         overflowY: 'auto',
                         border: '1px solid #ddd',
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
