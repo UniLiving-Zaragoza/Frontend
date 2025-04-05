@@ -57,8 +57,11 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                                         maxWidth: "75%",
                                         minWidth: "10ch",
                                         display: "inline-block",
-                                        whiteSpace: "pre-wrap",
+                                        whiteSpace: "normal",
                                         wordWrap: "break-word",
+                                        overflowWrap: "break-word",
+                                        wordBreak: "break-word",
+                                        hyphens: "auto",
                                         position: "relative",
                                         backgroundColor: msg.id !== 1 ? "#D6EAFF" : "#0056b3",
                                         color: msg.id !== 1 ? "#000" : "#fff"
