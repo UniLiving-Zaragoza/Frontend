@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
-import { FaChartBar, FaPaperPlane } from 'react-icons/fa';
+import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import CustomNavbar from '../components/CustomNavbar';
 import Pagination from "../components/CustomPagination";
+import CustomModal from '../components/CustomModal';
 import { Link } from 'react-router-dom';
 
 const AnalyticsCommentsPage = () => {
-    const [isLogged] = useState(true); 
+    const [isLogged] = useState(true);
+    const [isAdmin] = useState(true); 
     const [searchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [newComment, setNewComment] = useState('');
-    const usersPerPage = 8;
+    const [showModal, setShowModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const usersPerPage = 5;
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -48,6 +52,16 @@ const AnalyticsCommentsPage = () => {
         e.preventDefault();
         console.log("Comentario enviado:", newComment);
         setNewComment('');
+    };
+
+    const handleDeleteClick = (user) => {
+        setSelectedUser(user);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedUser(null);
     };
 
     const indexOfLastUser = currentPage * usersPerPage;
@@ -144,29 +158,46 @@ const AnalyticsCommentsPage = () => {
                                             overflow: 'visible',
                                             flexWrap: 'wrap'     
                                         }}
-                                        >
-                                        <Link
-                                            to={`/perfil/${user.id}`}
-                                            style={{
-                                            textDecoration: 'none',
-                                            color: 'inherit',
-                                            flexGrow: 1,
-                                            marginRight: '10px' 
-                                            }}
-                                        >
-                                            <span className="fw-semibold">{user.nombre}</span>
-                                        </Link>
+                                    >
+                                        <div className="d-flex flex-column">
+                                            <Link
+                                                to={`/perfil/${user.id}`}
+                                                style={{
+                                                textDecoration: 'none',
+                                                color: 'inherit',
+                                                }}
+                                            >
+                                                <span className="fw-semibold">{user.nombre}</span>
+                                            </Link>
 
-                                        <span
-                                            className="text-muted text-end"
-                                            style={{
-                                            whiteSpace: 'normal',        
-                                            overflowWrap: 'break-word', 
-                                            wordBreak: 'break-word'     
-                                            }}
-                                        >
-                                            {user.comentario || 'Sin comentarios'}
-                                        </span>
+                                            <span
+                                                className="text-muted"
+                                                style={{
+                                                whiteSpace: 'normal',        
+                                                overflowWrap: 'break-word', 
+                                                wordBreak: 'break-word'     
+                                                }}
+                                            >
+                                                {user.comentario || 'Sin comentarios'}
+                                            </span>
+                                        </div>
+                                        
+                                        {isAdmin && (
+                                            <Button
+                                                variant="outline-light"
+                                                size="sm"
+                                                className="ms-2"
+                                                onClick={() => handleDeleteClick(user)}
+                                                style={{
+                                                    backgroundColor: 'white',
+                                                    color: 'white',
+                                                    borderRadius: '6px',
+                                                    padding: '4px 8px',
+                                                }}
+                                            >
+                                                <FaTrash style={{ color: 'red' }} />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </Col>
@@ -218,6 +249,15 @@ const AnalyticsCommentsPage = () => {
                     </Row>
                 </Container>
             </Container>
+
+            <CustomModal
+                show={showModal}
+                onHide={handleCloseModal}
+                title={selectedUser ? `Eliminar comentario de ${selectedUser.nombre}` : "Eliminar comentario"}
+                bodyText={selectedUser ? `¿Estás seguro que deseas eliminar el comentario de ${selectedUser.nombre}?` : "¿Estás seguro que deseas eliminar el comentario?"}
+                confirmButtonText="Eliminar comentario"
+                onSave={handleCloseModal}
+            />
         </div>
     );
 };

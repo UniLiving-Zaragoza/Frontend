@@ -136,7 +136,6 @@ const BlockedUsers = () => {
                                             style={{ 
                                             textDecoration: 'none', 
                                             color: 'inherit',
-                                            flexGrow: 1  
                                             }}
                                         >
                                             <span className="ms-3">{user.nombre}</span>
