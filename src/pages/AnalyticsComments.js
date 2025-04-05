@@ -3,13 +3,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import CustomNavbar from '../components/CustomNavbar';
+import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
 import CustomModal from '../components/CustomModal';
 import { Link } from 'react-router-dom';
 
 const AnalyticsCommentsPage = () => {
+    // esto se debera cambiar, ahora esta solo para pruebas
+    // -----------------------------------------------------
     const [isLogged] = useState(true);
     const [isAdmin] = useState(true); 
+    // -----------------------------------------------------
     const [searchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [newComment, setNewComment] = useState('');
@@ -74,7 +78,12 @@ const AnalyticsCommentsPage = () => {
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
-            <CustomNavbar />
+            {sessionStorage.getItem("userRole") === "admin" && (
+                <CustomNavbarAdmin />
+            )}
+            {sessionStorage.getItem("userRole") !== "admin" && (
+                <CustomNavbar />
+            )}
             <Container fluid className="flex-grow-1 d-flex flex-column">
                 <Container className="mt-3 mb-1">
                     <div className="d-flex justify-content-center">
