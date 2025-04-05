@@ -78,7 +78,7 @@ const ChatList = () => {
                         <Button variant="light" className="w-100 border border-dark rounded-pill" onClick={() => navigate("/chat-global")}> Chat General</Button>
                     </Col>
                 </Row>
-                <Card className="p-3 mb-4" style={{ height: '80vh' }}>
+                <Card className="p-3 mb-4" style={{ height: '75vh' }}>
                     {data.length === 0 ? (
                         <Card.Body className="d-flex flex-column justify-content-center align-items-center h-100">
                             <Card.Text className="fs-4 text-center">
@@ -87,7 +87,7 @@ const ChatList = () => {
                             <Button variant="primary" className="fs-3 py-3 px-5 rounded-pill mt-3" style={{ backgroundColor: "#000842" }}>¡Empieza a buscar!</Button>
                         </Card.Body>
                     ) : (
-                        <div style={{ maxHeight: '77vh', overflowY: 'auto' }}>
+                        <div style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                             {data.map((chat, index) => (
                                 <Card key={index} className="mb-3 p-3 d-flex flex-row align-items-center" style={{ backgroundColor: "#D6EAFF" }}>
                                     <Link to={`/perfil/${chat.id}`}>

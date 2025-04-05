@@ -103,7 +103,7 @@ const BannedUsers = () => {
                     style={{
                         flexGrow: 1,
                         minHeight: '200px',
-                        maxHeight: 'calc(100vh - 300px)',
+                        maxHeight: 'calc(100vh - 310px)',
                         overflowY: 'auto',
                         border: '1px solid #ddd',
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
