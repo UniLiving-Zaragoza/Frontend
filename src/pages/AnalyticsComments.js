@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Button, Form } from 'react-bootstrap';
-import { FaChartBar } from 'react-icons/fa';
+import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
+import { FaChartBar, FaPaperPlane } from 'react-icons/fa';
 import CustomNavbar from '../components/CustomNavbar';
 import Pagination from "../components/CustomPagination";
 import { Link } from 'react-router-dom';
 
 const AnalyticsCommentsPage = () => {
+    const [isLogged] = useState(true); 
     const [searchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const usersPerPage = 5;
+    const [newComment, setNewComment] = useState('');
+    const usersPerPage = 8;
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -42,9 +44,19 @@ const AnalyticsCommentsPage = () => {
         }
     };
 
+    const handleCommentSubmit = (e) => {
+        e.preventDefault();
+        console.log("Comentario enviado:", newComment);
+        setNewComment('');
+    };
+
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
+
+    const commentsContainerMaxHeight = isLogged 
+        ? 'calc(100vh - 310px)'
+        : 'calc(100vh - 255px)'; 
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
@@ -66,11 +78,42 @@ const AnalyticsCommentsPage = () => {
                         </div>
                     </div>
                 </Container>
+                
+                {/* Campo de comentario para usuarios logueados */}
+                {isLogged && (
+                    <Container className="mb-3 px-4">
+                        <Form onSubmit={handleCommentSubmit}>
+                            <InputGroup>
+                                <Form.Control
+                                    placeholder="Escribe tu comentario..."
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    className="shadow-sm"
+                                />
+                                <Button 
+                                    type="submit" 
+                                    variant="outline-light"
+                                    style={{
+                                        backgroundColor: '#000842',
+                                        borderRadius: '0 5px 5px 0'
+                                    }}
+                                >
+                                    <FaPaperPlane style={{ 
+                                        color: 'white', 
+                                        pointerEvents: 'none' 
+                                    }} />
+                                </Button>
+                            </InputGroup>
+                        </Form>
+                    </Container>
+                )}
+                
+                {/* Contenedor de comentarios con altura ajustada dinámicamente */}
                 <div className="flex-grow-1 overflow-auto p-3 mx-3"
                     style={{
                         flexGrow: 1,
                         minHeight: '200px',
-                        maxHeight: 'calc(100vh - 255px)',
+                        maxHeight: commentsContainerMaxHeight,
                         overflowY: 'auto',
                         border: '1px solid #ddd',
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
@@ -125,7 +168,6 @@ const AnalyticsCommentsPage = () => {
                                             {user.comentario || 'Sin comentarios'}
                                         </span>
                                     </div>
-
                                 </div>
                             </Col>
                         ))}
