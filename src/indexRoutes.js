@@ -17,6 +17,7 @@ import AnalyticsGraphicsPage from './pages/AnalyticsGraphics'
 import AnalyticsCommetsPage from './pages/AnalyticsComments'
 import SearchPartnerPage from './pages/SearchPartner'
 import ChatGlobal from './pages/ChatGlobal';
+import ChatIndividual from './pages/ChatIndividual';
 // import ProtectedRoute from './protectedRoutes';
 
 function IndexRoutes() {
@@ -37,6 +38,7 @@ function IndexRoutes() {
       <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} />
       <Route path="/buscar-compañero" element={<SearchPartnerPage />} />
       <Route path="/chat-global/" element={<ChatGlobal />} />
+      <Route path="/chat-individual/:id" element={<ChatIndividual />} />
 
       {/* Páginas admin */}
       {/*<Route element={<ProtectedRoute />}>*/}

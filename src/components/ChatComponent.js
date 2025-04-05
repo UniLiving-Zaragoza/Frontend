@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Card, Row, Col, Form, Button } from "react-bootstrap";
 
 function ChatComponent({ dataMessages, icon, onIconClick }) {
     const [messages, setMessages] = useState(dataMessages);
     const [newMessage, setNewMessage] = useState("");
+    const bottomRef = useRef(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+
 
     const handleSendMessage = () => {
         if (newMessage.trim() === "") return;
@@ -88,6 +95,7 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                         </Col>
                     </Row>
                 ))}
+                <div ref={bottomRef}></div>
             </Card>
 
             {/* Campo de texto para enviar mensajes, admin no envia mensajes asi que no le aparece este campo */}
