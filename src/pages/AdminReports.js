@@ -1,21 +1,20 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
 import ChatComponent from "../components/ChatComponent";
-import { BsThreeDotsVertical, BsTrash3Fill } from "react-icons/bs";
+import { BsTrash3Fill } from "react-icons/bs";
 import CustomModal from "../components/CustomModal";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
-import { useNavigate } from "react-router-dom";
 
-const ChatGlobal = () => {
-    const navigate = useNavigate();
+const ChatReports = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [selectedUserName, setSelectedUserName] = useState(null);
     const [showMenu, setShowMenu] = useState(false);
     const [show, setShow] = useState(false);
-    const [modalType, setModalType] = useState(null); // 'reporte' o 'borrar'
+    const [showApprove, setShowApprove] = useState(false);
+
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
     const userRole = sessionStorage.getItem("userRole");
@@ -84,7 +83,7 @@ const ChatGlobal = () => {
         messages = messages.map(msg => msg.id === 1 ? { ...msg, id: 999 } : msg);
     }
 
-    const handleReportUser = (e, id, sender, text) => {
+    const handleMenu = (e, id, sender, text) => {
         setSelectedUser(id);
         setSelectedMessage(text);
         setSelectedUserName(sender);
@@ -96,65 +95,35 @@ const ChatGlobal = () => {
 
     const openDeleteModal = () => {
         setShowMenu(false);
-        setModalType("borrar");
         setShow(true);
     };
 
-    const openReportModal = () => {
+    const openApproveModal = () => {
         setShowMenu(false);
-        setModalType("reporte");
-        setShow(true);
+        setShowApprove(true);
     };
 
     const handleModalConfirm = () => {
-        if (modalType === "reporte") {
-            console.log(`Reportar mensaje de ${selectedUser} con el texto: "${selectedMessage}"`);
-        } else if (modalType === "borrar") {
-            console.log(`Comentario de ${selectedUserName} eliminado por admin`);
-        }
+        console.log(`Comentario de ${selectedUser} con texto ${selectedMessage} eliminado por admin`);
         setShow(false);
     };
+
+    const handleModalApprove = () => {
+        console.log(`Comentario de ${selectedUser} con texto ${selectedMessage} aprobado por admin`);
+        setShow(false);
+    }
 
     return (
         <div className="App">
             {userRole === "admin" ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container className="text-center mt-5">
-                {userRole !== "admin" && (
-                    <Row className="mb-3">
-                        <Col>
-                            <Button
-                                variant="primary"
-                                className="w-100 rounded-pill"
-                                style={{ backgroundColor: "#000842" }}
-                                onClick={() => navigate("/lista-chats")}
-                            >
-                                Emparejamientos
-                            </Button>
-                        </Col>
-                        <Col>
-                            <Button
-                                variant="light"
-                                className="w-100 border border-dark rounded-pill"
-                            >
-                                Chat General
-                            </Button>
-                        </Col>
-                    </Row>
-                )}
-
                 <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
-                    <strong>Chat general</strong>
+                    <strong>Mensajes reportados</strong>
                 </div>
                 <ChatComponent
                     dataMessages={messages}
-                    icon={
-                        userRole === "admin" ? (
-                            <BsTrash3Fill size={25} color="red" />
-                        ) : (
-                            <BsThreeDotsVertical size={25} />
-                        )
-                    }
-                    onIconClick={handleReportUser}
+                    icon={<BsTrash3Fill size={25} color="red" />}
+                    onIconClick={handleMenu}
                 />
                 {showMenu && (
                     <div
@@ -164,17 +133,13 @@ const ChatGlobal = () => {
                             left: menuPosition.x + "px",
                             top: menuPosition.y + "px",
                             zIndex: 1000
-                        }}
-                    >
-                        {userRole === "admin" ? (
-                            <button className="dropdown-item" onClick={openDeleteModal}>
-                                Eliminar mensaje
-                            </button>
-                        ) : (
-                            <button className="dropdown-item" onClick={openReportModal}>
-                                Reportar Usuario
-                            </button>
-                        )}
+                        }}>
+                        <button className="dropdown-item" onClick={openDeleteModal}>
+                            Eliminar mensaje
+                        </button>
+                        <button className="dropdown-item" onClick={openApproveModal}>
+                            Aprobar mensaje
+                        </button>
                     </div>
                 )}
                 <div style={{ marginBottom: '20px' }}></div>
@@ -183,23 +148,22 @@ const ChatGlobal = () => {
             <CustomModal
                 show={show}
                 onHide={() => setShow(false)}
-                title={
-                    modalType === "reporte"
-                        ? `Reportar usuario ${selectedUserName}`
-                        : `Eliminar comentario de ${selectedUserName}`
-                }
-                bodyText={
-                    modalType === "reporte"
-                        ? `Vas a reportar a ${selectedUserName} debido al siguiente mensaje: "${selectedMessage}". ¿Continuar?`
-                        : `Vas a eliminar el siguiente mensaje de ${selectedUserName}: "${selectedMessage}". ¿Deseas continuar?`
-                }
-                confirmButtonText={
-                    modalType === "reporte" ? "Reportar" : "Eliminar"
-                }
+                title={`Eliminar comentario de ${selectedUserName}`}
+                bodyText={`Vas a eliminar el siguiente mensaje de ${selectedUserName}: "${selectedMessage}". ¿Deseas continuar?`}
+                confirmButtonText={"Eliminar"}
                 onSave={handleModalConfirm}
+            />
+
+            <CustomModal
+                show={showApprove}
+                onHide={() => setShowApprove(false)}
+                title={`Aprobar comentario de ${selectedUserName}`}
+                bodyText={`Vas a aprobar el siguiente mensaje de ${selectedUserName}: "${selectedMessage}". ¿Deseas continuar?`}
+                confirmButtonText={"Aprobar"}
+                onSave={handleModalApprove}
             />
         </div>
     );
 };
 
-export default ChatGlobal;
+export default ChatReports;
