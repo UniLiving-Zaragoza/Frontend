@@ -83,7 +83,13 @@ const ChatList = () => {
                             <Card.Text className="fs-4 text-center">
                                 Aún no tienes ningun emparejamiento con el que empezar a hablar
                             </Card.Text>
-                            <Button variant="primary" className="fs-3 py-3 px-5 rounded-pill mt-3" style={{ backgroundColor: "#000842" }}>¡Empieza a buscar!</Button>
+                            <Button 
+                                onClick={() => navigate("/buscar-compañero")}
+                                variant="primary" 
+                                className="fs-3 py-3 px-5 rounded-pill mt-3" 
+                                style={{ backgroundColor: "#000842" }}>
+                                ¡Empieza a buscar!
+                            </Button>
                         </Card.Body>
                     ) : (
                         <div style={{ maxHeight: '72vh', overflowY: 'auto' }}>

@@ -2,6 +2,7 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { FaUsers, FaEnvelope, FaExclamationTriangle, FaCommentDots } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 import CustomAdminNavbar from "../components/CustomNavbarAdmin";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -75,7 +76,12 @@ const Dashboard = () => {
         <Row>
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
-              <Card.Header className="d-flex justify-content-between align-items-center">
+              <Card.Header 
+                as={Link} 
+                to="/buscar-usuario-admin" 
+                className="d-flex justify-content-between align-items-center"
+                style={{ textDecoration: 'none', cursor: 'pointer' }}
+              >
                 <span> Usuarios Totales <span  className="fs-4 fw-bold align-self-center">40,689</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaUsers className="align-middle" />
@@ -97,7 +103,12 @@ const Dashboard = () => {
 
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
-              <Card.Header className="d-flex justify-content-between align-items-center">
+              <Card.Header 
+                as={Link} 
+                to="/chat-global" 
+                className="d-flex justify-content-between align-items-center"
+                style={{ textDecoration: 'none', cursor: 'pointer' }}
+              >
                 <span> Mensajes Totales <span  className="fs-4 fw-bold align-self-center">10,293</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaEnvelope className="align-middle" />
@@ -119,7 +130,12 @@ const Dashboard = () => {
 
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
-              <Card.Header className="d-flex justify-content-between align-items-center">
+              <Card.Header 
+                as={Link} 
+                to="/principal-admin" 
+                className="d-flex justify-content-between align-items-center"
+                style={{ textDecoration: 'none', cursor: 'pointer' }}
+              >
                 <span> Mensajes Reportados <span  className="fs-4 fw-bold align-self-center">936</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaExclamationTriangle className="align-middle" />
@@ -141,7 +157,12 @@ const Dashboard = () => {
 
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
-              <Card.Header className="d-flex justify-content-between align-items-center">
+                <Card.Header 
+                  as={Link} 
+                  to="/analiticas-comentarios" 
+                  className="d-flex justify-content-between align-items-center"
+                  style={{ textDecoration: 'none', cursor: 'pointer' }}
+                >
                 <span> Comentarios Totales <span  className="fs-4 fw-bold align-self-center">2,040</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaCommentDots className="align-middle" />

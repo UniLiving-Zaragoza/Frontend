@@ -4,6 +4,7 @@ import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
+import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
 import CustomModal from '../components/CustomModal';
 import { Link } from 'react-router-dom';
@@ -12,7 +13,6 @@ const AnalyticsCommentsPage = () => {
     // esto se debera cambiar, ahora esta solo para pruebas
     // -----------------------------------------------------
     const [isLogged] = useState(true);
-    const [isAdmin] = useState(true); 
     // -----------------------------------------------------
     const [searchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,6 +20,8 @@ const AnalyticsCommentsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const usersPerPage = 5;
+
+    const userRole = sessionStorage.getItem("userRole");
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -83,18 +85,17 @@ const AnalyticsCommentsPage = () => {
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
 
-    const commentsContainerMaxHeight = isLogged 
-        ? 'calc(100vh - 320px)'
-        : 'calc(100vh - 265px)'; 
+    const commentsContainerMaxHeight =
+        isLogged && userRole === "admin"
+            ? 'calc(100vh - 200px)'
+            : isLogged && userRole !== "admin"
+            ? 'calc(100vh - 320px)'
+            : 'calc(100vh - 265px)';
+    
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
-            {sessionStorage.getItem("userRole") === "admin" && (
-                <CustomNavbar />
-            )}
-            {sessionStorage.getItem("userRole") !== "admin" && (
-                <CustomNavbar />
-            )}
+            {userRole === "admin" ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container fluid className="flex-grow-1 d-flex flex-column">
                 <Container className="mt-3 mb-1">
                     <div className="d-flex justify-content-center">
@@ -113,7 +114,7 @@ const AnalyticsCommentsPage = () => {
                 </Container>
                 
                 {/* Campo de comentario para usuarios logueados */}
-                {isLogged && (
+                {isLogged && userRole !== "admin" && (
                     <Container className="mb-3 px-4">
                         <Form onSubmit={handleCommentSubmit}>
                             <InputGroup>
@@ -200,8 +201,7 @@ const AnalyticsCommentsPage = () => {
                                                 {user.comentario || 'Sin comentarios'}
                                             </span>
                                         </div>
-                                        
-                                        {isAdmin && (
+                                        {userRole === "admin" && (
                                             <Button
                                                 variant="outline-light"
                                                 size="sm"
@@ -234,39 +234,43 @@ const AnalyticsCommentsPage = () => {
                         <Col sm={4} className="d-none d-sm-block"></Col>
                         
                         {/* Center button */}
-                        <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
-                            <Button
-                                onClick={handleSearch}
-                                variant="outline-light"
-                                style={{
-                                    backgroundColor: '#000842',
-                                    color: 'white',
-                                    borderRadius: '10px',
-                                    padding: '6px 16px',
-                                    width: '100%',
-                                    maxWidth: '200px'
-                                }}
-                            > 
-                                Buscar piso en X
-                            </Button>
-                        </Col>
+                        {userRole !== "admin" && (
+                            <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
+                                <Button
+                                    onClick={handleSearch}
+                                    variant="outline-light"
+                                    style={{
+                                        backgroundColor: '#000842',
+                                        color: 'white',
+                                        borderRadius: '10px',
+                                        padding: '6px 16px',
+                                        width: '100%',
+                                        maxWidth: '200px'
+                                    }}
+                                > 
+                                    Buscar piso en X
+                                </Button>
+                            </Col>
+                        )}
                         
                         {/* Right button */}
-                        <Col xs={12} sm={4} className="text-center text-sm-end">
-                            <Button 
-                                onClick={handleGraphics}
-                                variant="outline-secondary" 
-                                className="d-flex align-items-center mx-auto mx-sm-0 ms-sm-auto"
-                                style={{
-                                    borderRadius: '10px',
-                                    padding: '6px 16px',
-                                    maxWidth: '200px'
-                                }}
-                            >
-                                <FaChartBar className="me-2" />
-                                Ver gráficas
-                            </Button>
-                        </Col>
+                        {userRole !== "admin" && (
+                                <Col xs={12} sm={4} className="text-center text-sm-end">
+                                <Button 
+                                    onClick={handleGraphics}
+                                    variant="outline-secondary" 
+                                    className="d-flex align-items-center mx-auto mx-sm-0 ms-sm-auto"
+                                    style={{
+                                        borderRadius: '10px',
+                                        padding: '6px 16px',
+                                        maxWidth: '200px'
+                                    }}
+                                >
+                                    <FaChartBar className="me-2" />
+                                    Ver gráficas
+                                </Button>
+                            </Col>
+                        )}
                     </Row>
                 </Container>
             </Container>
