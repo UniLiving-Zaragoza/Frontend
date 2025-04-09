@@ -11,39 +11,38 @@ const HomePage = () => {
   return (
     <div className="App">
       <CustomNavbar />
-      <Container className="text-center mt-4">
+      <Container className="text-center mt-5">
         {/* Logo */}
         <div
           style={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            marginBottom: "25px",
-            gap: "20px"
+            marginBottom: "40px",
+            gap: "20px",
+            flexWrap: "wrap", 
+            width: "100%",
+            maxWidth: "100%",
           }}
         >
           <img
             src={Icono}
             alt="UniLiving Icono"
-            className="img-fluid"
             style={{
-              marginTop: "25px",
-              marginBottom: "25px",
-              maxWidth: "100%",
+              flex: "1 1 175px", 
+              maxWidth: "175px",
+              width: "100%",
               height: "auto",
-              maxHeight: "150px"
             }}
           />
           <img
             src={LogoTexto}
             alt="UniLiving"
-            className="img-fluid"
             style={{
-              marginTop: "25px",
-              marginBottom: "25px",
-              maxWidth: "100%",
+              flex: "2 1 200px", 
+              maxWidth: "300px",
+              width: "100%",
               height: "auto",
-              maxHeight: "125px"
             }}
           />
         </div>
