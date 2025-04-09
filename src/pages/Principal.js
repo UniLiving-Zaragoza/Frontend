@@ -6,6 +6,7 @@ import InfoPiso from '../components/CustomModalHouse';
 import { MapContainer, TileLayer, ZoomControl, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import CustomNavbar from '../components/CustomNavbar';
+import { Link } from 'react-router-dom';
 import { Accordion, Button, Form } from 'react-bootstrap';
 
 const pisos = [
@@ -113,6 +114,9 @@ const Principal = () => {
     setFilters({ precio: '', tamaño: '', habitaciones: '', barrio: '' });
     setFilteredPisos(pisos);
   };
+
+  const [isLoggedIn] = useState(false);
+
   return (
     <div className="App position-relative" style={{ height: '100vh', overflow: 'hidden' }}>
       <CustomNavbar />
@@ -168,27 +172,31 @@ const Principal = () => {
       </MapContainer>
 
       {/* Botón chat */}
-      <button
-        className="btn btn-round position-absolute bottom-0 end-0 m-3 d-flex justify-content-center align-items-center"
-        style={{
-          backgroundColor: '#000842',
-          color: 'white',
-          borderColor: '#000842',
-          borderRadius: '50%',
-          width: '60px',
-          height: '60px',
-          zIndex: 1000
-        }}
-      >
-        <MessageCircle size={30} />
-      </button>
+      <Link to={isLoggedIn ? "/lista-chats" : "/login"}>
+        <button
+          className="btn btn-round position-absolute bottom-0 end-0 m-3 d-flex justify-content-center align-items-center"
+          style={{
+            backgroundColor: '#000842',
+            color: 'white',
+            borderColor: '#000842',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
+            zIndex: 1000
+          }}
+        >
+          <MessageCircle size={30} />
+        </button>
+      </Link>
 
       {/* Filtros */}
       {showFilters && (
         <div className="position-absolute start-0 bg-white p-3 shadow" style={{ zIndex: 1001, top: '100px', margin: '0.5rem', left: '0' }}>
           <Accordion>
             <Accordion.Item eventKey="0">
-              <Accordion.Header>Datos del Piso</Accordion.Header>
+              <Accordion.Header>
+                <span style={{ marginRight: "15px" }}>Datos del Piso</span>
+              </Accordion.Header>
               <Accordion.Body>
                 <Form>
                   <Form.Group>
@@ -208,7 +216,9 @@ const Principal = () => {
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="1">
-              <Accordion.Header>Datos de la Ciudad</Accordion.Header>
+              <Accordion.Header>
+                <span style={{ marginRight: "15px" }}>Datos de la Ciudad</span>
+              </Accordion.Header>
               <Accordion.Body>
                 <Form.Group>
                   <Form.Label>Barrio</Form.Label>
@@ -222,6 +232,11 @@ const Principal = () => {
                 {/* En el futuro, añadir más filtros */}
               </Accordion.Body>
             </Accordion.Item>
+            <div className="d-flex justify-content-center mt-2">
+              <Link to="/analiticas" style={{ color: 'blue', textDecoration: 'none' }}>
+                Ver datos de las zonas
+              </Link>
+            </div>
           </Accordion>
           <div className="d-flex justify-content-between mt-3">
             <Button variant="primary" style={{ backgroundColor: "#000842" }} onClick={applyFilters}>Aplicar</Button>

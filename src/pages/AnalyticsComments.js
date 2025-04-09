@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
-import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
 import CustomModal from '../components/CustomModal';
 import { Link } from 'react-router-dom';
@@ -52,6 +52,8 @@ const AnalyticsCommentsPage = () => {
         }
     };
 
+    const navigate = useNavigate();
+
     const handleCommentSubmit = (e) => {
         e.preventDefault();
         console.log("Comentario enviado:", newComment);
@@ -68,6 +70,15 @@ const AnalyticsCommentsPage = () => {
         setSelectedUser(null);
     };
 
+    const handleSearch = () => {
+        navigate('/principal');
+    };
+
+    const handleGraphics = () => {
+        navigate('/analiticas-graficos');
+    };
+
+
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
@@ -79,7 +90,7 @@ const AnalyticsCommentsPage = () => {
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
             {sessionStorage.getItem("userRole") === "admin" && (
-                <CustomNavbarAdmin />
+                <CustomNavbar />
             )}
             {sessionStorage.getItem("userRole") !== "admin" && (
                 <CustomNavbar />
@@ -225,6 +236,7 @@ const AnalyticsCommentsPage = () => {
                         {/* Center button */}
                         <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
                             <Button
+                                onClick={handleSearch}
                                 variant="outline-light"
                                 style={{
                                     backgroundColor: '#000842',
@@ -242,6 +254,7 @@ const AnalyticsCommentsPage = () => {
                         {/* Right button */}
                         <Col xs={12} sm={4} className="text-center text-sm-end">
                             <Button 
+                                onClick={handleGraphics}
                                 variant="outline-secondary" 
                                 className="d-flex align-items-center mx-auto mx-sm-0 ms-sm-auto"
                                 style={{
