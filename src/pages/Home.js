@@ -2,7 +2,8 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
-import LogoGrande from "../assets/LogoGrande.png";
+import LogoTexto from "../assets/LogoTexto.png";
+import Icono from "../assets/icono_png.png";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
@@ -10,17 +11,39 @@ const HomePage = () => {
   return (
     <div className="App">
       <CustomNavbar />
-      <Container className="text-center mt-5">
+      <Container className="text-center mt-4">
         {/* Logo */}
-        <div className="d-flex justify-content-center mb-4">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: "25px",
+            gap: "20px"
+          }}
+        >
           <img
-            src={LogoGrande}
-            alt="UniLiving Logo"
+            src={Icono}
+            alt="UniLiving Icono"
             className="img-fluid"
             style={{
+              marginTop: "25px",
+              marginBottom: "25px",
               maxWidth: "100%",
               height: "auto",
-              maxHeight: "200px"
+              maxHeight: "150px"
+            }}
+          />
+          <img
+            src={LogoTexto}
+            alt="UniLiving"
+            className="img-fluid"
+            style={{
+              marginTop: "25px",
+              marginBottom: "25px",
+              maxWidth: "100%",
+              height: "auto",
+              maxHeight: "125px"
             }}
           />
         </div>

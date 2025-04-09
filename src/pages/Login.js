@@ -56,7 +56,7 @@ function LoginPage() {
             style={{
               maxWidth: "100%",
               height: "auto",
-              maxHeight: "100px"
+              maxHeight: "120px"
             }}
           />
         </div>

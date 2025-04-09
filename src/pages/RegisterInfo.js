@@ -49,7 +49,7 @@ function RegisterPage() {
             src={LogoGrande} 
             alt="UniLiving Logo" 
             className="img-fluid" 
-            style={{ maxWidth: "100%", height: "auto", maxHeight: "100px" }} 
+            style={{ maxWidth: "100%", height: "auto", maxHeight: "120px" }} 
           />
         </div>
 
