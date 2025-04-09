@@ -40,14 +40,14 @@ const CustomNavbar = () => {
         <Nav className="me-auto ms-lg-4">
           <div className="d-lg-none border-top border-secondary mt-2"></div>
 
-          {/* Enlaces de navegación. Cambiar los "/" por las pantallas cuando se hagan*/}
+          {/* Enlaces de navegación*/}
           <Nav.Link as={Link} to={isLoggedIn ? "/principal" : "/principal"} className="text-white mx-2">
             Explorar
           </Nav.Link>
-          <Nav.Link as={Link} to={isLoggedIn ? "/" : "/login"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isLoggedIn ? "/analiticas" : "/analiticas"} className="text-white mx-2">
             Analíticas
           </Nav.Link>
-          <Nav.Link as={Link} to={isLoggedIn ? "/" : "/login"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isLoggedIn ? "/buscar-compañero" : "/login"} className="text-white mx-2">
             Buscar compañero
           </Nav.Link>
           <Nav.Link as={Link} to={isLoggedIn ? "/lista-chats" : "/login"} className="text-white mx-2">

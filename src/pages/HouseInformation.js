@@ -2,7 +2,7 @@ import { useLocation, Link, useNavigate } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
 import Gallery from 'react-image-gallery';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGraduationCap, faTrain, faShoppingCart, faGlassCheers, faHospital, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faGraduationCap, faTrain, faShoppingCart, faGlassCheers, faHospital} from '@fortawesome/free-solid-svg-icons';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import '../css/gallery.css';
 import { useEffect } from 'react';
@@ -32,24 +32,40 @@ function DetallePiso() {
         <div className="App position-relative">
             <CustomNavbar />
 
-            <Link
-                to="/principal"
-                className="position-absolute top-0 start-0 p-3 d-none d-md-block"
-                style={{ marginTop: "60px", zIndex: 1000 }}
-            >
-                <FontAwesomeIcon icon={faTimes} size="2x" />
-            </Link>
-
-
-            <div className="d-flex justify-content-center align-items-center" style={{ marginTop: "80px", height: "95vh", margin: "2vh 4vw" }}>
-                <div className="d-flex flex-column w-100 h-100 gap-3">
+            <div className="d-flex justify-content-center" style={{ marginTop: "80px", margin: "3vh 6vw", minHeight: "80vh" }}>
+                <div className="d-flex flex-column w-100 gap-3" style={{ marginBottom: "20px" }}>
                     {/* Primera tarjeta con la galería */}
-                    <Card className="w-100 border-dark bg-light p-3">
-                        <Gallery items={images} showThumbnails={false} showFullscreenButton={false} showPlayButton={false} />
+                    <Card className="w-100 border-dark bg-light p-3"
+                        style={{
+                            border: '1px solid #ddd',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                            backgroundColor: 'white',
+                            borderRadius: '10px',
+                        }}>
+                        <Gallery
+                            items={images}
+                            showThumbnails={false}
+                            showFullscreenButton={false}
+                            showPlayButton={false}
+                            renderItem={(item) => (
+                                <div style={{ textAlign: 'center' }}>
+                                <img
+                                    src={item.original}
+                                    alt={item.originalAlt || ''}
+                                    style={{
+                                    maxHeight: '350px',
+                                    width: 'auto',
+                                    maxWidth: '100%',
+                                    objectFit: 'contain',
+                                    }}
+                                />
+                                </div>
+                            )}
+                        />
                         <Card.Body className="text-center">
                             <Card.Body className="text-center">
                                 <Card.Title className="fs-4">{piso.direccion}</Card.Title>
-                                <Card.Subtitle className="text-primary fs-5">{piso.precio}€ / mes</Card.Subtitle>
+                                <Card.Subtitle className="fs-5">{piso.precio}€ por mes</Card.Subtitle>
                                 <Card.Text className="fs-6">{piso.habitaciones} hab | {piso.metros} m²</Card.Text>
                                 <Card.Text className="fs-5">{piso.descripcion}</Card.Text>
                             </Card.Body>
@@ -57,7 +73,13 @@ function DetallePiso() {
                     </Card>
 
                     {/* Segunda tarjeta con sitios de interés */}
-                    <Card className="w-100 border-dark p-4 bg-white">
+                    <Card className="w-100 border-dark p-4 bg-white"
+                        style={{
+                            border: '1px solid #ddd',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                            backgroundColor: 'white',
+                            borderRadius: '10px',
+                        }}>
                         <Card.Body className="p-0">
                             <Card.Title className="text-center fw-bold">Sitios de interés cercanos al piso</Card.Title>
                             <hr />
@@ -107,8 +129,26 @@ function DetallePiso() {
                             </ListGroup>
                         </Card.Body>
                     </Card>
+                    <div className="d-flex justify-content-center mt-2">
+                        <Link
+                            to="/principal"
+                            className="btn text-center"
+                            style={{
+                            backgroundColor: '#000842',
+                            color: 'white',
+                            borderRadius: '10px',
+                            padding: '6px 16px',
+                            marginTop: '0.5rem',
+                            width: '130px'
+                            }}
+                        >
+                            Atrás
+                        </Link>
+                    </div>
                 </div>
             </div>
+
+            
         </div>
     );
 }

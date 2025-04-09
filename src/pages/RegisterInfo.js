@@ -36,6 +36,9 @@ function RegisterPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Formulario enviado:', formData);
+
+    document.cookie = "session=true; path=/; max-age=3600"; // Expira en 1 hora. Cambiar a guardar las variables de sesión en el backend
+    navigate("/principal"); // Redirigir a la página principal
   };
 
   return (

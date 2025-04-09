@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col, Form} from 'react-bootstrap';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import { FaChartBar, FaComments } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 import "leaflet/dist/leaflet.css";
 import CustomNavbar from '../components/CustomNavbar';
 
@@ -44,17 +45,20 @@ const AnalyticsPage = () => {
                 e.target.setStyle(geoJsonStyle);
             },
             click: () => {
-                alert(`Barrio seleccionado: ${feature.properties.name}`);
+                console.log(`Barrio seleccionado: ${feature.properties.name}`);
+                navigate('/analiticas-graficos');
             }
         });
     };
 
+    const navigate = useNavigate();
+
     const handleChartClick = () => {
-        console.log("Gráficas clickeado");
+        navigate('/analiticas-graficos');
     };
     
     const handleCommentsClick = () => {
-        console.log("Comentarios clickeado");
+        navigate('/analiticas-comentarios');
     };
 
     return (

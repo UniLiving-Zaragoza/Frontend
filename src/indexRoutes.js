@@ -35,9 +35,9 @@ function IndexRoutes() {
       <Route path="/lista-chats" element={<ChatList />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />
       <Route path="/analiticas-graficos" element={<AnalyticsGraphicsPage />} />
-      <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} />
+      <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} /> {/* Si el admin la usa habra que protegerla y que cambie segun el user role */}
       <Route path="/buscar-compañero" element={<SearchPartnerPage />} />
-      <Route path="/chat-global/" element={<ChatGlobal />} />
+      <Route path="/chat-global/" element={<ChatGlobal />} />   {/* Si el admin la usa habra que protegerla */}
       <Route path="/chat-individual/:id" element={<ChatIndividual />} />
 
       {/* Páginas admin */}

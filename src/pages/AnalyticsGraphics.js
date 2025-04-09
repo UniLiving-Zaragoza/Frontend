@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col, Form } from 'react-bootstrap';
 import { FaExclamationTriangle, FaUsers, FaChartLine, FaComments } from 'react-icons/fa';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area, BarChart, Bar} from 'recharts';
+import { useNavigate } from 'react-router-dom';
 import "leaflet/dist/leaflet.css";
 import CustomNavbar from '../components/CustomNavbar';
 
@@ -28,6 +29,17 @@ const AnalyticsGraphicsPage = () => {
         "Centro", "Las Fuentes", "Universidad", "San José",
         "Casablanca", "Torrero-La Paz", "Sur"
     ];
+
+    const navigate = useNavigate();
+
+    const handleSearch = () => {
+        navigate('/principal');
+    };
+
+    const handleCommets = () => {
+        navigate('/analiticas-comentarios');
+    };
+    
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
@@ -138,6 +150,7 @@ const AnalyticsGraphicsPage = () => {
                         {/* Center button */}
                         <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
                             <Button
+                                onClick={handleSearch}
                                 variant="outline-light"
                                 style={{
                                     backgroundColor: '#000842',
@@ -155,6 +168,7 @@ const AnalyticsGraphicsPage = () => {
                         {/* Right button */}
                         <Col xs={12} sm={4} className="text-center text-sm-end">
                             <Button 
+                                onClick={handleCommets}
                                 variant="outline-secondary" 
                                 className="d-flex align-items-center mx-auto mx-sm-0 ms-sm-auto"
                                 style={{
