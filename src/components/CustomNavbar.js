@@ -21,7 +21,7 @@ const CustomNavbar = () => {
       bg="custom"
       expand="lg"
       className="px-3 py-1"
-      style={{ backgroundColor: '#000842' }}
+      style={{ backgroundColor: '#000842', zIndex: 1050 }}
     >
       <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
         <img
