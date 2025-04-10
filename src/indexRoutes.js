@@ -18,6 +18,7 @@ import AnalyticsCommetsPage from './pages/AnalyticsComments'
 import SearchPartnerPage from './pages/SearchPartner'
 import ChatGlobal from './pages/ChatGlobal';
 import ChatIndividual from './pages/ChatIndividual';
+import ChatReports from './pages/AdminReports';
 // import ProtectedRoute from './protectedRoutes';
 
 function IndexRoutes() {
@@ -40,11 +41,13 @@ function IndexRoutes() {
       <Route path="/chat-global/" element={<ChatGlobal />} />   {/* Si el admin la usa habra que protegerla */}
       <Route path="/chat-individual/:id" element={<ChatIndividual />} />
 
+
       {/* Páginas admin */}
       {/*<Route element={<ProtectedRoute />}>*/}
       <Route path="/principal-admin" element={<AdminPrincipalPage />} />
       <Route path="/deshabilitados-admin" element={<AdminBannedUserPage />} />
       <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
+      <Route path="/reportes-admin" element={<ChatReports />} />
       {/*</Route>*/}
     </Routes>
   );

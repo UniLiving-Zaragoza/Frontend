@@ -40,7 +40,7 @@ const CustomNavbarAdmin = () => {
           <Nav.Link as={Link} to="/buscar-usuario-admin" className="text-white mx-2">Usuarios deshabilitados</Nav.Link>
           <Nav.Link as={Link} to="/chat-global" className="text-white mx-2">Mensajes</Nav.Link>
           <Nav.Link as={Link} to="/analiticas-comentarios" className="text-white mx-2">Comentarios</Nav.Link>
-          <Nav.Link as={Link} to="/principal-admin" className="text-white mx-2">Reportes</Nav.Link>
+          <Nav.Link as={Link} to="/reportes-admin" className="text-white mx-2">Reportes</Nav.Link>
 
           <div className="d-lg-none border-top border-secondary mb-2"></div>
         </Nav>
