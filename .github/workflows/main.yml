@@ -31,11 +31,3 @@ jobs:
       - name: Ejecutar análisis estático con Codacy CLI
         run: |
           curl -Ls https://coverage.codacy.com/get.sh | bash -s analyze --language javascript
-
-  deploy-to-render:
-    name: Desplegar frontend a Render
-    needs: codacy-analysis
-    runs-on: ubuntu-latest
-    steps:
-      - name: Llamar al webhook de Render
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
