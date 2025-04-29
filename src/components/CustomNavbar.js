@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
@@ -6,15 +6,8 @@ import LogoPequeño from '../assets/LogoPequeño.png';
 import Person from '../assets/Person.png';
 
 const CustomNavbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const sessionCookie = document.cookie
-      .split("; ")
-      .find(row => row.startsWith("session="));
-
-    setIsLoggedIn(sessionCookie ? sessionCookie.split("=")[1] === "true" : false);
-  }, []);
+  const isAuthenticated = sessionStorage.getItem("isAuthenticated");
 
   return (
     <Navbar
@@ -41,16 +34,16 @@ const CustomNavbar = () => {
           <div className="d-lg-none border-top border-secondary mt-2"></div>
 
           {/* Enlaces de navegación*/}
-          <Nav.Link as={Link} to={isLoggedIn ? "/principal" : "/principal"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isAuthenticated ? "/principal" : "/principal"} className="text-white mx-2">
             Explorar
           </Nav.Link>
-          <Nav.Link as={Link} to={isLoggedIn ? "/analiticas" : "/analiticas"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isAuthenticated ? "/analiticas" : "/analiticas"} className="text-white mx-2">
             Analíticas
           </Nav.Link>
-          <Nav.Link as={Link} to={isLoggedIn ? "/buscar-compañero" : "/login"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isAuthenticated ? "/buscar-compañero" : "/login"} className="text-white mx-2">
             Buscar compañero
           </Nav.Link>
-          <Nav.Link as={Link} to={isLoggedIn ? "/lista-chats" : "/login"} className="text-white mx-2">
+          <Nav.Link as={Link} to={isAuthenticated ? "/lista-chats" : "/login"} className="text-white mx-2">
             Chat
           </Nav.Link>
 
@@ -58,7 +51,7 @@ const CustomNavbar = () => {
         </Nav>
 
         <Form className="d-flex ps-3 ps-lg-0">
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <Link to="/perfil/1" className="d-flex align-items-center" //Seria perfil/{userId}
             >
               <img

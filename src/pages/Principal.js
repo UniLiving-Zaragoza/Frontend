@@ -115,7 +115,7 @@ const Principal = () => {
     setFilteredPisos(pisos);
   };
 
-  const [isLoggedIn] = useState(false);
+  const isAuthenticated = sessionStorage.getItem("isAuthenticated");
 
   return (
     <div className="App position-relative" style={{ height: '100vh', overflow: 'hidden' }}>
@@ -172,7 +172,7 @@ const Principal = () => {
       </MapContainer>
 
       {/* Botón chat */}
-      <Link to={isLoggedIn ? "/lista-chats" : "/login"}>
+      <Link to={isAuthenticated ? "/lista-chats" : "/login"}>
         <button
           className="btn btn-round position-absolute bottom-0 end-0 m-3 d-flex justify-content-center align-items-center"
           style={{

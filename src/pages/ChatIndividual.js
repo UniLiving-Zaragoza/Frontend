@@ -71,8 +71,6 @@ const ChatIndividual = () => {
         }
     }
 
-
-
     const handleReportUser = (e, id, sender, text) => {
         setSelectedUser(id);
         setSelectedMessage(text);

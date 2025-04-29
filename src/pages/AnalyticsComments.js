@@ -10,16 +10,14 @@ import CustomModal from '../components/CustomModal';
 import { Link } from 'react-router-dom';
 
 const AnalyticsCommentsPage = () => {
-    // esto se debera cambiar, ahora esta solo para pruebas
-    // -----------------------------------------------------
-    const [isLogged] = useState(true);
-    // -----------------------------------------------------
     const [searchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [newComment, setNewComment] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const usersPerPage = 5;
+
+    const isAuthenticated = sessionStorage.getItem("isAuthenticated");
 
     const isAdmin = sessionStorage.getItem("isAdmin");
 
@@ -86,9 +84,9 @@ const AnalyticsCommentsPage = () => {
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
 
     const commentsContainerMaxHeight =
-        isLogged && isAdmin === "true"
+        isAuthenticated && isAdmin === "true"
             ? 'calc(100vh - 200px)'
-            : isLogged && isAdmin !== "true"
+            : isAuthenticated && isAdmin !== "true"
             ? 'calc(100vh - 320px)'
             : 'calc(100vh - 265px)';
     
@@ -114,7 +112,7 @@ const AnalyticsCommentsPage = () => {
                 </Container>
                 
                 {/* Campo de comentario para usuarios logueados */}
-                {isLogged && isAdmin !== "true" && (
+                {isAuthenticated && isAdmin !== "true" && (
                     <Container className="mb-3 px-4">
                         <Form onSubmit={handleCommentSubmit}>
                             <InputGroup>
