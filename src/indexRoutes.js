@@ -19,6 +19,7 @@ import SearchPartnerPage from './pages/SearchPartner'
 import ChatGlobal from './pages/ChatGlobal';
 import ChatIndividual from './pages/ChatIndividual';
 import ChatReports from './pages/AdminReports';
+import NotFound from './pages/NotFound';
 // import ProtectedRoute from './protectedRoutes';
 
 function IndexRoutes() {
@@ -49,6 +50,8 @@ function IndexRoutes() {
       <Route path="/buscar-usuario-admin" element={<AdminSearchUserPage />} />
       <Route path="/reportes-admin" element={<ChatReports />} />
       {/*</Route>*/}
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
