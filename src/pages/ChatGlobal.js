@@ -18,7 +18,7 @@ const ChatGlobal = () => {
     const [modalType, setModalType] = useState(null); // 'reporte' o 'borrar'
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
-    const userRole = sessionStorage.getItem("userRole");
+    const isAdmin = sessionStorage.getItem("isAdmin");
 
     let messages = [
         {
@@ -80,7 +80,8 @@ const ChatGlobal = () => {
     ];
 
     // Modificar los ids directamente si el usuario es admin
-    if (userRole === "admin") {
+    if (isAdmin === "true") {
+        console.log("entro");
         messages = messages.map(msg => msg.id === 1 ? { ...msg, id: 999 } : msg);
     }
 
@@ -117,9 +118,9 @@ const ChatGlobal = () => {
 
     return (
         <div className="App">
-            {userRole === "admin" ? <CustomNavbarAdmin /> : <CustomNavbar />}
+            {isAdmin === "true" ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container className="text-center mt-5">
-                {userRole !== "admin" && (
+                {isAdmin !== "true" && (
                     <Row className="mb-3">
                         <Col>
                             <Button
@@ -148,7 +149,7 @@ const ChatGlobal = () => {
                 <ChatComponent
                     dataMessages={messages}
                     icon={
-                        userRole === "admin" ? (
+                        isAdmin === "true" ? (
                             <BsTrash3Fill size={25} color="red" />
                         ) : (
                             <BsThreeDotsVertical size={25} />
@@ -166,7 +167,7 @@ const ChatGlobal = () => {
                             zIndex: 1000
                         }}
                     >
-                        {userRole === "admin" ? (
+                        {isAdmin === "true" ? (
                             <button className="dropdown-item" onClick={openDeleteModal}>
                                 Eliminar mensaje
                             </button>

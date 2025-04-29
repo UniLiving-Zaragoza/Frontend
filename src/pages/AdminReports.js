@@ -17,7 +17,7 @@ const ChatReports = () => {
 
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
-    const userRole = sessionStorage.getItem("userRole");
+    const isAdmin = sessionStorage.getItem("isAdmin");
 
     let messages = [
         {
@@ -79,7 +79,7 @@ const ChatReports = () => {
     ];
 
     // Modificar los ids directamente si el usuario es admin
-    if (userRole === "admin") {
+    if (isAdmin === "true") {
         messages = messages.map(msg => msg.id === 1 ? { ...msg, id: 999 } : msg);
     }
 
@@ -115,7 +115,7 @@ const ChatReports = () => {
 
     return (
         <div className="App">
-            {userRole === "admin" ? <CustomNavbarAdmin /> : <CustomNavbar />}
+            {isAdmin === "true" ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container className="text-center mt-5">
                 <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
                     <strong>Mensajes reportados</strong>

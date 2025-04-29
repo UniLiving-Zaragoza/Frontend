@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import Accordion from 'react-bootstrap/Accordion';
 import LogoGrande from "../assets/LogoGrande.png";
 
@@ -9,6 +10,8 @@ import LogoGrande from "../assets/LogoGrande.png";
 // NO SE GUARDAN LOS CAMPOS ENTRE LAS DOS PÁGINAS DE REGISTRO
 
 function RegisterPage() {
+
+  const { register } = useAuth();
 
   const navigate = useNavigate();
 
@@ -33,12 +36,17 @@ function RegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Formulario enviado:', formData);
 
+    // FALTAN VERIFICACIONES IGUAL QUE EN Register.js **************
+
     document.cookie = "session=true; path=/; max-age=3600"; // Expira en 1 hora. Cambiar a guardar las variables de sesión en el backend
+
+    await register();
     navigate("/principal"); // Redirigir a la página principal
+
   };
 
   return (

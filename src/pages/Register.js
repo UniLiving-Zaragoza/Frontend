@@ -43,7 +43,7 @@ function RegisterPage() {
     setErrors(newErrors);
     
     if (form.checkValidity() && Object.keys(newErrors).length === 0) {
-      // LÓGICA DE AUTENTICACIÓN
+      // FALTA LÓGICA DE AUTENTICACIÓN DEL BACKEND - EN REGISTER INFO MEJOR
       navigate('/registro-info');
     }
     

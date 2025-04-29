@@ -1,16 +1,16 @@
-import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState } from "react";
 import { Container, Button, Card, Row, Col, ListGroup } from "react-bootstrap";
 import { PencilSquare } from "react-bootstrap-icons";
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import CustomNavbar from "../components/CustomNavbar";
 import Accordion from 'react-bootstrap/Accordion';
-import "../css/Perfil.css";
 import CustomModal from "../components/CustomModal";
 import Newimage from "../components/CustomModalPicture";
-import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
-import { Link, useParams } from 'react-router-dom';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../css/Perfil.css";
+
 
 const ProfilePage = () => {
     const { id } = useParams();
@@ -19,6 +19,9 @@ const ProfilePage = () => {
     const [showDissable, setShowDissable] = useState(false);
     const [showEnable, setShowEnable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
+
+    const { logout } = useAuth();
+
     const navigate = useNavigate();
 
     const handleShowModal = () => setShowModal(true);
@@ -30,10 +33,10 @@ const ProfilePage = () => {
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
 
-    const handleCloseSession = () => {
-        // Aquí pones lo que deseas hacer cuando se haga click en el botón de "Confirmar"
+    const handleCloseSession = async () => {
         document.cookie = "session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; // Eliminar la cookie de sesión. Cambiar a cerrar sesión en el backend
-        navigate("/");
+        await logout();
+        navigate('/');
         handleCloseModal();
     }
 
@@ -44,7 +47,7 @@ const ProfilePage = () => {
     }
 
     const handleEnableUser = () => {
-        console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
+        console.log("Habilitar cuenta de usuario"); // Cambiar a habilitar en el backend
         navigate(-1); // Volver a la página anterior
         handleCloseModal();
     }
@@ -89,10 +92,10 @@ const ProfilePage = () => {
     };
     return (
         <div className="App">
-            {sessionStorage.getItem("userRole") === "admin" && (
+            {sessionStorage.getItem("isAdmin") === "true" && (
                 <CustomNavbarAdmin />
             )}
-            {sessionStorage.getItem("userRole") !== "admin" && (
+            {sessionStorage.getItem("isAdmin") !== "true" && (
                 <CustomNavbar />
             )}
             <Container className="mt-4">
@@ -207,7 +210,7 @@ const ProfilePage = () => {
                 )}
 
                 {/* Botón de deshabilitar o habilitar dependiendo del estado de deshabilitado */}
-                {(data.deshabilitado === false || !data.deshabilitado) && sessionStorage.getItem("userRole") === "admin" && (
+                {(data.deshabilitado === false || !data.deshabilitado) && sessionStorage.getItem("isAdmin") === "true" && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
                             <Button
@@ -222,7 +225,7 @@ const ProfilePage = () => {
                     </Row>
                 )}
 
-                {data.deshabilitado === true && sessionStorage.getItem("userRole") === "admin" && (
+                {data.deshabilitado === true && sessionStorage.getItem("isAdmin") === "true" && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
                             <Button

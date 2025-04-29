@@ -66,8 +66,6 @@ const dataComments = [
   { mes: "12", comentarios: 620 },
 ];
 
-sessionStorage.setItem("userRole", "admin"); // Simulando que el usuario es un admin. Cambiar por el valor real cuando se haga la autenticación.
-
 const Dashboard = () => {
   return (
     <div className="App">

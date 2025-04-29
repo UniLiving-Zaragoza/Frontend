@@ -1,10 +1,23 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, Form, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import LogoPequeño from '../assets/LogoPequeño.png';
 
 const CustomNavbarAdmin = () => {
+
+  const { logout } = useAuth();
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+
+    await logout();
+    navigate('/');
+    
+  };
+
   return (
     <Navbar
       bg="custom"
@@ -47,10 +60,8 @@ const CustomNavbarAdmin = () => {
 
         <Form className="d-flex ps-3 ps-lg-0">
           <Button
-            as={Link}
-            to="/"
+            onClick={handleLogout}
             variant="light"
-            onClick={() => sessionStorage.setItem("userRole", "0")}
             size="sm"
             className="text-dark fw-bold mt-3 mt-lg-0 mb-2 mb-lg-0 ms-lg-2"
             style={{ minWidth: '120px', borderRadius: "25px" }}

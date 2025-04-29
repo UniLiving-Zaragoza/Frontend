@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
 import { FcGoogle } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
-import LogoGrande from "../assets/LogoGrande.png";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../authContext';
+import LogoGrande from "../assets/LogoGrande.png";
 
 function LoginPage() {
 
@@ -11,10 +12,13 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [validated, setValidated] = useState(false);
+
+  const { login } = useAuth();
+
   const navigate = useNavigate();
 
   // HABRÁ QUE AÑADIR NUEVAS VERIFICACIONES CON LA API *********
-  const handleSubmit = (event) => {
+  const handleSubmit =  async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
 
@@ -36,9 +40,14 @@ function LoginPage() {
     setErrors(newErrors);
 
     if (form.checkValidity() && Object.keys(newErrors).length === 0) {
-      // LÓGICA DE AUTENTICACIÓN
-      document.cookie = "session=true; path=/; max-age=3600"; // Expira en 1 hora. Cambiar a guardar las variables de sesión en el backend
-      navigate("/principal"); // Redirigir a la página principal
+      // FALTA LÓGICA DE AUTENTICACIÓN DEL BACKEND
+  
+      document.cookie = "session=true; path=/; max-age=3600";
+      await login();
+
+      const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+      navigate(isAdmin ? "/principal-admin" : "/principal");
+      
     }
 
     setValidated(true);
