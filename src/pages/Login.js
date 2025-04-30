@@ -41,10 +41,7 @@ function LoginPage() {
 
     if (form.checkValidity() && Object.keys(newErrors).length === 0) {
       // FALTA LÓGICA DE AUTENTICACIÓN DEL BACKEND
-  
-      document.cookie = "session=true; path=/; max-age=3600";
       await login();
-
       const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
       navigate(isAdmin ? "/principal-admin" : "/principal");
       

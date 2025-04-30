@@ -42,8 +42,6 @@ function RegisterPage() {
 
     // FALTAN VERIFICACIONES IGUAL QUE EN Register.js **************
 
-    document.cookie = "session=true; path=/; max-age=3600"; // Expira en 1 hora. Cambiar a guardar las variables de sesión en el backend
-
     await register();
     navigate("/principal"); // Redirigir a la página principal
 

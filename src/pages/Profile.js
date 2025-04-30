@@ -34,7 +34,6 @@ const ProfilePage = () => {
     const handleCloseImageModal = () => setShowImageModal(false);
 
     const handleCloseSession = async () => {
-        document.cookie = "session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; // Eliminar la cookie de sesión. Cambiar a cerrar sesión en el backend
         await logout();
         navigate('/');
         handleCloseModal();
