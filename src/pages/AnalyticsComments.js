@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
 import CustomModal from '../components/CustomModal';
-import { Link } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AnalyticsCommentsPage = () => {
     const [searchQuery] = useState('');
@@ -15,6 +14,7 @@ const AnalyticsCommentsPage = () => {
     const [newComment, setNewComment] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedBarrio, setSelectedBarrio] = useState('');
     const usersPerPage = 5;
 
     const isAuthenticated = sessionStorage.getItem("isAuthenticated");
@@ -71,6 +71,7 @@ const AnalyticsCommentsPage = () => {
     };
 
     const handleSearch = () => {
+        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS
         navigate('/principal');
     };
 
@@ -78,6 +79,10 @@ const AnalyticsCommentsPage = () => {
         navigate('/analiticas-graficos');
     };
 
+    const handleBarrioChange = (e) => {
+        const value = e.target.value;
+        setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
+    };
 
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
@@ -90,6 +95,9 @@ const AnalyticsCommentsPage = () => {
             ? 'calc(100vh - 320px)'
             : 'calc(100vh - 265px)';
     
+    const searchButtonText = selectedBarrio ? 
+        `Buscar piso en ${selectedBarrio}` : 
+        'Buscar piso en toda Zaragoza';
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
@@ -101,6 +109,8 @@ const AnalyticsCommentsPage = () => {
                             <Form.Select 
                                 aria-label="Selector de barrios" 
                                 className="mb-3 shadow-sm"
+                                onChange={handleBarrioChange}
+                                value={selectedBarrio || 'Selecciona un barrio de Zaragoza'}
                             >
                                 <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
                                 {barriosZaragoza.map((barrio, index) => (
@@ -241,12 +251,12 @@ const AnalyticsCommentsPage = () => {
                                         backgroundColor: '#000842',
                                         color: 'white',
                                         borderRadius: '10px',
-                                        padding: '6px 16px',
-                                        width: '100%',
-                                        maxWidth: '200px'
+                                        padding: '6px 16px', 
+                                        width: 'auto',
+                                        maxWidth: 'none'
                                     }}
                                 > 
-                                    Buscar piso en X
+                                    {searchButtonText}
                                 </Button>
                             </Col>
                         )}
