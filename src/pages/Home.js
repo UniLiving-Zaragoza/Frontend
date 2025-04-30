@@ -2,25 +2,46 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Card, Row, Col } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
-import LogoGrande from "../assets/LogoGrande.png";
+import LogoTexto from "../assets/LogoTexto.png";
+import Icono from "../assets/icono_png.png";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
-  sessionStorage.setItem("userRole", 0);
   return (
     <div className="App">
       <CustomNavbar />
       <Container className="text-center mt-5">
         {/* Logo */}
-        <div className="d-flex justify-content-center mb-4">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: "40px",
+            gap: "20px",
+            flexWrap: "wrap", 
+            width: "100%",
+            maxWidth: "100%",
+          }}
+        >
           <img
-            src={LogoGrande}
-            alt="UniLiving Logo"
-            className="img-fluid"
+            src={Icono}
+            alt="UniLiving Icono"
             style={{
-              maxWidth: "100%",
+              flex: "1 1 175px", 
+              maxWidth: "175px",
+              width: "100%",
               height: "auto",
-              maxHeight: "200px"
+            }}
+          />
+          <img
+            src={LogoTexto}
+            alt="UniLiving"
+            style={{
+              flex: "2 1 200px", 
+              maxWidth: "300px",
+              width: "100%",
+              height: "auto",
             }}
           />
         </div>

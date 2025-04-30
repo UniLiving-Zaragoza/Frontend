@@ -1,27 +1,25 @@
 import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
 import CustomModal from '../components/CustomModal';
-import { Link } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AnalyticsCommentsPage = () => {
-    // esto se debera cambiar, ahora esta solo para pruebas
-    // -----------------------------------------------------
-    const [isLogged] = useState(true);
-    // -----------------------------------------------------
     const [searchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [newComment, setNewComment] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedBarrio, setSelectedBarrio] = useState('');
     const usersPerPage = 5;
 
-    const userRole = sessionStorage.getItem("userRole");
+    const isAuthenticated = sessionStorage.getItem("isAuthenticated");
+
+    const isAdmin = sessionStorage.getItem("isAdmin");
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -73,6 +71,7 @@ const AnalyticsCommentsPage = () => {
     };
 
     const handleSearch = () => {
+        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS
         navigate('/principal');
     };
 
@@ -80,22 +79,29 @@ const AnalyticsCommentsPage = () => {
         navigate('/analiticas-graficos');
     };
 
+    const handleBarrioChange = (e) => {
+        const value = e.target.value;
+        setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
+    };
 
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
 
     const commentsContainerMaxHeight =
-        isLogged && userRole === "admin"
+        isAuthenticated && isAdmin === "true"
             ? 'calc(100vh - 200px)'
-            : isLogged && userRole !== "admin"
+            : isAuthenticated && isAdmin !== "true"
             ? 'calc(100vh - 320px)'
             : 'calc(100vh - 265px)';
     
+    const searchButtonText = selectedBarrio ? 
+        `Buscar piso en ${selectedBarrio}` : 
+        'Buscar piso en toda Zaragoza';
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
-            {userRole === "admin" ? <CustomNavbarAdmin /> : <CustomNavbar />}
+            {isAdmin === "true" ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container fluid className="flex-grow-1 d-flex flex-column">
                 <Container className="mt-3 mb-1">
                     <div className="d-flex justify-content-center">
@@ -103,6 +109,8 @@ const AnalyticsCommentsPage = () => {
                             <Form.Select 
                                 aria-label="Selector de barrios" 
                                 className="mb-3 shadow-sm"
+                                onChange={handleBarrioChange}
+                                value={selectedBarrio || 'Selecciona un barrio de Zaragoza'}
                             >
                                 <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
                                 {barriosZaragoza.map((barrio, index) => (
@@ -114,7 +122,7 @@ const AnalyticsCommentsPage = () => {
                 </Container>
                 
                 {/* Campo de comentario para usuarios logueados */}
-                {isLogged && userRole !== "admin" && (
+                {isAuthenticated && isAdmin !== "true" && (
                     <Container className="mb-3 px-4">
                         <Form onSubmit={handleCommentSubmit}>
                             <InputGroup>
@@ -201,7 +209,7 @@ const AnalyticsCommentsPage = () => {
                                                 {user.comentario || 'Sin comentarios'}
                                             </span>
                                         </div>
-                                        {userRole === "admin" && (
+                                        {isAdmin === "true" && (
                                             <Button
                                                 variant="outline-light"
                                                 size="sm"
@@ -234,7 +242,7 @@ const AnalyticsCommentsPage = () => {
                         <Col sm={4} className="d-none d-sm-block"></Col>
                         
                         {/* Center button */}
-                        {userRole !== "admin" && (
+                        {isAdmin !== "true" && (
                             <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
                                 <Button
                                     onClick={handleSearch}
@@ -243,18 +251,18 @@ const AnalyticsCommentsPage = () => {
                                         backgroundColor: '#000842',
                                         color: 'white',
                                         borderRadius: '10px',
-                                        padding: '6px 16px',
-                                        width: '100%',
-                                        maxWidth: '200px'
+                                        padding: '6px 16px', 
+                                        width: 'auto',
+                                        maxWidth: 'none'
                                     }}
                                 > 
-                                    Buscar piso en X
+                                    {searchButtonText}
                                 </Button>
                             </Col>
                         )}
                         
                         {/* Right button */}
-                        {userRole !== "admin" && (
+                        {isAdmin !== "true" && (
                                 <Col xs={12} sm={4} className="text-center text-sm-end">
                                 <Button 
                                     onClick={handleGraphics}

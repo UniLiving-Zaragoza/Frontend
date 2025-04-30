@@ -30,7 +30,7 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
 
     return (
         <Container className="mt-4">
-            <Card className="p-3" style={{ height: sessionStorage.getItem("userRole") === "admin" ? "80vh" : "70vh", overflowY: "auto" }}>
+            <Card className="p-3" style={{ height: sessionStorage.getItem("isAdmin") === "true" ? "65vh" : "57vh", overflowY: "auto" }}>
                 {messages.map((msg, index) => (
                     <Row
                         key={index}
@@ -102,7 +102,7 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
             </Card>
 
             {/* Campo de texto para enviar mensajes, admin no envia mensajes asi que no le aparece este campo */}
-            {sessionStorage.getItem("userRole") !== "admin" && (
+            {sessionStorage.getItem("isAdmin") !== "true" && (
                 <Form className="mt-3 d-flex" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
                     <Form.Control
                         type="text"

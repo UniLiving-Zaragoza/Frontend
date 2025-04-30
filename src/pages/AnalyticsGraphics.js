@@ -1,12 +1,15 @@
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState } from 'react';
 import { Container, Button, Card, Row, Col, Form } from 'react-bootstrap';
 import { FaExclamationTriangle, FaUsers, FaChartLine, FaComments } from 'react-icons/fa';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area, BarChart, Bar} from 'recharts';
 import { useNavigate } from 'react-router-dom';
-import "leaflet/dist/leaflet.css";
 import CustomNavbar from '../components/CustomNavbar';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "leaflet/dist/leaflet.css";
 
-const AnalyticsGraphicsPage = () => {    
+const AnalyticsGraphicsPage = () => {
+    
+    const [selectedBarrio, setSelectedBarrio] = useState('');
 
     const dataExample = [
         { mes: "1", data: 200 },
@@ -33,6 +36,7 @@ const AnalyticsGraphicsPage = () => {
     const navigate = useNavigate();
 
     const handleSearch = () => {
+        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS
         navigate('/principal');
     };
 
@@ -40,6 +44,14 @@ const AnalyticsGraphicsPage = () => {
         navigate('/analiticas-comentarios');
     };
     
+    const handleBarrioChange = (e) => {
+        const value = e.target.value;
+        setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
+    };
+
+    const searchButtonText = selectedBarrio ? 
+        `Buscar piso en ${selectedBarrio}` : 
+        'Buscar piso en toda Zaragoza';
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
@@ -51,6 +63,8 @@ const AnalyticsGraphicsPage = () => {
                             <Form.Select 
                                 aria-label="Selector de barrios" 
                                 className="mb-3 shadow-sm"
+                                onChange={handleBarrioChange}
+                                value={selectedBarrio || 'Selecciona un barrio de Zaragoza'}
                             >
                                 <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
                                 {barriosZaragoza.map((barrio, index) => (
@@ -156,12 +170,12 @@ const AnalyticsGraphicsPage = () => {
                                     backgroundColor: '#000842',
                                     color: 'white',
                                     borderRadius: '10px',
-                                    padding: '6px 16px',
-                                    width: '100%',
-                                    maxWidth: '200px'
+                                    padding: '6px 16px', 
+                                    width: 'auto',
+                                    maxWidth: 'none'
                                 }}
                             > 
-                                Buscar piso en X
+                                {searchButtonText}
                             </Button>
                         </Col>
                         

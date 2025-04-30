@@ -1,12 +1,20 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from './authContext';
+import Unauthorized from './pages/Unauthorized';
 
-export const ProtectedRoute = ({ children }) => { //para cuando guardemos el rol en sessionStorage. 
-    const userRole = sessionStorage.getItem("userRole");
-    const location = useLocation();
 
-    if (userRole !== "admin") {
-        return <Navigate to="/" state={{ from: location }} replace />;
-    }
+function PrivateRoute({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" />;
+}
 
-    return children;
-};
+function AdminRoute({ children }) {
+  const { isAuthenticated, isAdmin } = useAuth();
+
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (!isAdmin) return <Unauthorized />;
+
+  return children;
+}
+
+export { PrivateRoute, AdminRoute };

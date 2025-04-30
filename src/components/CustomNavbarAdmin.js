@@ -1,10 +1,23 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, Form, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import LogoPequeño from '../assets/LogoPequeño.png';
 
 const CustomNavbarAdmin = () => {
+
+  const { logout } = useAuth();
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+
+    await logout();
+    navigate('/');
+    
+  };
+
   return (
     <Navbar
       bg="custom"
@@ -40,17 +53,15 @@ const CustomNavbarAdmin = () => {
           <Nav.Link as={Link} to="/buscar-usuario-admin" className="text-white mx-2">Usuarios deshabilitados</Nav.Link>
           <Nav.Link as={Link} to="/chat-global" className="text-white mx-2">Mensajes</Nav.Link>
           <Nav.Link as={Link} to="/analiticas-comentarios" className="text-white mx-2">Comentarios</Nav.Link>
-          <Nav.Link as={Link} to="/principal-admin" className="text-white mx-2">Reportes</Nav.Link>
+          <Nav.Link as={Link} to="/reportes-admin" className="text-white mx-2">Reportes</Nav.Link>
 
           <div className="d-lg-none border-top border-secondary mb-2"></div>
         </Nav>
 
         <Form className="d-flex ps-3 ps-lg-0">
           <Button
-            as={Link}
-            to="/"
+            onClick={handleLogout}
             variant="light"
-            onClick={() => sessionStorage.setItem("userRole", "0")}
             size="sm"
             className="text-dark fw-bold mt-3 mt-lg-0 mb-2 mb-lg-0 ms-lg-2"
             style={{ minWidth: '120px', borderRadius: "25px" }}
