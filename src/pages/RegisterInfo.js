@@ -100,10 +100,11 @@ function RegisterPage() {
           <Form onSubmit={handleSubmit} className="container">
             <Row>
               <Col md={4} sm={12}>
-                <Form.Group className="mb-3" controlId="nombre">
+                <Form.Group className="mb-2" controlId="nombre">
+                  <Form.Label>Nombre</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Nombre"
+                    placeholder="Ingresa tu nombre"
                     name="nombre"
                     value={formData.nombre}
                     onChange={handleChange}
@@ -113,10 +114,11 @@ function RegisterPage() {
                 </Form.Group>
               </Col>
               <Col md={8} sm={12}>
-                <Form.Group className="mb-3" controlId="apellidos">
+                <Form.Group className="mb-2" controlId="apellidos">
+                  <Form.Label>Apellidos</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Apellidos"
+                    placeholder="Ingresa tus apellidos"
                     name="apellidos"
                     value={formData.apellidos}
                     onChange={handleChange}
@@ -129,10 +131,11 @@ function RegisterPage() {
   
             <Row>
               <Col md={4} sm={12}>
-                <Form.Group className="mb-3" controlId="edad">
+                <Form.Group className="mb-2" controlId="edad">
+                  <Form.Label>Edad</Form.Label>
                   <Form.Control
                     type="number"
-                    placeholder="Edad"
+                    placeholder="Ingresa tu edad"
                     name="edad"
                     value={formData.edad}
                     onChange={handleChange}
@@ -144,14 +147,15 @@ function RegisterPage() {
                 </Form.Group>
               </Col>
               <Col md={8} sm={12}>
-                <Form.Group className="mb-3" controlId="genero">
+                <Form.Group className="mb-2" controlId="genero">
+                  <Form.Label>Género</Form.Label>
                   <Form.Select
                     name="genero"
                     value={formData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
                   >
-                    <option value="">Género</option>
+                    <option value="">Selecciona tu género</option>
                     <option value="Masculino">Masculino</option>
                     <option value="Femenino">Femenino</option>
                     <option value="Otro">Otro</option>
@@ -161,7 +165,7 @@ function RegisterPage() {
               </Col>
             </Row>
   
-            {/*<Form.Group className="mb-3" controlId="pais">
+            {/*<Form.Group className="mb-2" controlId="pais">
               <Form.Select
                 name="pais"
                 value={formData.pais}
@@ -174,9 +178,10 @@ function RegisterPage() {
             </Form.Group>*/}
   
             <Form.Group className="mb-3" controlId="descripcion">
+              <Form.Label>Descripción personal</Form.Label>
               <Form.Control
                 as="textarea"
-                placeholder="Descripción personal"
+                placeholder="Ingresa una descripción personal"
                 name="descripcion"
                 value={formData.descripcion}
                 onChange={handleChange}
@@ -190,28 +195,26 @@ function RegisterPage() {
                 <Accordion.Header>Situación personal</Accordion.Header>
                 <Accordion.Body>
                 <Row className="mb-3">
-                    <Col xs={12}>
-                    <Form.Group controlId="estadoLaboral">
+                    <Col md={6} sm={12}>
+                    <Form.Group controlId="mascotas">
+                        <Form.Label>Mascotas</Form.Label>
                         <Form.Select
-                        name="estadoLaboral"
-                        value={formData.estadoLaboral}
+                        name="mascotas"
+                        value={formData.mascotas}
                         onChange={handleChange}
-                        isInvalid={!!errors.estadoLaboral}
+                        isInvalid={!!errors.mascotas}
                         >
-                        <option value="">Selecciona tu estado laboral</option>
-                        <option value="Estudiante">Estudiante</option>
-                        <option value="Empleado">Empleado</option>
-                        <option value="Desempleado">Desempleado</option>
-                        <option value="Otro">Otro</option>
+                        <option value="">Selecciona si tienes mascotas</option>
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
                         </Form.Select>
-                        <Form.Control.Feedback type="invalid">{errors.estadoLaboral}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">{errors.mascotas}</Form.Control.Feedback>
                     </Form.Group>
                     </Col>
-                </Row>
-                
-                <Row className="mb-3">
-                    <Col xs={12}>
+                    
+                    <Col md={6} sm={12}>
                     <Form.Group controlId="fumador">
+                        <Form.Label>Fumador</Form.Label>
                         <Form.Select
                         name="fumador"
                         value={formData.fumador}
@@ -228,37 +231,39 @@ function RegisterPage() {
                 </Row>
                 
                 <Row className="mb-3">
-                    <Col xs={12}>
-                    <Form.Group controlId="mascotas">
+                <Col md={6} sm={12}>
+                    <Form.Group controlId="estadoLaboral">
+                        <Form.Label>Estado Laboral</Form.Label>
                         <Form.Select
-                        name="mascotas"
-                        value={formData.mascotas}
+                        name="estadoLaboral"
+                        value={formData.estadoLaboral}
                         onChange={handleChange}
-                        isInvalid={!!errors.mascotas}
+                        isInvalid={!!errors.estadoLaboral}
                         >
-                        <option value="">Selecciona si tienes mascotas</option>
-                        <option value="Sí">Sí</option>
-                        <option value="No">No</option>
+                        <option value="">Selecciona tu estado laboral</option>
+                        <option value="Estudiante">Estudiante</option>
+                        <option value="Empleado">Empleado</option>
+                        <option value="Desempleado">Desempleado</option>
+                        <option value="Otro">Otro</option>
                         </Form.Select>
-                        <Form.Control.Feedback type="invalid">{errors.mascotas}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">{errors.estadoLaboral}</Form.Control.Feedback>
                     </Form.Group>
                     </Col>
-                </Row>
 
-                <Row className="mb-3">
-                    <Col xs={12}>
+                    <Col md={6} sm={12}>
                     <Form.Group controlId="preferenciaConvivencia">
+                        <Form.Label>Preferencias de convivencia</Form.Label>
                         <Form.Select
                         name="preferenciaConvivencia"
                         value={formData.preferenciaConvivencia}
                         onChange={handleChange}
                         isInvalid={!!errors.preferenciaConvivencia}
                         >
-                        <option value="">Selecciona tus preferecias de convivencia</option>
-                        <option value="Sí">Solo</option>
-                        <option value="No">Compartido</option>
-                        <option value="No">Familiar</option>
-                        <option value="No">Otros</option>
+                        <option value="">Selecciona preferecia de convivencia</option>
+                        <option value="Solo">Solo</option>
+                        <option value="Compartido">Compartido</option>
+                        <option value="Familiar">Familiar</option>
+                        <option value="Otros">Otros</option>
                         </Form.Select>
                         <Form.Control.Feedback type="invalid">{errors.preferenciaConvivencia}</Form.Control.Feedback>
                     </Form.Group>
@@ -266,8 +271,9 @@ function RegisterPage() {
                 </Row>
 
                 <Row className="mb-3">
-                    <Col xs={12}>
+                    <Col md={6} sm={12}>
                     <Form.Group controlId="frecuenciaVisitas">
+                        <Form.Label>Frecuencia de visitas</Form.Label>
                         <Form.Select
                         name="frecuenciaVisitas"
                         value={formData.frecuenciaVisitas}
@@ -275,20 +281,19 @@ function RegisterPage() {
                         isInvalid={!!errors.frecuenciaVisitas}
                         >
                         <option value="">Selecciona cuando recibes visitas</option>
-                        <option value="Sí">Diarias</option>
-                        <option value="No">Semanales</option>
-                        <option value="No">Mensuales</option>
-                        <option value="No">Ocasionales</option>
-                        <option value="No">Nunca</option>
+                        <option value="Diarias">Diarias</option>
+                        <option value="Semanales">Semanales</option>
+                        <option value="Mensuales">Mensuales</option>
+                        <option value="Ocasionales">Ocasionales</option>
+                        <option value="Nunca">Nunca</option>
                         </Form.Select>
                         <Form.Control.Feedback type="invalid">{errors.frecuenciaVisitas}</Form.Control.Feedback>
                     </Form.Group>
                     </Col>
-                </Row>
 
-                <Row className="mb-3">
-                    <Col xs={12}>
+                    <Col md={6} sm={12}>
                     <Form.Group controlId="zonasBusqueda">
+                        <Form.Label>Zona de búsqueda</Form.Label>
                         <Form.Select
                         name="zonasBusqueda"
                         value={formData.zonasBusqueda}
@@ -305,18 +310,19 @@ function RegisterPage() {
                     </Col>
                 </Row>
 
-                <Row className="mb-3" key={'interesesHobbies'}>
+                <Row className="mb-3">
                     <Col xs={12}>
+                        <Form.Label>Intereses y hobbies</Form.Label>
                         <Form.Control
-                        id={'interesesHobbies'}
-                        name={'interesesHobbies'}
-                        value={formData['interesesHobbies']}
+                        id="interesesHobbies"
+                        name="interesesHobbies"
+                        value={formData.interesesHobbies}
                         onChange={handleChange}
-                        placeholder={'Intereses y hobbies'}
-                        aria-label={'Intereses y hobbies'}
-                        isInvalid={!!errors['interesesHobbies']}
+                        placeholder="Intereses y hobbies"
+                        aria-label="Intereses y hobbies"
+                        isInvalid={!!errors.interesesHobbies}
                         />
-                        <Form.Control.Feedback type="invalid">{errors['interesesHobbies']}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                     </Col>
                 </Row>
                 </Accordion.Body>
