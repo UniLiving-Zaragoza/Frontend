@@ -36,7 +36,6 @@ function RegisterPage() {
       'edad',
       'genero',
       'pais',
-      'descripcion',
       'fumador',
       'mascotas',
       'estadoLaboral'
@@ -78,18 +77,19 @@ function RegisterPage() {
   
     return (
       <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-        <Card style={{ width: '600px', padding: '2rem' }} className="shadow">
-          <div className="d-flex justify-content-center mb-4">
-            <img 
-              src={LogoGrande} 
-              alt="UniLiving Logo" 
-              className="img-fluid" 
-              style={{ maxWidth: "100%", height: "auto", maxHeight: "120px" }} 
-            />
-          </div>
-  
-          <h4 className="text-center mb-4">Crear una cuenta</h4>
-          
+        <Card style={{ width: '850px', maxHeight: '90vh', padding: '2rem' }} className="shadow">
+          <div style={{ height: '100%', overflowY: 'auto', paddingRight: '10px' }}>
+            <div className="d-flex justify-content-center mb-4">
+              <img 
+                src={LogoGrande} 
+                alt="UniLiving Logo" 
+                className="img-fluid" 
+                style={{ maxWidth: "100%", height: "auto", maxHeight: "120px" }} 
+              />
+            </div>
+    
+            <h4 className="text-center mb-4">Crear una cuenta</h4>
+            
           <Form onSubmit={handleSubmit} className="container">
             <Row>
               <Col md={4} sm={12}>
@@ -182,32 +182,34 @@ function RegisterPage() {
             <Accordion activeKey={accordionOpen ? "0" : null} onSelect={(key) => setAccordionOpen(key === "0")}>
               <Accordion.Item eventKey="0">
                 <Accordion.Header>Situación personal</Accordion.Header>
-                <Accordion.Body>
-                  {[
-                    { name: 'estadoLaboral', placeholder: 'Estado laboral' },
-                    { name: 'fumador', placeholder: 'Fumador' },
-                    { name: 'duracionEstancia', placeholder: 'Duración de la estancia' },
-                    { name: 'mascotas', placeholder: 'Mascotas' },
-                    { name: 'frecuenciaVisitas', placeholder: 'Frecuencia de visitas' },
-                    { name: 'zonasBusqueda', placeholder: 'Zonas de búsqueda' },
-                    { name: 'preferenciaConvivencia', placeholder: 'Preferencia de convivencia' },
-                    { name: 'interesesHobbies', placeholder: 'Intereses y hobbies' }
-                  ].map(({ name, placeholder }) => (
-                    <Row className="mb-3" key={name}>
-                      <Col xs={12}>
-                        <Form.Control
-                          id={name}
-                          name={name}
-                          value={formData[name]}
-                          onChange={handleChange}
-                          placeholder={placeholder}
-                          aria-label={placeholder}
-                          isInvalid={!!errors[name]}
-                        />
-                        <Form.Control.Feedback type="invalid">{errors[name]}</Form.Control.Feedback>
-                      </Col>
-                    </Row>
-                  ))}
+                <Accordion.Body className="p-0">
+                  <div style={{ padding: '1rem' }}>
+                    {[
+                      { name: 'estadoLaboral', placeholder: 'Estado laboral' },
+                      { name: 'fumador', placeholder: 'Fumador' },
+                      { name: 'mascotas', placeholder: 'Mascotas' },
+                      { name: 'duracionEstancia', placeholder: 'Duración de la estancia' },
+                      { name: 'frecuenciaVisitas', placeholder: 'Frecuencia de visitas' },
+                      { name: 'zonasBusqueda', placeholder: 'Zonas de búsqueda' },
+                      { name: 'preferenciaConvivencia', placeholder: 'Preferencia de convivencia' },
+                      { name: 'interesesHobbies', placeholder: 'Intereses y hobbies' }
+                    ].map(({ name, placeholder }) => (
+                      <Row className="mb-3" key={name}>
+                        <Col xs={12}>
+                          <Form.Control
+                            id={name}
+                            name={name}
+                            value={formData[name]}
+                            onChange={handleChange}
+                            placeholder={placeholder}
+                            aria-label={placeholder}
+                            isInvalid={!!errors[name]}
+                          />
+                          <Form.Control.Feedback type="invalid">{errors[name]}</Form.Control.Feedback>
+                        </Col>
+                      </Row>
+                    ))}
+                  </div>
                 </Accordion.Body>
               </Accordion.Item>
             </Accordion>
@@ -228,10 +230,10 @@ function RegisterPage() {
               </Button>
             </div>
           </Form>
+          </div>
         </Card>
       </Container>
     );
   }
   
   export default RegisterPage;
-  
