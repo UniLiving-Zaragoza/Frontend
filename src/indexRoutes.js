@@ -1,8 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
-import RegisterInfoPage from './pages/RegisterInfo';
+import RegisterFlow from './pages/RegisterFlow';
 import PrincipalPage from './pages/Principal';
 import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
@@ -29,8 +28,7 @@ function IndexRoutes() {
       {/* Páginas sin login necesario */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/registro" element={<RegisterPage />} />
-      <Route path="/registro-info" element={<RegisterInfoPage />} />
+      <Route path="/registro" element={<RegisterFlow />} />
       <Route path="/principal" element={<PrincipalPage />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />
