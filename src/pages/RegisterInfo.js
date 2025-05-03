@@ -5,274 +5,233 @@ import { useAuth } from '../authContext';
 import Accordion from 'react-bootstrap/Accordion';
 import LogoGrande from "../assets/LogoGrande.png";
 
-// FALTA ESTRUCUTRAR IGUAL QUE MODIFICAR EL PERFIL, CON EL MISMO ACORDEÓN
-// FALTAN VERIFICACIONES Y DEFINIR QUE CAMPOS CON OBLIGATORIOS
-// NO SE GUARDAN LOS CAMPOS ENTRE LAS DOS PÁGINAS DE REGISTRO
 
 function RegisterPage() {
-
-  const { register } = useAuth();
-
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellidos: '',
-    edad: '',
-    genero: '',
-    pais: '',
-    descripcion: '',
-    estadoLaboral: '',
-    fumador: '',
-    duracionEstancia: '',
-    mascotas: '',
-    frecuenciaVisitas: '',
-    zonasBusqueda: '',
-    preferenciaConvivencia: '',
-    interesesHobbies: ''
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('Formulario enviado:', formData);
-
-    // FALTAN VERIFICACIONES IGUAL QUE EN Register.js **************
-
-    await register();
-    navigate("/principal"); // Redirigir a la página principal
-
-  };
-
-  return (
-    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <Card style={{ width: '600px', padding: '2rem' }} className="shadow">
-        <div className="d-flex justify-content-center mb-4">
-          <img 
-            src={LogoGrande} 
-            alt="UniLiving Logo" 
-            className="img-fluid" 
-            style={{ maxWidth: "100%", height: "auto", maxHeight: "120px" }} 
-          />
-        </div>
-
-        <h4 className="text-center mb-4">Crear una cuenta</h4>
-        
-        <Form onSubmit={handleSubmit} className="container">
+    const { register } = useAuth();
+    const navigate = useNavigate();
+  
+    const [formData, setFormData] = useState({
+      nombre: '',
+      apellidos: '',
+      edad: '',
+      genero: '',
+      pais: '',
+      descripcion: '',
+      estadoLaboral: '',
+      fumador: '',
+      duracionEstancia: '',
+      mascotas: '',
+      frecuenciaVisitas: '',
+      zonasBusqueda: '',
+      preferenciaConvivencia: '',
+      interesesHobbies: ''
+    });
+  
+    const [errors, setErrors] = useState({});
+    const [accordionOpen, setAccordionOpen] = useState(false);
+  
+    const requiredFields = [
+      'nombre',
+      'apellidos',
+      'edad',
+      'genero',
+      'pais',
+      'descripcion',
+      'fumador',
+      'mascotas',
+      'estadoLaboral'
+    ];
+  
+    const handleChange = (e) => {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+      if (errors[e.target.name]) {
+        setErrors({ ...errors, [e.target.name]: null });
+      }
+    };
+  
+    const validateForm = () => {
+      const newErrors = {};
+      requiredFields.forEach(field => {
+        if (!formData[field] || formData[field].trim() === '') {
+          newErrors[field] = 'Este campo es obligatorio';
+        }
+      });
+  
+      // Abrir acordeón si algún campo dentro de él tiene error
+      const accordedFields = ['estadoLaboral', 'fumador', 'mascotas', 'duracionEstancia', 'frecuenciaVisitas', 'zonasBusqueda', 'preferenciaConvivencia', 'interesesHobbies'];
+      const shouldOpenAccordion = accordedFields.some(field => newErrors[field]);
+  
+      setAccordionOpen(shouldOpenAccordion);
+      setErrors(newErrors);
+  
+      return Object.keys(newErrors).length === 0;
+    };
+  
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!validateForm()) return;
+  
+      console.log('Formulario enviado:', formData);
+      await register();
+      navigate("/principal");
+    };
+  
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <Card style={{ width: '600px', padding: '2rem' }} className="shadow">
+          <div className="d-flex justify-content-center mb-4">
+            <img 
+              src={LogoGrande} 
+              alt="UniLiving Logo" 
+              className="img-fluid" 
+              style={{ maxWidth: "100%", height: "auto", maxHeight: "120px" }} 
+            />
+          </div>
+  
+          <h4 className="text-center mb-4">Crear una cuenta</h4>
+          
+          <Form onSubmit={handleSubmit} className="container">
             <Row>
-                <Col md={4} sm={12}>
+              <Col md={4} sm={12}>
                 <Form.Group className="mb-3" controlId="nombre">
-                    <Form.Control 
-                    type="text" 
-                    placeholder="Nombre" 
-                    name="nombre" 
-                    value={formData.nombre} 
-                    onChange={handleChange} 
-                    required 
-                    />
+                  <Form.Control
+                    type="text"
+                    placeholder="Nombre"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    isInvalid={!!errors.nombre}
+                  />
+                  <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                 </Form.Group>
-                </Col>
-                <Col md={8} sm={12}>
+              </Col>
+              <Col md={8} sm={12}>
                 <Form.Group className="mb-3" controlId="apellidos">
-                    <Form.Control 
-                    type="text" 
-                    placeholder="Apellidos" 
-                    name="apellidos" 
-                    value={formData.apellidos} 
-                    onChange={handleChange} 
-                    required 
-                    />
+                  <Form.Control
+                    type="text"
+                    placeholder="Apellidos"
+                    name="apellidos"
+                    value={formData.apellidos}
+                    onChange={handleChange}
+                    isInvalid={!!errors.apellidos}
+                  />
+                  <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                 </Form.Group>
-                </Col>
+              </Col>
             </Row>
-
+  
             <Row>
-                <Col md={4} sm={12}>
+              <Col md={4} sm={12}>
                 <Form.Group className="mb-3" controlId="edad">
-                    <Form.Control 
-                    type="number" 
-                    placeholder="Edad" 
-                    name="edad" 
-                    value={formData.edad} 
-                    onChange={handleChange} 
-                    required 
-                    />
+                  <Form.Control
+                    type="number"
+                    placeholder="Edad"
+                    name="edad"
+                    value={formData.edad}
+                    onChange={handleChange}
+                    isInvalid={!!errors.edad}
+                  />
+                  <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
-                </Col>
-                <Col md={8} sm={12}>
+              </Col>
+              <Col md={8} sm={12}>
                 <Form.Group className="mb-3" controlId="genero">
-                    <Form.Select name="genero" value={formData.genero} onChange={handleChange} required>
+                  <Form.Select
+                    name="genero"
+                    value={formData.genero}
+                    onChange={handleChange}
+                    isInvalid={!!errors.genero}
+                  >
                     <option value="">Género</option>
                     <option value="Masculino">Masculino</option>
                     <option value="Femenino">Femenino</option>
                     <option value="Otro">Otro</option>
-                    </Form.Select>
+                  </Form.Select>
+                  <Form.Control.Feedback type="invalid">{errors.genero}</Form.Control.Feedback>
                 </Form.Group>
-                </Col>
+              </Col>
             </Row>
-
+  
             <Form.Group className="mb-3" controlId="pais">
-                    <Form.Select name="pais" value={formData.pais} onChange={handleChange} required>
-                    <option value="">País de nacimiento</option>
-                    <option value="España">España</option>
-                    <option value="México">México</option>
-                    <option value="Argentina">Argentina</option>
-                    </Form.Select>
+              <Form.Select
+                name="pais"
+                value={formData.pais}
+                onChange={handleChange}
+                isInvalid={!!errors.pais}
+              >
+                <option value="">País de nacimiento</option>
+                <option value="España">España</option>
+                <option value="México">México</option>
+                <option value="Argentina">Argentina</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{errors.pais}</Form.Control.Feedback>
             </Form.Group>
-
+  
             <Form.Group className="mb-3" controlId="descripcion">
-                <Form.Control 
-                as="textarea" 
-                placeholder="Descripción personal" 
-                name="descripcion" 
-                value={formData.descripcion} 
-                onChange={handleChange} 
-                />
+              <Form.Control
+                as="textarea"
+                placeholder="Descripción personal"
+                name="descripcion"
+                value={formData.descripcion}
+                onChange={handleChange}
+                isInvalid={!!errors.descripcion}
+              />
+              <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
             </Form.Group>
-
-            {/* Acordeón para información adicional */}
-            <Accordion defaultActiveKey="0">
-                <Card>
-                    <Accordion.Header>Situación personal</Accordion.Header>
-                    <Accordion.Body>
-                        {/* Estado laboral */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="estadoLaboral"
-                                    name="estadoLaboral"
-                                    value={formData.estadoLaboral}
-                                    onChange={handleChange}
-                                    placeholder="Estado laboral"
-                                    aria-label="Estado laboral"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Fumador */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="fumador"
-                                    name="fumador"
-                                    value={formData.fumador}
-                                    onChange={handleChange}
-                                    placeholder="Fumador"
-                                    aria-label="Fumador"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Duración de la estancia */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="duracionEstancia"
-                                    name="duracionEstancia"
-                                    value={formData.duracionEstancia}
-                                    onChange={handleChange}
-                                    placeholder="Duración de la estancia"
-                                    aria-label="Duración de la estancia"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Mascotas */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="mascotas"
-                                    name="mascotas"
-                                    value={formData.mascotas}
-                                    onChange={handleChange}
-                                    placeholder="Mascotas"
-                                    aria-label="Mascotas"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Frecuencia de visitas */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="frecuenciaVisitas"
-                                    name="frecuenciaVisitas"
-                                    value={formData.frecuenciaVisitas}
-                                    onChange={handleChange}
-                                    placeholder="Frecuencia de visitas"
-                                    aria-label="Frecuencia de visitas"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Zonas de búsqueda */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="zonasBusqueda"
-                                    name="zonasBusqueda"
-                                    value={formData.zonasBusqueda}
-                                    onChange={handleChange}
-                                    placeholder="Zonas de búsqueda"
-                                    aria-label="Zonas de búsqueda"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Preferencia de convivencia */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="preferenciaConvivencia"
-                                    name="preferenciaConvivencia"
-                                    value={formData.preferenciaConvivencia}
-                                    onChange={handleChange}
-                                    placeholder="Preferencia de convivencia"
-                                    aria-label="Preferencia de convivencia"
-                                />
-                            </Col>
-                        </Row>
-
-                        {/* Intereses y hobbies */}
-                        <Row className="mb-3">
-                            <Col xs={12}>
-                                <Form.Control
-                                    id="interesesHobbies"
-                                    name="interesesHobbies"
-                                    value={formData.interesesHobbies}
-                                    onChange={handleChange}
-                                    placeholder="Intereses y hobbies"
-                                    aria-label="Intereses y hobbies"
-                                />
-                            </Col>
-                        </Row>
-                    </Accordion.Body>
-                </Card>
+  
+            <Accordion activeKey={accordionOpen ? "0" : null} onSelect={(key) => setAccordionOpen(key === "0")}>
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>Situación personal</Accordion.Header>
+                <Accordion.Body>
+                  {[
+                    { name: 'estadoLaboral', placeholder: 'Estado laboral' },
+                    { name: 'fumador', placeholder: 'Fumador' },
+                    { name: 'duracionEstancia', placeholder: 'Duración de la estancia' },
+                    { name: 'mascotas', placeholder: 'Mascotas' },
+                    { name: 'frecuenciaVisitas', placeholder: 'Frecuencia de visitas' },
+                    { name: 'zonasBusqueda', placeholder: 'Zonas de búsqueda' },
+                    { name: 'preferenciaConvivencia', placeholder: 'Preferencia de convivencia' },
+                    { name: 'interesesHobbies', placeholder: 'Intereses y hobbies' }
+                  ].map(({ name, placeholder }) => (
+                    <Row className="mb-3" key={name}>
+                      <Col xs={12}>
+                        <Form.Control
+                          id={name}
+                          name={name}
+                          value={formData[name]}
+                          onChange={handleChange}
+                          placeholder={placeholder}
+                          aria-label={placeholder}
+                          isInvalid={!!errors[name]}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors[name]}</Form.Control.Feedback>
+                      </Col>
+                    </Row>
+                  ))}
+                </Accordion.Body>
+              </Accordion.Item>
             </Accordion>
-
+  
             <div className="d-flex justify-content-between mt-4">
-                <Button variant="secondary" onClick={() => navigate(-1)}>Atrás</Button>
-
-                <Button 
-                    variant="primary" 
-                    type="submit" 
-                    style={{
-                        borderRadius: "30px",
-                        backgroundColor: "#000842",
-                        borderColor: "#000842",
-                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    }}
-                    >
-                    Crear cuenta
-                </Button>
+              <Button variant="secondary" onClick={() => navigate(-1)}>Atrás</Button>
+              <Button
+                variant="primary"
+                type="submit"
+                style={{
+                  borderRadius: "30px",
+                  backgroundColor: "#000842",
+                  borderColor: "#000842",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                Crear cuenta
+              </Button>
             </div>
-        </Form>
-      </Card>
-    </Container>
-  );
-}
-
-export default RegisterPage;
+          </Form>
+        </Card>
+      </Container>
+    );
+  }
+  
+  export default RegisterPage;
+  
