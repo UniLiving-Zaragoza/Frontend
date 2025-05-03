@@ -9,6 +9,13 @@ import LogoGrande from "../assets/LogoGrande.png";
 function RegisterPage() {
     const { register } = useAuth();
     const navigate = useNavigate();
+
+    const barriosZaragoza = [
+        "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
+        "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
+        "Centro", "Las Fuentes", "Universidad", "San José",
+        "Casablanca", "Torrero-La Paz", "Sur"
+    ];
   
     const [formData, setFormData] = useState({
       nombre: '',
@@ -130,6 +137,8 @@ function RegisterPage() {
                     value={formData.edad}
                     onChange={handleChange}
                     isInvalid={!!errors.edad}
+                    min="0"
+                    max="100"
                   />
                   <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
@@ -152,7 +161,7 @@ function RegisterPage() {
               </Col>
             </Row>
   
-            <Form.Group className="mb-3" controlId="pais">
+            {/*<Form.Group className="mb-3" controlId="pais">
               <Form.Select
                 name="pais"
                 value={formData.pais}
@@ -160,12 +169,9 @@ function RegisterPage() {
                 isInvalid={!!errors.pais}
               >
                 <option value="">País de nacimiento</option>
-                <option value="España">España</option>
-                <option value="México">México</option>
-                <option value="Argentina">Argentina</option>
               </Form.Select>
               <Form.Control.Feedback type="invalid">{errors.pais}</Form.Control.Feedback>
-            </Form.Group>
+            </Form.Group>*/}
   
             <Form.Group className="mb-3" controlId="descripcion">
               <Form.Control
@@ -180,38 +186,141 @@ function RegisterPage() {
             </Form.Group>
   
             <Accordion activeKey={accordionOpen ? "0" : null} onSelect={(key) => setAccordionOpen(key === "0")}>
-              <Accordion.Item eventKey="0">
+            <Accordion.Item eventKey="0">
                 <Accordion.Header>Situación personal</Accordion.Header>
-                <Accordion.Body className="p-0">
-                  <div style={{ padding: '1rem' }}>
-                    {[
-                      { name: 'estadoLaboral', placeholder: 'Estado laboral' },
-                      { name: 'fumador', placeholder: 'Fumador' },
-                      { name: 'mascotas', placeholder: 'Mascotas' },
-                      { name: 'duracionEstancia', placeholder: 'Duración de la estancia' },
-                      { name: 'frecuenciaVisitas', placeholder: 'Frecuencia de visitas' },
-                      { name: 'zonasBusqueda', placeholder: 'Zonas de búsqueda' },
-                      { name: 'preferenciaConvivencia', placeholder: 'Preferencia de convivencia' },
-                      { name: 'interesesHobbies', placeholder: 'Intereses y hobbies' }
-                    ].map(({ name, placeholder }) => (
-                      <Row className="mb-3" key={name}>
-                        <Col xs={12}>
-                          <Form.Control
-                            id={name}
-                            name={name}
-                            value={formData[name]}
-                            onChange={handleChange}
-                            placeholder={placeholder}
-                            aria-label={placeholder}
-                            isInvalid={!!errors[name]}
-                          />
-                          <Form.Control.Feedback type="invalid">{errors[name]}</Form.Control.Feedback>
-                        </Col>
-                      </Row>
-                    ))}
-                  </div>
+                <Accordion.Body>
+                <Row className="mb-3">
+                    <Col xs={12}>
+                    <Form.Group controlId="estadoLaboral">
+                        <Form.Select
+                        name="estadoLaboral"
+                        value={formData.estadoLaboral}
+                        onChange={handleChange}
+                        isInvalid={!!errors.estadoLaboral}
+                        >
+                        <option value="">Selecciona tu estado laboral</option>
+                        <option value="Estudiante">Estudiante</option>
+                        <option value="Empleado">Empleado</option>
+                        <option value="Desempleado">Desempleado</option>
+                        <option value="Otro">Otro</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{errors.estadoLaboral}</Form.Control.Feedback>
+                    </Form.Group>
+                    </Col>
+                </Row>
+                
+                <Row className="mb-3">
+                    <Col xs={12}>
+                    <Form.Group controlId="fumador">
+                        <Form.Select
+                        name="fumador"
+                        value={formData.fumador}
+                        onChange={handleChange}
+                        isInvalid={!!errors.fumador}
+                        >
+                        <option value="">Selecciona si eres fumador</option>
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{errors.fumador}</Form.Control.Feedback>
+                    </Form.Group>
+                    </Col>
+                </Row>
+                
+                <Row className="mb-3">
+                    <Col xs={12}>
+                    <Form.Group controlId="mascotas">
+                        <Form.Select
+                        name="mascotas"
+                        value={formData.mascotas}
+                        onChange={handleChange}
+                        isInvalid={!!errors.mascotas}
+                        >
+                        <option value="">Selecciona si tienes mascotas</option>
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{errors.mascotas}</Form.Control.Feedback>
+                    </Form.Group>
+                    </Col>
+                </Row>
+
+                <Row className="mb-3">
+                    <Col xs={12}>
+                    <Form.Group controlId="preferenciaConvivencia">
+                        <Form.Select
+                        name="preferenciaConvivencia"
+                        value={formData.preferenciaConvivencia}
+                        onChange={handleChange}
+                        isInvalid={!!errors.preferenciaConvivencia}
+                        >
+                        <option value="">Selecciona tus preferecias de convivencia</option>
+                        <option value="Sí">Solo</option>
+                        <option value="No">Compartido</option>
+                        <option value="No">Familiar</option>
+                        <option value="No">Otros</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{errors.preferenciaConvivencia}</Form.Control.Feedback>
+                    </Form.Group>
+                    </Col>
+                </Row>
+
+                <Row className="mb-3">
+                    <Col xs={12}>
+                    <Form.Group controlId="frecuenciaVisitas">
+                        <Form.Select
+                        name="frecuenciaVisitas"
+                        value={formData.frecuenciaVisitas}
+                        onChange={handleChange}
+                        isInvalid={!!errors.frecuenciaVisitas}
+                        >
+                        <option value="">Selecciona cuando recibes visitas</option>
+                        <option value="Sí">Diarias</option>
+                        <option value="No">Semanales</option>
+                        <option value="No">Mensuales</option>
+                        <option value="No">Ocasionales</option>
+                        <option value="No">Nunca</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{errors.frecuenciaVisitas}</Form.Control.Feedback>
+                    </Form.Group>
+                    </Col>
+                </Row>
+
+                <Row className="mb-3">
+                    <Col xs={12}>
+                    <Form.Group controlId="zonasBusqueda">
+                        <Form.Select
+                        name="zonasBusqueda"
+                        value={formData.zonasBusqueda}
+                        onChange={handleChange}
+                        isInvalid={!!errors.zonasBusqueda}
+                        >
+                        <option value="">Selecciona la zona donde buscas piso</option>
+                        {barriosZaragoza.map((barrio, index) => (
+                            <option key={index} value={barrio}>{barrio}</option>
+                        ))}
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{errors.zonasBusqueda}</Form.Control.Feedback>
+                    </Form.Group>
+                    </Col>
+                </Row>
+
+                <Row className="mb-3" key={'interesesHobbies'}>
+                    <Col xs={12}>
+                        <Form.Control
+                        id={'interesesHobbies'}
+                        name={'interesesHobbies'}
+                        value={formData['interesesHobbies']}
+                        onChange={handleChange}
+                        placeholder={'Intereses y hobbies'}
+                        aria-label={'Intereses y hobbies'}
+                        isInvalid={!!errors['interesesHobbies']}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors['interesesHobbies']}</Form.Control.Feedback>
+                    </Col>
+                </Row>
                 </Accordion.Body>
-              </Accordion.Item>
+            </Accordion.Item>
             </Accordion>
   
             <div className="d-flex justify-content-between mt-4">
