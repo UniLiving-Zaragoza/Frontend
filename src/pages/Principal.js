@@ -180,6 +180,10 @@ const Principal = () => {
       <MapContainer
         center={[41.675, -0.889]}
         zoom={16}
+        minZoom={10}
+        maxZoom={18}
+        maxBounds={[[41.55, -1.0], [41.75, -0.75]]} 
+        maxBoundsViscosity={1.0}
         zoomControl={false}
         style={{
           height: 'calc(100vh - 56px)',
