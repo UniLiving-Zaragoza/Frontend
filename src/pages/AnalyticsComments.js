@@ -18,9 +18,7 @@ const AnalyticsCommentsPage = () => {
     const [selectedBarrio, setSelectedBarrio] = useState('');
     const usersPerPage = 5;
 
-    const { isAuthenticated } = useAuth();
-
-    const isAdmin = sessionStorage.getItem("isAdmin");
+    const { isAuthenticated, isAdmin } = useAuth();
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -90,9 +88,9 @@ const AnalyticsCommentsPage = () => {
     const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
 
     const commentsContainerMaxHeight =
-        isAuthenticated && isAdmin === "true"
+        isAuthenticated && isAdmin
             ? 'calc(100vh - 200px)'
-            : isAuthenticated && isAdmin !== "true"
+            : isAuthenticated && !isAdmin
             ? 'calc(100vh - 320px)'
             : 'calc(100vh - 265px)';
     
@@ -102,7 +100,7 @@ const AnalyticsCommentsPage = () => {
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
-            {isAdmin === "true" ? <CustomNavbarAdmin /> : <CustomNavbar />}
+            {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container fluid className="flex-grow-1 d-flex flex-column">
                 <Container className="mt-3 mb-1">
                     <div className="d-flex justify-content-center">
@@ -123,7 +121,7 @@ const AnalyticsCommentsPage = () => {
                 </Container>
                 
                 {/* Campo de comentario para usuarios logueados */}
-                {isAuthenticated && isAdmin !== "true" && (
+                {isAuthenticated && !isAdmin && (
                     <Container className="mb-3 px-4">
                         <Form onSubmit={handleCommentSubmit}>
                             <InputGroup>
@@ -210,7 +208,7 @@ const AnalyticsCommentsPage = () => {
                                                 {user.comentario || 'Sin comentarios'}
                                             </span>
                                         </div>
-                                        {isAdmin === "true" && (
+                                        {isAdmin && (
                                             <Button
                                                 variant="outline-light"
                                                 size="sm"
@@ -243,7 +241,7 @@ const AnalyticsCommentsPage = () => {
                         <Col sm={4} className="d-none d-sm-block"></Col>
                         
                         {/* Center button */}
-                        {isAdmin !== "true" && (
+                        {!isAdmin && (
                             <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
                                 <Button
                                     onClick={handleSearch}
@@ -263,7 +261,7 @@ const AnalyticsCommentsPage = () => {
                         )}
                         
                         {/* Right button */}
-                        {isAdmin !== "true" && (
+                        {!isAdmin && (
                                 <Col xs={12} sm={4} className="text-center text-sm-end">
                                 <Button 
                                     onClick={handleGraphics}

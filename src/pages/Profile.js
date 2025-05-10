@@ -20,7 +20,7 @@ const ProfilePage = () => {
     const [showEnable, setShowEnable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
 
-    const { logout } = useAuth();
+    const { logout, isAdmin } = useAuth();
 
     const navigate = useNavigate();
 
@@ -91,10 +91,10 @@ const ProfilePage = () => {
     };
     return (
         <div className="App">
-            {sessionStorage.getItem("isAdmin") === "true" && (
+            {isAdmin && (
                 <CustomNavbarAdmin />
             )}
-            {sessionStorage.getItem("isAdmin") !== "true" && (
+            {!isAdmin && (
                 <CustomNavbar />
             )}
             <Container className="mt-4">
@@ -209,7 +209,7 @@ const ProfilePage = () => {
                 )}
 
                 {/* Botón de deshabilitar o habilitar dependiendo del estado de deshabilitado */}
-                {(data.deshabilitado === false || !data.deshabilitado) && sessionStorage.getItem("isAdmin") === "true" && (
+                {(data.deshabilitado === false || !data.deshabilitado) && isAdmin && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
                             <Button
@@ -224,7 +224,7 @@ const ProfilePage = () => {
                     </Row>
                 )}
 
-                {data.deshabilitado === true && sessionStorage.getItem("isAdmin") === "true" && (
+                {data.deshabilitado === true && isAdmin && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
                             <Button

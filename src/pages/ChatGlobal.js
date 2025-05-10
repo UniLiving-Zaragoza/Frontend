@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Button, Row, Col } from 'react-bootstrap';
+import { useAuth } from '../authContext';
+import { BsThreeDotsVertical, BsTrash3Fill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 import CustomNavbar from '../components/CustomNavbar';
 import ChatComponent from "../components/ChatComponent";
-import { BsThreeDotsVertical, BsTrash3Fill } from "react-icons/bs";
 import CustomModal from "../components/CustomModal";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
-import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const ChatGlobal = () => {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ const ChatGlobal = () => {
     const [modalType, setModalType] = useState(null); // 'reporte' o 'borrar'
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
-    const isAdmin = sessionStorage.getItem("isAdmin");
+    const { isAdmin } = useAuth();
 
     let messages = [
         {
@@ -80,7 +81,7 @@ const ChatGlobal = () => {
     ];
 
     // Modificar los ids directamente si el usuario es admin
-    if (isAdmin === "true") {
+    if (isAdmin) {
         console.log("entro");
         messages = messages.map(msg => msg.id === 1 ? { ...msg, id: 999 } : msg);
     }
@@ -118,9 +119,9 @@ const ChatGlobal = () => {
 
     return (
         <div className="App">
-            {isAdmin === "true" ? <CustomNavbarAdmin /> : <CustomNavbar />}
+            {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container className="text-center mt-5">
-                {isAdmin !== "true" && (
+                {!isAdmin && (
                     <Row className="mb-3">
                         <Col>
                             <Button
@@ -149,7 +150,7 @@ const ChatGlobal = () => {
                 <ChatComponent
                     dataMessages={messages}
                     icon={
-                        isAdmin === "true" ? (
+                        isAdmin ? (
                             <BsTrash3Fill size={25} color="red" />
                         ) : (
                             <BsThreeDotsVertical size={25} />
@@ -167,7 +168,7 @@ const ChatGlobal = () => {
                             zIndex: 1000
                         }}
                     >
-                        {isAdmin === "true" ? (
+                        {isAdmin ? (
                             <button className="dropdown-item" onClick={openDeleteModal}>
                                 Eliminar mensaje
                             </button>
