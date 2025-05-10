@@ -14,6 +14,7 @@ function LoginPage() {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
 
   const { login } = useAuth();
 
@@ -30,14 +31,14 @@ function LoginPage() {
 
     const newErrors = {};
     if (!email) {
-      newErrors.email = 'Email es requerido';
+      newErrors.email = isAdminLogin ? 'Nombre de administrador es requerido' : 'Email es requerido';
     }
 
     if (!password) {
       newErrors.password = 'Contraseña es requerida';
     }
-    else if (password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    else if (password.length < (isAdminLogin ? 8 : 6)) {
+      newErrors.password = `La contraseña debe tener al menos ${isAdminLogin ? 8 : 6} caracteres`;
     }
 
     setErrors(newErrors);
@@ -47,23 +48,23 @@ function LoginPage() {
       setApiError('');
       
       try {
+        // Determinar si es login normal o de administrador
+        const endpoint = isAdminLogin ? `${API_URL}/admin/login` : `${API_URL}/user/login`;
+        const payload = isAdminLogin ? { name: email, password } : { email, password };
 
-        const response = await axios.post(`${API_URL}/user/login`, {
-          email,
-          password
-        });
+        const response = await axios.post(endpoint, payload);
         
         if (response.data && response.data.token) {
 
           sessionStorage.setItem('isAuthenticated', response.data.token);
           
-          const userData = parseJwt(response.data.token);
-          
-          const isAdmin = userData.role === 'admin';
-          sessionStorage.setItem('isAdmin', isAdmin.toString());
+          if (isAdminLogin) {
+            sessionStorage.setItem('isAdmin', 'true');
+          }
           
           await login();
           
+          const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
           navigate(isAdmin ? "/principal-admin" : "/principal");
         }
       } catch (error) {
@@ -89,15 +90,6 @@ function LoginPage() {
     setValidated(true);
   };
 
-  // Función para decodificar el token JWT
-  const parseJwt = (token) => {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      return null;
-    }
-  };
-
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '450px', maxWidth: '90vw', padding: '2.5rem' }} className="shadow">
@@ -118,27 +110,31 @@ function LoginPage() {
         <h4 className="text-center mb-3">Iniciar sesión</h4>
 
         {/* Inicio de sesión con Google */}
-        <Button
-          variant="outline-secondary"
-          className="w-100 mb-3 d-flex align-items-center justify-content-center"
-          style={{ height: '45px' }}
-          onClick={handleGoogleLogin}
-        >
-          <FcGoogle size={20} className="me-2" />
-          Iniciar sesión con Google
-        </Button>
+        {!isAdminLogin && (
+          <>
+            <Button
+              variant="outline-secondary"
+              className="w-100 mb-3 d-flex align-items-center justify-content-center"
+              style={{ height: '45px' }}
+              onClick={handleGoogleLogin}
+            >
+              <FcGoogle size={20} className="me-2" />
+              Iniciar sesión con Google
+            </Button>
 
-        {/* Inicio de sesión con email */}
-        <div className="text-center mb-2">
-          <span style={{ color: '#6c757d' }}>───── o usar email ─────</span>
-        </div>
+            {/* Línea divisora */}
+            <div className="text-center mb-2">
+              <span style={{ color: '#6c757d' }}>───── o usar email ─────</span>
+            </div>
+          </>
+        )}
 
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Form.Group className="mb-1" controlId="formBasicEmail">
-            <Form.Label>Email</Form.Label>
+            <Form.Label>{isAdminLogin ? 'Nombre de Administrador' : 'Email'}</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Ingresa tu email"
+              placeholder={isAdminLogin ? "Ingresa tu nombre de administrador" : "Ingresa tu email"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               isInvalid={!!errors.email}
@@ -160,11 +156,21 @@ function LoginPage() {
               isInvalid={!!errors.password}
               isValid={validated && !errors.password}
               required
-              minLength={6}
+              minLength={isAdminLogin ? 8 : 6}
             />
             <Form.Control.Feedback type="invalid">
               {errors.password}
             </Form.Control.Feedback>
+          </Form.Group>
+
+          {/* Opción para iniciar sesión como admin */}
+          <Form.Group className="mb-3" controlId="formAdminLogin">
+            <Form.Check 
+              type="checkbox"
+              label="Iniciar sesión como administrador"
+              checked={isAdminLogin}
+              onChange={() => setIsAdminLogin(!isAdminLogin)}
+            />
           </Form.Group>
 
           {/* Mostrar errores de la API */}
