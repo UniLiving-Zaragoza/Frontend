@@ -134,13 +134,14 @@ export function AuthProvider({ children }) {
     return false;
   };
 
-  const register = async (token) => {
+  // FUNCIÓN NO NECESARIA YA QUE TRAS EL REGISTRO NO SE INICIA SESIÓN
+  /*const register = async (token) => {
     if (setAuthToken(token, false)) {
       await fetchUserData();
       return true;
     }
     return false;
-  };
+  };*/
 
   const logout = () => {
     // Eliminar el token y la información de la sesión
@@ -172,7 +173,7 @@ export function AuthProvider({ children }) {
         isAdmin, 
         user,
         login, 
-        register, 
+        //register, 
         logout,
         isLoading,
         isTokenValid,

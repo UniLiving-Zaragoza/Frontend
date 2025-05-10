@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../authContext';
 import Accordion from 'react-bootstrap/Accordion';
 import LogoGrande from "../assets/LogoGrande.png";
+import axios from 'axios';
 
 function RegisterInfo({ formData, onFormChange, prevStep }) {
-  const { register } = useAuth();
+
   const navigate = useNavigate();
+
+  const API_URL = 'https://uniliving-backend.onrender.com';
 
   const barriosZaragoza = [
     "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -35,6 +37,9 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
 
   const [errors, setErrors] = useState({});
   const [accordionOpen, setAccordionOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const requiredFields = [
     'nombre',
@@ -72,23 +77,141 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     return Object.keys(newErrors).length === 0;
   };
 
+
+  const mapFormDataToApiModel = () => {
+
+    const age = parseInt(localFormData.edad, 10);
+    const smoker = localFormData.fumador === 'Sí';
+    const pets = localFormData.mascotas === 'Sí';
+    
+    let gender;
+    switch(localFormData.genero) {
+      case 'Masculino':
+        gender = 'Male';
+        break;
+      case 'Femenino':
+        gender = 'Female';
+        break;
+      default:
+        gender = 'Other';
+    }
+
+    let employmentStatus;
+    switch(localFormData.estadoLaboral) {
+      case 'Estudiante':
+        employmentStatus = 'Student';
+        break;
+      case 'Empleado':
+        employmentStatus = 'Employed';
+        break;
+      case 'Desempleado':
+        employmentStatus = 'Unemployed';
+        break;
+      default:
+        employmentStatus = 'Other';
+    }
+
+    let livingPreference;
+    switch(localFormData.preferenciaConvivencia) {
+      case 'Solo':
+        livingPreference = 'Alone';
+        break;
+      case 'Compartido':
+        livingPreference = 'Shared';
+        break;
+      case 'Familiar':
+        livingPreference = 'Family';
+        break;
+      default:
+        livingPreference = 'Other';
+    }
+
+    let visitFrequency;
+    switch(localFormData.frecuenciaVisitas) {
+      case 'Diarias':
+        visitFrequency = 'Daily';
+        break;
+      case 'Semanales':
+        visitFrequency = 'Weekly';
+        break;
+      case 'Mensuales':
+        visitFrequency = 'Monthly';
+        break;
+      case 'Ocasionales':
+        visitFrequency = 'Occasional';
+        break;
+      case 'Nunca':
+        visitFrequency = 'Never';
+        break;
+      default:
+        visitFrequency = 'Occasional';
+    }
+
+    const hobbiesInterests = localFormData.interesesHobbies 
+      ? localFormData.interesesHobbies.split(',').map(item => item.trim()) 
+      : [];
+
+    return {
+      firstName: localFormData.nombre,
+      lastName: localFormData.apellidos,
+      age: age,
+      gender: gender,
+      personalDescription: localFormData.descripcion || "No description provided",
+      email: formData.email,
+      password: formData.password,
+      personalSituation: {
+        smoker: smoker,
+        pets: pets,
+        employmentStatus: employmentStatus,
+        livingPreference: livingPreference,
+        visitFrequency: visitFrequency,
+        hobbiesInterests: hobbiesInterests
+      }
+    };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const completeFormData = {
-      ...formData,
-      ...localFormData
-    };
+    setIsSubmitting(true);
+    setApiError('');
 
-    console.log('Formulario completo enviado:', completeFormData);
-    
     try {
+      const userData = mapFormDataToApiModel();
+      console.log('Datos a enviar al backend:', userData);
+      
+      const response = await axios.post(`${API_URL}/user/register`, userData);
+      
+      console.log('Respuesta del registro:', response.data);
+      
+      setRegistrationSuccess(true);
+      
       onFormChange(localFormData);
-      await register();
-      navigate("/principal");
+      
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      
     } catch (error) {
       console.error("Error durante el registro:", error);
+      
+      // Manejo de errores
+      if (error.response) {
+        if (error.response.status === 400 && error.response.data.message) {
+          setApiError(error.response.data.message);
+        } else if (error.response.data && error.response.data.error) {
+          setApiError(error.response.data.error);
+        } else {
+          setApiError(`Error del servidor: ${error.response.status}`);
+        }
+      } else if (error.request) {
+        setApiError('No se pudo conectar con el servidor.');
+      } else {
+        setApiError('Error al procesar la solicitud de registro.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -124,6 +247,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.nombre}
                     onChange={handleChange}
                     isInvalid={!!errors.nombre}
+                    disabled={isSubmitting}
                   />
                   <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                 </Form.Group>
@@ -138,6 +262,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.apellidos}
                     onChange={handleChange}
                     isInvalid={!!errors.apellidos}
+                    disabled={isSubmitting}
                   />
                   <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                 </Form.Group>
@@ -155,8 +280,9 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.edad}
                     onChange={handleChange}
                     isInvalid={!!errors.edad}
-                    min="0"
+                    min="18"
                     max="100"
+                    disabled={isSubmitting}
                   />
                   <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
@@ -169,6 +295,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
+                    disabled={isSubmitting}
                   >
                     <option value="">Selecciona tu género</option>
                     <option value="Masculino">Masculino</option>
@@ -180,28 +307,17 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               </Col>
             </Row>
 
-            {/*<Form.Group className="mb-3" controlId="pais">
-              <Form.Label>País</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Ingresa tu país"
-                name="pais"
-                value={localFormData.pais}
-                onChange={handleChange}
-                isInvalid={!!errors.pais}
-              />
-              <Form.Control.Feedback type="invalid">{errors.pais}</Form.Control.Feedback>
-            </Form.Group>*/}
-
             <Form.Group className="mb-3" controlId="descripcion">
               <Form.Label>Descripción personal</Form.Label>
               <Form.Control
                 as="textarea"
-                placeholder="Ingresa una descripción personal"
+                placeholder="Ingresa una descripción personal (mínimo 10 caracteres)"
                 name="descripcion"
                 value={localFormData.descripcion}
                 onChange={handleChange}
                 isInvalid={!!errors.descripcion}
+                disabled={isSubmitting}
+                minLength={10}
               />
               <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
             </Form.Group>
@@ -219,6 +335,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.mascotas}
                           onChange={handleChange}
                           isInvalid={!!errors.mascotas}
+                          disabled={isSubmitting}
                         >
                           <option value="">Selecciona si tienes mascotas</option>
                           <option value="Sí">Sí</option>
@@ -236,6 +353,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.fumador}
                           onChange={handleChange}
                           isInvalid={!!errors.fumador}
+                          disabled={isSubmitting}
                         >
                           <option value="">Selecciona si eres fumador</option>
                           <option value="Sí">Sí</option>
@@ -255,6 +373,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.estadoLaboral}
                           onChange={handleChange}
                           isInvalid={!!errors.estadoLaboral}
+                          disabled={isSubmitting}
                         >
                           <option value="">Selecciona tu estado laboral</option>
                           <option value="Estudiante">Estudiante</option>
@@ -274,6 +393,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.preferenciaConvivencia}
                           onChange={handleChange}
                           isInvalid={!!errors.preferenciaConvivencia}
+                          disabled={isSubmitting}
                         >
                           <option value="">Selecciona preferecia de convivencia</option>
                           <option value="Solo">Solo</option>
@@ -295,6 +415,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.frecuenciaVisitas}
                           onChange={handleChange}
                           isInvalid={!!errors.frecuenciaVisitas}
+                          disabled={isSubmitting}
                         >
                           <option value="">Selecciona cuando recibes visitas</option>
                           <option value="Diarias">Diarias</option>
@@ -315,6 +436,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.zonasBusqueda}
                           onChange={handleChange}
                           isInvalid={!!errors.zonasBusqueda}
+                          disabled={isSubmitting}
                         >
                           <option value="">Selecciona la zona donde buscas piso</option>
                           {barriosZaragoza.map((barrio, index) => (
@@ -328,15 +450,16 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
 
                   <Row className="mb-3">
                     <Col xs={12}>
-                      <Form.Label>Intereses y hobbies</Form.Label>
+                      <Form.Label>Intereses y hobbies (separados por comas)</Form.Label>
                       <Form.Control
                         id="interesesHobbies"
                         name="interesesHobbies"
                         value={localFormData.interesesHobbies}
                         onChange={handleChange}
-                        placeholder="Intereses y hobbies"
+                        placeholder="Ej: Leer, Deporte, Cocinar"
                         aria-label="Intereses y hobbies"
                         isInvalid={!!errors.interesesHobbies}
+                        disabled={isSubmitting}
                       />
                       <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                     </Col>
@@ -345,11 +468,32 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               </Accordion.Item>
             </Accordion>
 
+            {/* Mensaje de exito */}
+            {registrationSuccess && (
+              <Alert variant="success" className="mb-3 mt-3">
+                ¡Cuenta creada exitosamente! Redirigiendo al inicio de sesión...
+              </Alert>
+            )}
+            
+            {/* Mensaje de error */}
+            {apiError && (
+              <Alert variant="danger" className="mb-3 mt-3">
+                {apiError}
+              </Alert>
+            )}
+
             <div className="d-flex justify-content-between mt-4">
-              <Button variant="secondary" onClick={handleGoBack}>Atrás</Button>
+              <Button 
+                variant="secondary" 
+                onClick={handleGoBack}
+                disabled={isSubmitting}
+              >
+                Atrás
+              </Button>
               <Button
                 variant="primary"
                 type="submit"
+                disabled={isSubmitting}
                 style={{
                   borderRadius: "30px",
                   backgroundColor: "#000842",
@@ -357,7 +501,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 }}
               >
-                Crear cuenta
+                {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
               </Button>
             </div>
           </Form>
