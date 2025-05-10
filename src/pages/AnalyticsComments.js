@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
@@ -17,7 +18,7 @@ const AnalyticsCommentsPage = () => {
     const [selectedBarrio, setSelectedBarrio] = useState('');
     const usersPerPage = 5;
 
-    const isAuthenticated = sessionStorage.getItem("isAuthenticated");
+    const { isAuthenticated } = useAuth();
 
     const isAdmin = sessionStorage.getItem("isAdmin");
 

@@ -49,14 +49,21 @@ function LoginPage() {
       
       try {
         // Determinar si es login normal o de administrador
-        const endpoint = isAdminLogin ? `${API_URL}/admin/login` : `${API_URL}/user/login`;
-        const payload = isAdminLogin ? { name: email, password } : { email, password };
+        let endpoint;
+        let payload;
+        
+        if (isAdminLogin) {
+          endpoint = `${API_URL}/admin/login`;
+          payload = { name: email, password };
+        } else {
+          endpoint = `${API_URL}/auth/login`;
+          payload = { email, password };
+        }
 
         const response = await axios.post(endpoint, payload);
         
         if (response.data && response.data.token) {
-
-          sessionStorage.setItem('isAuthenticated', response.data.token);
+          sessionStorage.setItem('authToken', response.data.token);
           
           if (isAdminLogin) {
             sessionStorage.setItem('isAdmin', 'true');
@@ -66,16 +73,26 @@ function LoginPage() {
           
           const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
           navigate(isAdmin ? "/principal-admin" : "/principal");
+        } else {
+          setApiError('No se recibió un token válido del servidor.');
         }
       } catch (error) {
         console.error('Error de inicio de sesión:', error);
         
-        // Manejar diferentes tipos de errores
+        // Manejo de errores
         if (error.response) {
-          if (error.response.status === 401) {
-            setApiError('Credenciales inválidas.');
-          } else {
-            setApiError('Error en el servidor.');
+          switch(error.response.status) {
+            case 400:
+              setApiError('Datos de inicio de sesión inválidos.');
+              break;
+            case 401:
+              setApiError('Credenciales inválidas.');
+              break;
+            case 403:
+              setApiError('Cuenta no verificada o bloqueada.');
+              break;
+            default:
+              setApiError(`Error del servidor: ${error.response.data?.message || 'Desconocido'}`);
           }
         } else if (error.request) {
           setApiError('No se pudo conectar con el servidor.');
@@ -117,6 +134,7 @@ function LoginPage() {
               className="w-100 mb-3 d-flex align-items-center justify-content-center"
               style={{ height: '45px' }}
               onClick={handleGoogleLogin}
+              disabled={isLoading}
             >
               <FcGoogle size={20} className="me-2" />
               Iniciar sesión con Google

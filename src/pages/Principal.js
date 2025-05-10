@@ -3,6 +3,7 @@ import { Filter, MessageCircle, RefreshCcw } from 'lucide-react';
 import { MapContainer, TileLayer, ZoomControl, Marker } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import { Accordion, Button, Form } from 'react-bootstrap';
+import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
 import InfoPiso from '../components/CustomModalHouse';
 import L from 'leaflet';
@@ -152,7 +153,7 @@ const Principal = () => {
     setFilteredPisos(pisos);
   };  
 
-  const isAuthenticated = sessionStorage.getItem("isAuthenticated");
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="App position-relative" style={{ height: '100vh', overflow: 'hidden' }}>

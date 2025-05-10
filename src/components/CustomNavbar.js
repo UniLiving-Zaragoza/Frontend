@@ -2,12 +2,13 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import LogoPequeño from '../assets/LogoPequeño.png';
 import Person from '../assets/Person.png';
 
 const CustomNavbar = () => {
 
-  const isAuthenticated = sessionStorage.getItem("isAuthenticated");
+  const { isAuthenticated } = useAuth();
 
   return (
     <Navbar

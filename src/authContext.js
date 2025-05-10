@@ -1,84 +1,145 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
 
+// Función para decodificar el token JWT
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+};
+
+// Verificar si el token ha expirado
+const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  const decodedToken = parseJwt(token);
+  if (!decodedToken || !decodedToken.exp) return true;
+
+  return decodedToken.exp * 1000 < Date.now();
+};
+
 export function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('isAuthenticated') ? true : false;
-  });
-
-  const [isAdmin, setIsAdmin] = useState(() => {
-    return sessionStorage.getItem('isAdmin') === 'true';
-  });
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const axiosInterceptorId = useRef(null);
+  
+  // Configurar interceptor de Axios
+  const setupAxiosInterceptors = (token) => {
+
+    if (axiosInterceptorId.current !== null) {
+      axios.interceptors.request.eject(axiosInterceptorId.current);
+    }
+    
+    axiosInterceptorId.current = axios.interceptors.request.use(
+      (config) => {
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  };
 
   // Función para obtener datos del usuario actual
   const fetchUserData = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem('isAuthenticated');
-      if (!token) return;
+      const token = sessionStorage.getItem('authToken');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
   
       const userData = parseJwt(token);
-      if (!userData || !userData.id) return;
+      if (!userData || !userData.id) {
+        setIsLoading(false);
+        return;
+      }
   
       setUser(userData);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error al obtener datos del usuario:', error);
+      setIsLoading(false);
     }
   }, []);
   
-  
+  // Efecto de inicialización
   useEffect(() => {
-    const token = sessionStorage.getItem('isAuthenticated');
-  
-    if (token) {
-      axios.interceptors.request.use(
-        (config) => {
-          config.headers.Authorization = `Bearer ${token}`;
-          return config;
-        },
-        (error) => {
-          return Promise.reject(error);
-        }
-      );
-  
+    const token = sessionStorage.getItem('authToken');
+    const adminFlag = sessionStorage.getItem('isAdmin') === 'true';
+    
+    if (token && !isTokenExpired(token)) {
+      setIsAuthenticated(true);
+      setIsAdmin(adminFlag);
+      setupAxiosInterceptors(token);
       fetchUserData();
+    } else if (token) {
+      // Token existe pero está expirado
+      logout();
+    } else {
+      setIsLoading(false);
     }
-  }, [isAuthenticated, fetchUserData]);
-  
-  
-  // Función para decodificar el token JWT
-  const parseJwt = (token) => {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      return null;
-    }
-  };
+    
+    // Configurar un intervalo para revisar la expiración periódicamente
+    const checkTokenInterval = setInterval(() => {
+      const currentToken = sessionStorage.getItem('authToken');
+      if (currentToken && isTokenExpired(currentToken)) {
+        logout();
+        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      }
+    }, 60000);
+    
+    return () => {
+      clearInterval(checkTokenInterval);
+      if (axiosInterceptorId.current !== null) {
+        axios.interceptors.request.eject(axiosInterceptorId.current);
+      }
+    };
+  }, [fetchUserData]);
 
   const login = async () => {
-    // La lógica de autenticación real y guardado del token se maneja en el componente Login
-    setIsAuthenticated(true);
+    const token = sessionStorage.getItem('authToken');
     const isAdminValue = sessionStorage.getItem('isAdmin') === 'true';
-    setIsAdmin(isAdminValue);
     
-    await fetchUserData();
+    if (token && !isTokenExpired(token)) {
+      setIsAuthenticated(true);
+      setIsAdmin(isAdminValue);
+      setupAxiosInterceptors(token);
+      await fetchUserData();
+    }
   };
 
   const register = async () => {
-
-    setIsAuthenticated(true);
-    setIsAdmin(false);
+    const token = sessionStorage.getItem('authToken');
     
-    await fetchUserData();
+    if (token && !isTokenExpired(token)) {
+      setIsAuthenticated(true);
+      setIsAdmin(false);
+      setupAxiosInterceptors(token);
+      await fetchUserData();
+    }
   };
 
   const logout = () => {
     // Eliminar el token y la información de la sesión
-    sessionStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('isAdmin');
+    
+    // Eliminar el interceptor de Axios
+    if (axiosInterceptorId.current !== null) {
+      axios.interceptors.request.eject(axiosInterceptorId.current);
+      axiosInterceptorId.current = null;
+    }
     
     // Actualizar el estado
     setIsAuthenticated(false);
@@ -94,7 +155,8 @@ export function AuthProvider({ children }) {
         user,
         login, 
         register, 
-        logout 
+        logout,
+        isLoading
       }}
     >
       {children}
