@@ -63,16 +63,13 @@ function LoginPage() {
         const response = await axios.post(endpoint, payload);
         
         if (response.data && response.data.token) {
-          sessionStorage.setItem('authToken', response.data.token);
+          const success = await login(response.data.token, isAdminLogin);
           
-          if (isAdminLogin) {
-            sessionStorage.setItem('isAdmin', 'true');
+          if (success) {
+            navigate(isAdminLogin ? "/principal-admin" : "/principal");
+          } else {
+            setApiError('Error al procesar la autenticación.');
           }
-          
-          await login();
-          
-          const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
-          navigate(isAdmin ? "/principal-admin" : "/principal");
         } else {
           setApiError('No se recibió un token válido del servidor.');
         }

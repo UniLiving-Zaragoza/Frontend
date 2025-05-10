@@ -107,27 +107,39 @@ export function AuthProvider({ children }) {
     };
   }, [fetchUserData]);
 
-  const login = async () => {
-    const token = sessionStorage.getItem('authToken');
-    const isAdminValue = sessionStorage.getItem('isAdmin') === 'true';
-    
-    if (token && !isTokenExpired(token)) {
+  // Método para guardar el token y establecer estado de autenticación
+  const setAuthToken = (token, isAdminUser = false) => {
+    if (token) {
+      sessionStorage.setItem('authToken', token);
+      
+      if (isAdminUser) {
+        sessionStorage.setItem('isAdmin', 'true');
+      } else {
+        sessionStorage.removeItem('isAdmin');
+      }
+      
       setIsAuthenticated(true);
-      setIsAdmin(isAdminValue);
+      setIsAdmin(isAdminUser);
       setupAxiosInterceptors(token);
-      await fetchUserData();
+      return true;
     }
+    return false;
   };
 
-  const register = async () => {
-    const token = sessionStorage.getItem('authToken');
-    
-    if (token && !isTokenExpired(token)) {
-      setIsAuthenticated(true);
-      setIsAdmin(false);
-      setupAxiosInterceptors(token);
+  const login = async (token, isAdminUser = false) => {
+    if (setAuthToken(token, isAdminUser)) {
       await fetchUserData();
+      return true;
     }
+    return false;
+  };
+
+  const register = async (token) => {
+    if (setAuthToken(token, false)) {
+      await fetchUserData();
+      return true;
+    }
+    return false;
   };
 
   const logout = () => {
@@ -147,6 +159,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Método para verificar si el token actual es válido
+  const isTokenValid = () => {
+    const token = sessionStorage.getItem('authToken');
+    return token && !isTokenExpired(token);
+  };
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -156,7 +174,9 @@ export function AuthProvider({ children }) {
         login, 
         register, 
         logout,
-        isLoading
+        isLoading,
+        isTokenValid,
+        setAuthToken
       }}
     >
       {children}
