@@ -68,7 +68,7 @@ function Register({ formData, onFormChange, nextStep }) {
         {/* Inicio de sesión con email */}
         
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
-          <Form.Group className="mb-3" controlId="formBasicEmail">
+          <Form.Group className="mb-2" controlId="formBasicEmail">
             <Form.Label>Email</Form.Label>
             <Form.Control
               type="email"
@@ -84,7 +84,7 @@ function Register({ formData, onFormChange, nextStep }) {
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className="mb-4" controlId="formBasicPassword">
+          <Form.Group className="mb-2" controlId="formBasicPassword">
             <Form.Label>Contraseña</Form.Label>
             <Form.Control
               type="password"
@@ -101,7 +101,7 @@ function Register({ formData, onFormChange, nextStep }) {
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className="mb-4" controlId="formConfirmPassword">
+          <Form.Group className="mb-3" controlId="formConfirmPassword">
             <Form.Label>Confirmar contraseña</Form.Label>
             <Form.Control
               type="password"

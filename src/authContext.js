@@ -1,47 +1,102 @@
-import { createContext, useContext, useState } from 'react';
-
-// Lógica de autenticación para portección de rutas
-// DEMOMENTO ASÍ, PERO NO ES NADA SEGURO!!!! ********************************
-
-// Por todo el código hay cosas que varían en función del rol, esa variable demomento fija debera obtenerse de aqui
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('isAuthenticated') === 'true';
+    return sessionStorage.getItem('isAuthenticated') ? true : false;
   });
 
   const [isAdmin, setIsAdmin] = useState(() => {
     return sessionStorage.getItem('isAdmin') === 'true';
   });
 
-  const login = () => {
-    sessionStorage.setItem('isAuthenticated', 'true');
-    setIsAuthenticated(true);
+  const [user, setUser] = useState(null);
 
-    sessionStorage.setItem('isAdmin', 'false'); // DEMOMENTO HARDCODEADO ---> CAMBIAR!!!!****************
-    setIsAdmin(false);
+  // Función para obtener datos del usuario actual
+  const fetchUserData = useCallback(async () => {
+    try {
+      const token = sessionStorage.getItem('isAuthenticated');
+      if (!token) return;
+  
+      const userData = parseJwt(token);
+      if (!userData || !userData.id) return;
+  
+      setUser(userData);
+    } catch (error) {
+      console.error('Error al obtener datos del usuario:', error);
+    }
+  }, []);
+  
+  
+  useEffect(() => {
+    const token = sessionStorage.getItem('isAuthenticated');
+  
+    if (token) {
+      axios.interceptors.request.use(
+        (config) => {
+          config.headers.Authorization = `Bearer ${token}`;
+          return config;
+        },
+        (error) => {
+          return Promise.reject(error);
+        }
+      );
+  
+      fetchUserData();
+    }
+  }, [isAuthenticated, fetchUserData]);
+  
+  
+  // Función para decodificar el token JWT
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
   };
 
-  const register = () => {
-    sessionStorage.setItem('isAuthenticated', 'true');
+  const login = async () => {
+    // La lógica de autenticación real y guardado del token se maneja en el componente Login
     setIsAuthenticated(true);
+    const isAdminValue = sessionStorage.getItem('isAdmin') === 'true';
+    setIsAdmin(isAdminValue);
+    
+    await fetchUserData();
+  };
 
-    sessionStorage.setItem('isAdmin', 'false'); // Debería ser siempre false, ya que los admin no se registran
+  const register = async () => {
+
+    setIsAuthenticated(true);
     setIsAdmin(false);
+    
+    await fetchUserData();
   };
 
   const logout = () => {
+    // Eliminar el token y la información de la sesión
     sessionStorage.removeItem('isAuthenticated');
-    setIsAuthenticated(false);
-
     sessionStorage.removeItem('isAdmin');
+    
+    // Actualizar el estado
+    setIsAuthenticated(false);
     setIsAdmin(false);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isAdmin, login, register, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        isAuthenticated, 
+        isAdmin, 
+        user,
+        login, 
+        register, 
+        logout 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
