@@ -4,12 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import Accordion from 'react-bootstrap/Accordion';
 import LogoGrande from "../assets/LogoGrande.png";
 import axios from 'axios';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function RegisterInfo({ formData, onFormChange, prevStep }) {
 
   const navigate = useNavigate();
 
   const API_URL = 'https://uniliving-backend.onrender.com';
+
+  const RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY
 
   const barriosZaragoza = [
     "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -41,6 +44,15 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
   const [apiError, setApiError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
+  // Variables para el capcha
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [captchaError, setCaptchaError] = useState('');
+  const [attemptCount, setAttemptCount] = useState(0);
+  const MAX_ATTEMPTS = 5;
+  const [temporarilyBlocked, setTemporarilyBlocked] = useState(false);
+  const BLOCK_TIME = 60;
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(BLOCK_TIME);
+
   const requiredFields = [
     'nombre',
     'apellidos',
@@ -59,6 +71,11 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     }
   };
 
+  const handleCaptchaChange = (value) => {
+    setCaptchaValue(value);
+    setCaptchaError('');
+  };
+
   const validateForm = () => {
     const newErrors = {};
     requiredFields.forEach(field => {
@@ -66,6 +83,12 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
+
+    // Verificar captcha
+    if (!captchaValue) {
+      setCaptchaError('Por favor, complete el captcha');
+      return false;
+    }
 
     // Abrir acordeón si algún campo dentro de él tiene error
     const accordedFields = ['estadoLaboral', 'fumador', 'mascotas', 'duracionEstancia', 'frecuenciaVisitas', 'zonasBusqueda', 'preferenciaConvivencia', 'interesesHobbies'];
@@ -77,6 +100,24 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Función para iniciar bloqueo temporal
+  const startTemporaryBlock = () => {
+    setTemporarilyBlocked(true);
+    
+    let remainingTime = BLOCK_TIME;
+    setBlockTimeRemaining(remainingTime);
+    
+    const timer = setInterval(() => {
+      remainingTime -= 1;
+      setBlockTimeRemaining(remainingTime);
+      
+      if (remainingTime <= 0) {
+        clearInterval(timer);
+        setTemporarilyBlocked(false);
+        setAttemptCount(0);
+      }
+    }, 1000);
+  };
 
   const mapFormDataToApiModel = () => {
 
@@ -159,6 +200,8 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
       personalDescription: localFormData.descripcion || "No description provided",
       email: formData.email,
       password: formData.password,
+      // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
+      // captchaToken: captchaValue,
       personalSituation: {
         smoker: smoker,
         pets: pets,
@@ -170,14 +213,51 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     };
   };
 
+  // Función para verificar el captcha en el servidor (DEMOMENTO SIMULADO) ************************************
+  const verifyCaptcha = async (token) => {
+    try {
+      // En un caso real, este endpoint verificaría el token con la API de Google
+      // const response = await axios.post(`${API_URL}/verify-captcha`, { token });
+      // return response.data.success;
+      
+      // Para esta implementación, se simula la respuesta
+      return true;
+    } catch (error) {
+      console.error("Error al verificar captcha:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Verificar si está bloqueado temporalmente
+    if (temporarilyBlocked) {
+      return;
+    }
+    
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setApiError('');
 
     try {
+      const isCaptchaValid = await verifyCaptcha(captchaValue);
+      
+      if (!isCaptchaValid) {
+        setCaptchaError('Error al validar el captcha. Por favor, inténtelo de nuevo.');
+
+        const newAttemptCount = attemptCount + 1;
+        setAttemptCount(newAttemptCount);
+        
+        if (newAttemptCount >= MAX_ATTEMPTS) {
+          startTemporaryBlock();
+        }
+        
+        setIsSubmitting(false);
+        return;
+      }
+
       const userData = mapFormDataToApiModel();
       console.log('Datos a enviar al backend:', userData);
       
@@ -195,6 +275,13 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
       
     } catch (error) {
       console.error("Error durante el registro:", error);
+      
+      const newAttemptCount = attemptCount + 1;
+      setAttemptCount(newAttemptCount);
+      
+      if (newAttemptCount >= MAX_ATTEMPTS) {
+        startTemporaryBlock();
+      }
       
       // Manejo de errores
       if (error.response) {
@@ -224,16 +311,8 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '850px', maxHeight: '90vh', padding: '2rem' }} className="shadow">
         <div style={{ height: '100%', overflowY: 'auto', paddingRight: '10px' }}>
-          <div className="d-flex justify-content-center mb-4">
-            <img 
-              src={LogoGrande} 
-              alt="UniLiving Logo" 
-              className="img-fluid" 
-              style={{ maxWidth: "100%", height: "auto", maxHeight: "120px" }} 
-            />
-          </div>
   
-          <h4 className="text-center mb-4">Crear una cuenta</h4>
+          <h3 className="text-center mb-5">Crear una cuenta</h3>
           
           <Form onSubmit={handleSubmit} className="container">
             <Row>
@@ -247,7 +326,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.nombre}
                     onChange={handleChange}
                     isInvalid={!!errors.nombre}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   />
                   <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                 </Form.Group>
@@ -262,7 +341,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.apellidos}
                     onChange={handleChange}
                     isInvalid={!!errors.apellidos}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   />
                   <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                 </Form.Group>
@@ -282,7 +361,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     isInvalid={!!errors.edad}
                     min="18"
                     max="100"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   />
                   <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
@@ -295,7 +374,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   >
                     <option value="">Selecciona tu género</option>
                     <option value="Masculino">Masculino</option>
@@ -316,7 +395,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                 value={localFormData.descripcion}
                 onChange={handleChange}
                 isInvalid={!!errors.descripcion}
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
                 minLength={10}
               />
               <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
@@ -335,7 +414,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.mascotas}
                           onChange={handleChange}
                           isInvalid={!!errors.mascotas}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona si tienes mascotas</option>
                           <option value="Sí">Sí</option>
@@ -353,7 +432,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.fumador}
                           onChange={handleChange}
                           isInvalid={!!errors.fumador}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona si eres fumador</option>
                           <option value="Sí">Sí</option>
@@ -373,7 +452,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.estadoLaboral}
                           onChange={handleChange}
                           isInvalid={!!errors.estadoLaboral}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona tu estado laboral</option>
                           <option value="Estudiante">Estudiante</option>
@@ -393,7 +472,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.preferenciaConvivencia}
                           onChange={handleChange}
                           isInvalid={!!errors.preferenciaConvivencia}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona preferecia de convivencia</option>
                           <option value="Solo">Solo</option>
@@ -415,7 +494,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.frecuenciaVisitas}
                           onChange={handleChange}
                           isInvalid={!!errors.frecuenciaVisitas}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona cuando recibes visitas</option>
                           <option value="Diarias">Diarias</option>
@@ -436,7 +515,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.zonasBusqueda}
                           onChange={handleChange}
                           isInvalid={!!errors.zonasBusqueda}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona la zona donde buscas piso</option>
                           {barriosZaragoza.map((barrio, index) => (
@@ -459,7 +538,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         placeholder="Ej: Leer, Deporte, Cocinar"
                         aria-label="Intereses y hobbies"
                         isInvalid={!!errors.interesesHobbies}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || temporarilyBlocked}
                       />
                       <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                     </Col>
@@ -467,6 +546,29 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                 </Accordion.Body>
               </Accordion.Item>
             </Accordion>
+
+            {/* Componente reCAPTCHA */}
+            <div className="mt-4 mb-3 d-flex justify-content-center">
+              <ReCAPTCHA
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={handleCaptchaChange}
+                disabled={isSubmitting || temporarilyBlocked}
+              />
+            </div>
+
+            {/* Mostrar mensaje de bloqueo temporal si aplica */}
+            {temporarilyBlocked && (
+              <Alert variant="danger" className="mb-3">
+                Demasiados intentos fallidos. Por favor, espere {blockTimeRemaining} segundos antes de intentar nuevamente.
+              </Alert>
+            )}
+            
+            {/* Error de captcha */}
+            {captchaError && (
+              <div className="text-center text-danger mb-3">
+                {captchaError}
+              </div>
+            )}
 
             {/* Mensaje de exito */}
             {registrationSuccess && (
@@ -482,18 +584,25 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               </Alert>
             )}
 
+            {/* Mensaje de intentos fallidos */}
+            {!temporarilyBlocked && attemptCount > 0 && (
+              <Alert variant="warning" className="mb-3 mt-3">
+                Intentos fallidos: {attemptCount}/{MAX_ATTEMPTS}
+              </Alert>
+            )}
+
             <div className="d-flex justify-content-between mt-4">
               <Button 
                 variant="secondary" 
                 onClick={handleGoBack}
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
               >
                 Atrás
               </Button>
               <Button
                 variant="primary"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
                 style={{
                   borderRadius: "30px",
                   backgroundColor: "#000842",
