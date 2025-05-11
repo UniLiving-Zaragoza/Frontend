@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Accordion from 'react-bootstrap/Accordion';
-import LogoGrande from "../assets/LogoGrande.png";
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 
