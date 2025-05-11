@@ -10,6 +10,36 @@ function Register({ formData, onFormChange, nextStep }) {
   const [errors, setErrors] = useState({});
   const [validated, setValidated] = useState(false);
 
+  const validatePassword = (password) => {
+    const errors = [];
+    
+    if (!password) {
+      return ['Contraseña es requerida'];
+    }
+    
+    if (password.length < 8) {
+      errors.push('Mínimo 8 caracteres');
+    }
+    
+    if (password.length > 128) {
+      errors.push('Máximo 128 caracteres');
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Debe contener al menos una mayúscula');
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.push('Debe contener al menos una minúscula');
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.push('Debe contener al menos un número');
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -22,11 +52,10 @@ function Register({ formData, onFormChange, nextStep }) {
       newErrors.email = 'Email no válido';
     }
     
-    if (!password){
-      newErrors.password = 'Contraseña es requerida';
-    } 
-    else if (password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    const passwordErrors = validatePassword(password);
+
+    if (passwordErrors.length > 0) {
+      newErrors.password = passwordErrors;
     }
 
     if (!confirmPassword) {
@@ -46,6 +75,21 @@ function Register({ formData, onFormChange, nextStep }) {
     setValidated(true);
   };
 
+  // Renderiza los errores de la contraseña como una lista
+  const renderPasswordErrors = () => {
+    if (!errors.password || !Array.isArray(errors.password)) {
+      return errors.password;
+    }
+    
+    return (
+      <ul className="mb-0 ps-3">
+        {errors.password.map((error, index) => (
+          <li key={index}>{error}</li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '450px', maxWidth: '90vw', padding: '2.5rem' }} className="shadow">
@@ -58,12 +102,12 @@ function Register({ formData, onFormChange, nextStep }) {
             style={{ 
               maxWidth: "100%", 
               height: "auto", 
-              maxHeight: "120px" 
+              maxHeight: "110px" 
             }} 
           />
         </div>
         
-        <h4 className="text-center mb-4">Crear una cuenta</h4>
+        <h4 className="text-center mb-3">Crear una cuenta</h4>
                 
         {/* Inicio de sesión con email */}
         
@@ -94,10 +138,11 @@ function Register({ formData, onFormChange, nextStep }) {
               isInvalid={!!errors.password}
               isValid={validated && !errors.password}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={128}
             />
             <Form.Control.Feedback type="invalid">
-              {errors.password}
+              {renderPasswordErrors()}
             </Form.Control.Feedback>
           </Form.Group>
 
@@ -111,7 +156,8 @@ function Register({ formData, onFormChange, nextStep }) {
               isInvalid={!!errors.confirmPassword}
               isValid={validated && !errors.confirmPassword && confirmPassword.length > 0}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={128}
             />
             <Form.Control.Feedback type="invalid">
               {errors.confirmPassword}
@@ -139,7 +185,7 @@ function Register({ formData, onFormChange, nextStep }) {
         </Form>
         
         {/* Acceso al área de registro */}
-        <div className="text-center mt-3">
+        <div className="text-center mt-2">
           <span style={{ color: '#6c757d' }}>
             ¿Ya tienes cuenta? <Link to="/login" style={{ textDecoration: 'none' }}>Inicia sesión</Link>
           </span>
