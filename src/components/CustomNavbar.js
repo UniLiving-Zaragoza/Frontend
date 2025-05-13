@@ -3,8 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../authContext';
+import { FaUser } from 'react-icons/fa';
 import LogoPequeño from '../assets/LogoPequeño.png';
-import Person from '../assets/Person.png';
 
 const CustomNavbar = () => {
 
@@ -55,11 +55,20 @@ const CustomNavbar = () => {
           {isAuthenticated ? (
             <Link to="/perfil/1" className="d-flex align-items-center" //Seria perfil/{userId}
             >
-              <img
-                src={Person}
-                alt="Perfil"
-                style={{ height: '35px', width: 'auto', maxWidth: '100%' }}
-              />
+              <div
+                style={{
+                  height: '35px',
+                  width: '35px',
+                  borderRadius: '50%',
+                  border: '2px solid white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <FaUser size={20} />
+              </div>
             </Link>
           ) : (
             <Button
