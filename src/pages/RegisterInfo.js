@@ -40,6 +40,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
   const [errors, setErrors] = useState({});
   const [accordionOpen, setAccordionOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [apiError, setApiError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
@@ -265,6 +266,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
       console.log('Respuesta del registro:', response.data);
       
       setRegistrationSuccess(true);
+      setIsRedirecting(true);
       
       onFormChange(localFormData);
       
@@ -306,6 +308,9 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     prevStep();
   };
 
+  // Determinar si los controles deben estar deshabilitados
+  const isFormDisabled = isSubmitting || temporarilyBlocked || isRedirecting;
+
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '850px', maxHeight: '90vh', padding: '2rem' }} className="shadow">
@@ -325,7 +330,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.nombre}
                     onChange={handleChange}
                     isInvalid={!!errors.nombre}
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   />
                   <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                 </Form.Group>
@@ -340,7 +345,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.apellidos}
                     onChange={handleChange}
                     isInvalid={!!errors.apellidos}
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   />
                   <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                 </Form.Group>
@@ -360,7 +365,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     isInvalid={!!errors.edad}
                     min="18"
                     max="100"
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   />
                   <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
@@ -373,7 +378,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     value={localFormData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   >
                     <option value="">Selecciona tu género</option>
                     <option value="Masculino">Masculino</option>
@@ -394,7 +399,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                 value={localFormData.descripcion}
                 onChange={handleChange}
                 isInvalid={!!errors.descripcion}
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
                 minLength={10}
               />
               <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
@@ -413,7 +418,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.mascotas}
                           onChange={handleChange}
                           isInvalid={!!errors.mascotas}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona si tienes mascotas</option>
                           <option value="Sí">Sí</option>
@@ -431,7 +436,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.fumador}
                           onChange={handleChange}
                           isInvalid={!!errors.fumador}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona si eres fumador</option>
                           <option value="Sí">Sí</option>
@@ -451,7 +456,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.estadoLaboral}
                           onChange={handleChange}
                           isInvalid={!!errors.estadoLaboral}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona tu estado laboral</option>
                           <option value="Estudiante">Estudiante</option>
@@ -471,7 +476,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.preferenciaConvivencia}
                           onChange={handleChange}
                           isInvalid={!!errors.preferenciaConvivencia}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona preferecia de convivencia</option>
                           <option value="Solo">Solo</option>
@@ -493,7 +498,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.frecuenciaVisitas}
                           onChange={handleChange}
                           isInvalid={!!errors.frecuenciaVisitas}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona cuando recibes visitas</option>
                           <option value="Diarias">Diarias</option>
@@ -514,7 +519,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           value={localFormData.zonasBusqueda}
                           onChange={handleChange}
                           isInvalid={!!errors.zonasBusqueda}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona la zona donde buscas piso</option>
                           {barriosZaragoza.map((barrio, index) => (
@@ -537,7 +542,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         placeholder="Ej: Leer, Deporte, Cocinar"
                         aria-label="Intereses y hobbies"
                         isInvalid={!!errors.interesesHobbies}
-                        disabled={isSubmitting || temporarilyBlocked}
+                        disabled={isFormDisabled}
                       />
                       <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                     </Col>
@@ -551,7 +556,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               <ReCAPTCHA
                 sitekey={RECAPTCHA_SITE_KEY}
                 onChange={handleCaptchaChange}
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
               />
             </div>
 
@@ -594,14 +599,14 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               <Button 
                 variant="secondary" 
                 onClick={handleGoBack}
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
               >
                 Atrás
               </Button>
               <Button
                 variant="primary"
                 type="submit"
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
                 style={{
                   borderRadius: "30px",
                   backgroundColor: "#000842",
@@ -609,7 +614,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 }}
               >
-                {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
+                {isSubmitting ? 'Creando cuenta...' : isRedirecting ? 'Redirigiendo...' : 'Crear cuenta'}
               </Button>
             </div>
           </Form>

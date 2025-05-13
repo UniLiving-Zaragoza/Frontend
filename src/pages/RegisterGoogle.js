@@ -40,6 +40,7 @@ function RegisterGoogle() {
   const [errors, setErrors] = useState({});
   const [accordionOpen, setAccordionOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [apiError, setApiError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
@@ -309,6 +310,7 @@ function RegisterGoogle() {
       console.log('Respuesta del registro con Google:', response.data);
       
       setRegistrationSuccess(true);
+      setIsRedirecting(true);
       
       setTimeout(() => {
         navigate("/login");
@@ -342,6 +344,9 @@ function RegisterGoogle() {
     }
   };
 
+  // Determinar si los controles deben estar deshabilitados
+  const isFormDisabled = isSubmitting || temporarilyBlocked || isRedirecting;
+
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '850px', maxHeight: '90vh', padding: '2rem' }} className="shadow">
@@ -361,7 +366,7 @@ function RegisterGoogle() {
                     value={formData.nombre}
                     onChange={handleChange}
                     isInvalid={!!errors.nombre}
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   />
                   <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                 </Form.Group>
@@ -376,7 +381,7 @@ function RegisterGoogle() {
                     value={formData.apellidos}
                     onChange={handleChange}
                     isInvalid={!!errors.apellidos}
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   />
                   <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                 </Form.Group>
@@ -396,7 +401,7 @@ function RegisterGoogle() {
                     isInvalid={!!errors.edad}
                     min="18"
                     max="100"
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   />
                   <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
@@ -409,7 +414,7 @@ function RegisterGoogle() {
                     value={formData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
-                    disabled={isSubmitting || temporarilyBlocked}
+                    disabled={isFormDisabled}
                   >
                     <option value="">Selecciona tu género</option>
                     <option value="Masculino">Masculino</option>
@@ -430,7 +435,7 @@ function RegisterGoogle() {
                 value={formData.password}
                 onChange={handleChange}
                 isInvalid={!!errors.password}
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
               />
               <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
               
@@ -455,7 +460,7 @@ function RegisterGoogle() {
                 value={formData.descripcion}
                 onChange={handleChange}
                 isInvalid={!!errors.descripcion}
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
                 minLength={10}
               />
               <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
@@ -474,7 +479,7 @@ function RegisterGoogle() {
                           value={formData.mascotas}
                           onChange={handleChange}
                           isInvalid={!!errors.mascotas}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona si tienes mascotas</option>
                           <option value="Sí">Sí</option>
@@ -492,7 +497,7 @@ function RegisterGoogle() {
                           value={formData.fumador}
                           onChange={handleChange}
                           isInvalid={!!errors.fumador}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona si eres fumador</option>
                           <option value="Sí">Sí</option>
@@ -512,7 +517,7 @@ function RegisterGoogle() {
                           value={formData.estadoLaboral}
                           onChange={handleChange}
                           isInvalid={!!errors.estadoLaboral}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona tu estado laboral</option>
                           <option value="Estudiante">Estudiante</option>
@@ -532,7 +537,7 @@ function RegisterGoogle() {
                           value={formData.preferenciaConvivencia}
                           onChange={handleChange}
                           isInvalid={!!errors.preferenciaConvivencia}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona preferecia de convivencia</option>
                           <option value="Solo">Solo</option>
@@ -554,7 +559,7 @@ function RegisterGoogle() {
                           value={formData.frecuenciaVisitas}
                           onChange={handleChange}
                           isInvalid={!!errors.frecuenciaVisitas}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona cuando recibes visitas</option>
                           <option value="Diarias">Diarias</option>
@@ -575,7 +580,7 @@ function RegisterGoogle() {
                           value={formData.zonasBusqueda}
                           onChange={handleChange}
                           isInvalid={!!errors.zonasBusqueda}
-                          disabled={isSubmitting || temporarilyBlocked}
+                          disabled={isFormDisabled}
                         >
                           <option value="">Selecciona la zona donde buscas piso</option>
                           {barriosZaragoza.map((barrio, index) => (
@@ -598,7 +603,7 @@ function RegisterGoogle() {
                         placeholder="Ej: Leer, Deporte, Cocinar"
                         aria-label="Intereses y hobbies"
                         isInvalid={!!errors.interesesHobbies}
-                        disabled={isSubmitting || temporarilyBlocked}
+                        disabled={isFormDisabled}
                       />
                       <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                     </Col>
@@ -612,7 +617,7 @@ function RegisterGoogle() {
               <ReCAPTCHA
                 sitekey={RECAPTCHA_SITE_KEY}
                 onChange={handleCaptchaChange}
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
               />
             </div>
             
@@ -655,7 +660,7 @@ function RegisterGoogle() {
               <Button
                 variant="primary"
                 type="submit"
-                disabled={isSubmitting || temporarilyBlocked}
+                disabled={isFormDisabled}
                 style={{
                   borderRadius: "30px",
                   backgroundColor: "#000842",
@@ -663,7 +668,7 @@ function RegisterGoogle() {
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 }}
               >
-                {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
+                {isSubmitting ? 'Creando cuenta...' : isRedirecting ? 'Redirigiendo...' : 'Crear cuenta'}
               </Button>
             </div>
           </Form>
