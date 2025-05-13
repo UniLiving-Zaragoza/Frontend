@@ -187,13 +187,14 @@ const Principal = () => {
         maxBoundsViscosity={1.0}
         zoomControl={false}
         style={{
-          height: 'calc(100vh - 56px)',
-          width: '100%',
           position: 'absolute',
-          top: '56px',
-          zIndex: 1,
-          left: 0,
-          right: 0
+          top: '0',
+          bottom: '0',
+          left: '0',
+          right: '0',
+          height: '100%',
+          width: '100%',
+          zIndex: 1
         }}
       >
         <TileLayer
