@@ -24,6 +24,7 @@ function RegisterGoogle() {
     apellidos: googleProfile.lastName || googleProfile.name?.split(' ').slice(1).join(' ') || '',
     edad: '',
     genero: '',
+    password: '',
     pais: '',
     descripcion: '',
     estadoLaboral: '',
@@ -43,21 +44,62 @@ function RegisterGoogle() {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
   const [captchaError, setCaptchaError] = useState('');
+  const [passwordFeedback, setPasswordFeedback] = useState([]);
 
   const requiredFields = [
     'nombre',
     'apellidos',
     'edad',
     'genero',
+    'password',
     'fumador',
     'mascotas',
     'estadoLaboral'
   ];
 
+  const validatePassword = (password) => {
+    const errors = [];
+    
+    if (!password) {
+      return ['Contraseña es requerida'];
+    }
+    
+    if (password.length < 8) {
+      errors.push('Mínimo 8 caracteres');
+    }
+    
+    if (password.length > 128) {
+      errors.push('Máximo 128 caracteres');
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Debe contener al menos una mayúscula');
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.push('Debe contener al menos una minúscula');
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.push('Debe contener al menos un número');
+    }
+    
+    return errors;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
+    
+    if (name === 'password') {
+      const passwordErrors = validatePassword(value);
+      setPasswordFeedback(passwordErrors);
+      if (passwordErrors.length > 0) {
+        setErrors(prev => ({ ...prev, password: 'La contraseña no cumple con los requisitos' }));
+      } else {
+        setErrors(prev => ({ ...prev, password: null }));
+      }
+    } else if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
@@ -74,6 +116,12 @@ function RegisterGoogle() {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
+
+    // Validar contraseña
+    const passwordErrors = validatePassword(formData.password);
+    if (passwordErrors.length > 0) {
+      newErrors.password = 'La contraseña no cumple con los requisitos';
+    }
 
     if (!captchaValue) {
       setCaptchaError('Por favor, complete el captcha');
@@ -168,7 +216,7 @@ function RegisterGoogle() {
       gender: gender,
       personalDescription: formData.descripcion || "No description provided",
       email: googleProfile.email,
-      password: googleProfile.googleId,         // FALTA METER ************************
+      password: formData.password,
       // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
       // captchaToken: captchaValue,
       personalSituation: {
@@ -303,6 +351,31 @@ function RegisterGoogle() {
                 </Form.Group>
               </Col>
             </Row>
+
+            <Form.Group className="mb-2" controlId="password">
+              <Form.Label>Contraseña</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Ingresa tu contraseña"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                isInvalid={!!errors.password}
+                disabled={isSubmitting}
+              />
+              <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+              
+              {/* Requisitos de contraseña */}
+              {formData.password && 
+                <div className="mt-2">
+                  <ul className="small ps-4 mb-0">
+                    {passwordFeedback.map((error, index) => (
+                      <li key={index} className="text-danger">{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              }
+            </Form.Group>
 
             <Form.Group className="mb-3" controlId="descripcion">
               <Form.Label>Descripción personal</Form.Label>

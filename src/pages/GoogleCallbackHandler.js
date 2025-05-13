@@ -15,30 +15,46 @@ function GoogleCallbackHandler() {
         const status = params.get('status');
 
         if (token) {
-          // Usuario autenticado completamente
+          // Usuario existente autenticado completamente
           await login(token);
-          window.location.replace('/principal')
+          navigate('/principal', { replace: true });
         } else if (status === 'incomplete') {
+          // Usuario NO existente requiere completar registro
           const partialProfile = {
             email: params.get('email'),
             name: params.get('name')
           };
           navigate('/registro-google', {
-            state: { googleProfile: partialProfile }
+            state: { googleProfile: partialProfile },
+            replace: true,
           });
         } else {
-          navigate('/login');
+          navigate('/login', { replace: true });
         }
       } catch (err) {
         console.error('Error procesando Google callback:', err);
-        navigate('/login');
+        navigate('/login', { replace: true });
       }
     };
 
     fetchGoogleCallback();
-  }, [navigate, login, location.search]);
+  }, [navigate, location.search, login]);
 
-  return <p>Procesando autenticación con Google...</p>;
+
+  return (
+    <div className="d-flex flex-column justify-content-center align-items-center vh-100 bg-white">
+      <div
+        className="spinner-border"
+        role="status"
+        style={{ width: '3rem', height: '3rem', borderColor: '#f3f3f3', borderTopColor: '#000842' }}
+      >
+        <span className="visually-hidden">Cargando...</span>
+      </div>
+      <p className="mt-3 fw-bold" style={{ color: '#000842' }}>
+        Procesando autenticación...
+      </p>
+    </div>
+  );
 }
 
 export default GoogleCallbackHandler;

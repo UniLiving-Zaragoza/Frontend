@@ -108,7 +108,7 @@ export function AuthProvider({ children }) {
   }, [fetchUserData]);
 
   // Método para guardar el token y establecer estado de autenticación
-  const setAuthToken = (token, isAdminUser = false) => {
+  const setAuthToken = useCallback((token, isAdminUser = false) => {
     if (token) {
       sessionStorage.setItem('authToken', token);
       
@@ -124,15 +124,15 @@ export function AuthProvider({ children }) {
       return true;
     }
     return false;
-  };
+  }, []);
 
-  const login = async (token, isAdminUser = false) => {
+  const login = useCallback(async (token, isAdminUser = false) => {
     if (setAuthToken(token, isAdminUser)) {
       await fetchUserData();
       return true;
     }
     return false;
-  };
+  }, [fetchUserData, setAuthToken]);
 
   // FUNCIÓN NO NECESARIA YA QUE TRAS EL REGISTRO NO SE INICIA SESIÓN
   /*const register = async (token) => {
