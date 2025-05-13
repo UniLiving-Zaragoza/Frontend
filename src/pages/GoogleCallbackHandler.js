@@ -1,30 +1,30 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../authContext';
-import axios from 'axios';
 
 function GoogleCallbackHandler() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   useEffect(() => {
     const fetchGoogleCallback = async () => {
       try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        const status = params.get('status');
 
-        const response = await axios.get('https://uniliving-backend.onrender.com/auth/google/callback', {
-          credentials: 'include',
-        });
-
-        if (response.data.token) {
+        if (token) {
           // Usuario autenticado completamente
-          await login(response.data.token);
-          navigate('/principal');
-        } else if (response.data.requiresProfileCompletion) {
-          // Guardar info parcial
+          await login(token);
+          window.location.replace('/principal')
+        } else if (status === 'incomplete') {
+          const partialProfile = {
+            email: params.get('email'),
+            name: params.get('name')
+          };
           navigate('/registro-google', {
-            state: {
-              googleProfile: response.data.partialProfile
-            }
+            state: { googleProfile: partialProfile }
           });
         } else {
           navigate('/login');
@@ -36,7 +36,7 @@ function GoogleCallbackHandler() {
     };
 
     fetchGoogleCallback();
-  }, [navigate, login]);
+  }, [navigate, login, location.search]);
 
   return <p>Procesando autenticación con Google...</p>;
 }

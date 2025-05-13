@@ -3,7 +3,6 @@ import { Container, Form, Button, Card, Alert, Row, Col, Accordion } from 'react
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
-import LogoGrande from "../assets/LogoGrande.png";
 
 function RegisterGoogle() {
   const navigate = useNavigate();
@@ -169,8 +168,9 @@ function RegisterGoogle() {
       gender: gender,
       personalDescription: formData.descripcion || "No description provided",
       email: googleProfile.email,
-      googleId: googleProfile.googleId,
-      captchaToken: captchaValue,
+      password: googleProfile.googleId,         // FALTA METER ************************
+      // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
+      // captchaToken: captchaValue,
       personalSituation: {
         smoker: smoker,
         pets: pets,
@@ -194,7 +194,7 @@ function RegisterGoogle() {
       const userData = mapFormDataToApiModel();
       console.log('Datos a enviar al backend:', userData);
       
-      const response = await axios.post(`${API_URL}/user/register-google`, userData);
+      const response = await axios.post(`${API_URL}/user/register`, userData);
       
       console.log('Respuesta del registro con Google:', response.data);
       
@@ -229,19 +229,6 @@ function RegisterGoogle() {
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '850px', maxHeight: '90vh', padding: '2rem' }} className="shadow">
         <div style={{ height: '100%', overflowY: 'auto', paddingRight: '10px' }}>
-  
-          <div className="d-flex justify-content-center mb-4">
-            <img 
-              src={LogoGrande} 
-              alt="UniLiving Logo" 
-              className="img-fluid" 
-              style={{ 
-                maxWidth: "100%", 
-                height: "auto", 
-                maxHeight: "110px" 
-              }} 
-            />
-          </div>
 
           <h3 className="text-center mb-5">Completa tu información de perfil</h3>
           
