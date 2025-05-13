@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import LoginPage from './pages/Login';
 import RegisterFlow from './pages/RegisterFlow';
+import GoogleCallbackHandler from './pages/GoogleCallbackHandler';
+import RegisterGoogle from './pages/RegisterGoogle';
 import PrincipalPage from './pages/Principal';
 import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
@@ -29,6 +31,8 @@ function IndexRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registro" element={<RegisterFlow />} />
+      <Route path="/auth/google/callback" element={<GoogleCallbackHandler />} />
+      <Route path="/registro-google" element={<RegisterGoogle />} />
       <Route path="/principal" element={<PrincipalPage />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />

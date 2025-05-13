@@ -23,6 +23,7 @@ function LoginPage() {
   const API_URL = 'https://uniliving-backend.onrender.com';
 
   const handleGoogleLogin = () => {
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   const handleSubmit = async (event) => {
