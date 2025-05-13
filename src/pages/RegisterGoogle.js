@@ -45,6 +45,13 @@ function RegisterGoogle() {
   const [captchaValue, setCaptchaValue] = useState(null);
   const [captchaError, setCaptchaError] = useState('');
   const [passwordFeedback, setPasswordFeedback] = useState([]);
+  
+  // Variables para el manejo de intentos fallidos del captcha
+  const [attemptCount, setAttemptCount] = useState(0);
+  const MAX_ATTEMPTS = 5;
+  const [temporarilyBlocked, setTemporarilyBlocked] = useState(false);
+  const BLOCK_TIME = 60;
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(BLOCK_TIME);
 
   const requiredFields = [
     'nombre',
@@ -107,6 +114,25 @@ function RegisterGoogle() {
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
     setCaptchaError('');
+  };
+
+  // Función para iniciar bloqueo temporal
+  const startTemporaryBlock = () => {
+    setTemporarilyBlocked(true);
+    
+    let remainingTime = BLOCK_TIME;
+    setBlockTimeRemaining(remainingTime);
+    
+    const timer = setInterval(() => {
+      remainingTime -= 1;
+      setBlockTimeRemaining(remainingTime);
+      
+      if (remainingTime <= 0) {
+        clearInterval(timer);
+        setTemporarilyBlocked(false);
+        setAttemptCount(0);
+      }
+    }, 1000);
   };
 
   const validateForm = () => {
@@ -230,8 +256,28 @@ function RegisterGoogle() {
     };
   };
 
+  // Función para verificar el captcha en el servidor (DEMOMENTO SIMULADO) **************************************
+  const verifyCaptcha = async (token) => {
+    try {
+      // En un caso real, este endpoint verificaría el token con la API de Google
+      // const response = await axios.post(`${API_URL}/verify-captcha`, { token });
+      // return response.data.success;
+      
+      // Para esta implementación, se simula la respuesta
+      return true;
+    } catch (error) {
+      console.error("Error al verificar captcha:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Verificar si está bloqueado temporalmente
+    if (temporarilyBlocked) {
+      return;
+    }
     
     if (!validateForm()) return;
 
@@ -239,6 +285,22 @@ function RegisterGoogle() {
     setApiError('');
 
     try {
+      const isCaptchaValid = await verifyCaptcha(captchaValue);
+      
+      if (!isCaptchaValid) {
+        setCaptchaError('Error al validar el captcha. Por favor, inténtelo de nuevo.');
+
+        const newAttemptCount = attemptCount + 1;
+        setAttemptCount(newAttemptCount);
+        
+        if (newAttemptCount >= MAX_ATTEMPTS) {
+          startTemporaryBlock();
+        }
+        
+        setIsSubmitting(false);
+        return;
+      }
+
       const userData = mapFormDataToApiModel();
       console.log('Datos a enviar al backend:', userData);
       
@@ -254,6 +316,13 @@ function RegisterGoogle() {
       
     } catch (error) {
       console.error("Error durante el registro con Google:", error);
+      
+      const newAttemptCount = attemptCount + 1;
+      setAttemptCount(newAttemptCount);
+      
+      if (newAttemptCount >= MAX_ATTEMPTS) {
+        startTemporaryBlock();
+      }
       
       if (error.response) {
         if (error.response.status === 400 && error.response.data.message) {
@@ -292,7 +361,7 @@ function RegisterGoogle() {
                     value={formData.nombre}
                     onChange={handleChange}
                     isInvalid={!!errors.nombre}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   />
                   <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                 </Form.Group>
@@ -307,7 +376,7 @@ function RegisterGoogle() {
                     value={formData.apellidos}
                     onChange={handleChange}
                     isInvalid={!!errors.apellidos}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   />
                   <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                 </Form.Group>
@@ -327,7 +396,7 @@ function RegisterGoogle() {
                     isInvalid={!!errors.edad}
                     min="18"
                     max="100"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   />
                   <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                 </Form.Group>
@@ -340,7 +409,7 @@ function RegisterGoogle() {
                     value={formData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || temporarilyBlocked}
                   >
                     <option value="">Selecciona tu género</option>
                     <option value="Masculino">Masculino</option>
@@ -361,7 +430,7 @@ function RegisterGoogle() {
                 value={formData.password}
                 onChange={handleChange}
                 isInvalid={!!errors.password}
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
               />
               <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
               
@@ -386,7 +455,7 @@ function RegisterGoogle() {
                 value={formData.descripcion}
                 onChange={handleChange}
                 isInvalid={!!errors.descripcion}
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
                 minLength={10}
               />
               <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
@@ -405,7 +474,7 @@ function RegisterGoogle() {
                           value={formData.mascotas}
                           onChange={handleChange}
                           isInvalid={!!errors.mascotas}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona si tienes mascotas</option>
                           <option value="Sí">Sí</option>
@@ -423,7 +492,7 @@ function RegisterGoogle() {
                           value={formData.fumador}
                           onChange={handleChange}
                           isInvalid={!!errors.fumador}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona si eres fumador</option>
                           <option value="Sí">Sí</option>
@@ -443,7 +512,7 @@ function RegisterGoogle() {
                           value={formData.estadoLaboral}
                           onChange={handleChange}
                           isInvalid={!!errors.estadoLaboral}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona tu estado laboral</option>
                           <option value="Estudiante">Estudiante</option>
@@ -463,7 +532,7 @@ function RegisterGoogle() {
                           value={formData.preferenciaConvivencia}
                           onChange={handleChange}
                           isInvalid={!!errors.preferenciaConvivencia}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona preferecia de convivencia</option>
                           <option value="Solo">Solo</option>
@@ -485,7 +554,7 @@ function RegisterGoogle() {
                           value={formData.frecuenciaVisitas}
                           onChange={handleChange}
                           isInvalid={!!errors.frecuenciaVisitas}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona cuando recibes visitas</option>
                           <option value="Diarias">Diarias</option>
@@ -506,7 +575,7 @@ function RegisterGoogle() {
                           value={formData.zonasBusqueda}
                           onChange={handleChange}
                           isInvalid={!!errors.zonasBusqueda}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || temporarilyBlocked}
                         >
                           <option value="">Selecciona la zona donde buscas piso</option>
                           {barriosZaragoza.map((barrio, index) => (
@@ -529,7 +598,7 @@ function RegisterGoogle() {
                         placeholder="Ej: Leer, Deporte, Cocinar"
                         aria-label="Intereses y hobbies"
                         isInvalid={!!errors.interesesHobbies}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || temporarilyBlocked}
                       />
                       <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                     </Col>
@@ -543,9 +612,16 @@ function RegisterGoogle() {
               <ReCAPTCHA
                 sitekey={RECAPTCHA_SITE_KEY}
                 onChange={handleCaptchaChange}
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
               />
             </div>
+            
+            {/* Mostrar mensaje de bloqueo temporal si aplica */}
+            {temporarilyBlocked && (
+              <Alert variant="danger" className="mb-3">
+                Demasiados intentos fallidos. Por favor, espere {blockTimeRemaining} segundos antes de intentar nuevamente.
+              </Alert>
+            )}
             
             {/* Error de captcha */}
             {captchaError && (
@@ -568,11 +644,18 @@ function RegisterGoogle() {
               </Alert>
             )}
 
+            {/* Mensaje de intentos fallidos */}
+            {!temporarilyBlocked && attemptCount > 0 && (
+              <Alert variant="warning" className="mb-3 mt-3">
+                Intentos fallidos: {attemptCount}/{MAX_ATTEMPTS}
+              </Alert>
+            )}
+
             <div className="d-flex justify-content-end mt-4">
               <Button
                 variant="primary"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || temporarilyBlocked}
                 style={{
                   borderRadius: "30px",
                   backgroundColor: "#000842",
