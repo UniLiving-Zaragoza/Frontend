@@ -142,20 +142,13 @@ const AnalyticsGraphicsPage = () => {
                                 <Container className="mb-3">
                                     <Card className="shadow-sm p-3">
                                         <Card.Body className="d-flex justify-content-between align-items-center">
-                                            <h5 className="mb-0">
-                                                Barrio seleccionado: <strong>{selectedBarrio}</strong>
+                                            <h5 className="mb-4">
+                                                <strong>{selectedBarrio}</strong>
                                             </h5>
                                             <div className="d-flex align-items-center">
                                                 <span className="text-muted me-2">
                                                     Población total: <h3>{barrioData.totalPoblacion.toLocaleString()}</h3>
                                                 </span>
-                                                <FaQuestionCircle 
-                                                    role="button" 
-                                                    size={30} 
-                                                    className="text-primary" 
-                                                    onClick={() => setShowInfoModal(true)} 
-                                                    title="Información sobre los indicadores"
-                                                />
                                             </div>
                                         </Card.Body>
                                     </Card>
@@ -190,6 +183,13 @@ const AnalyticsGraphicsPage = () => {
                                     <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                                         <FaChartLine className="align-middle" />
                                     </span>
+                                    <FaQuestionCircle 
+                                                    role="button" 
+                                                    size={30} 
+                                                    className="text-primary" 
+                                                    onClick={() => setShowInfoModal(true)} 
+                                                    title="Información sobre los indicadores"
+                                    />
                                 </Card.Header>
                                 <Card.Body>
                                     {loading ? (
@@ -208,7 +208,7 @@ const AnalyticsGraphicsPage = () => {
                                                         <CartesianGrid stroke="#e6e6e6" strokeDasharray="3 3" />
                                                         <XAxis 
                                                             dataKey="name" 
-                                                            tick={{ fill: '#444', fontSize: 20, fontStyle: 'bold' }} 
+                                                            tick={{ fill: '#444', fontSize: 20, fontWeight: 'bold' }} 
                                                             axisLine={false} 
                                                             tickLine={false} 
                                                         />
@@ -226,12 +226,12 @@ const AnalyticsGraphicsPage = () => {
                                                             }} 
                                                         />
                                                         <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                                                            {resumenData.map((entry, index) => (
-                                                                <Cell 
-                                                                    key={`cell-${index}`} 
-                                                                    fill={["#000842", "#32418f", "#5460b9", "#8792da", "#b6c3f3"][index % 5]} 
-                                                                />
-                                                            ))}
+                                                        {resumenData.map((entry, index) => (
+                                                            <Cell 
+                                                            key={`cell-${index}`} 
+                                                            fill="#000842" 
+                                                            />
+                                                        ))}
                                                         </Bar>
                                                     </BarChart>
                                                 </ResponsiveContainer>
