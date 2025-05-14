@@ -1,49 +1,60 @@
-import React, { useState } from 'react';
-import { Container, Button, Card, Row, Col, Form } from 'react-bootstrap';
-import { FaExclamationTriangle, FaUsers, FaChartLine, FaComments } from 'react-icons/fa';
-import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, AreaChart, Area, BarChart, Bar} from 'recharts';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Container, Button, Card, Row, Col, Form, Spinner, Modal } from 'react-bootstrap';
+import {  FaChartLine, FaComments,FaQuestionCircle  } from 'react-icons/fa';
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip,LineChart, Line, Cell } from 'recharts';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "leaflet/dist/leaflet.css";
 
+const barriosZaragoza = [
+    "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
+    "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
+    "Centro", "Las Fuentes", "Universidad", "San José",
+    "Casablanca", "Torrero-La Paz", "Sur"
+];
+
 const AnalyticsGraphicsPage = () => {
-    
-    const [selectedBarrio, setSelectedBarrio] = useState('');
-
-    const dataExample = [
-        { mes: "1", data: 200 },
-        { mes: "2", data: 300 },
-        { mes: "3", data: 250 },
-        { mes: "4", data: 400 },
-        { mes: "5", data: 450 },
-        { mes: "6", data: 500 },
-        { mes: "7", data: 600 },
-        { mes: "8", data: 550 },
-        { mes: "9", data: 700 },
-        { mes: "10", data: 620 },
-        { mes: "11", data: 620 },
-        { mes: "12", data: 620 },
-    ];
-
-    const barriosZaragoza = [
-        "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
-        "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
-        "Centro", "Las Fuentes", "Universidad", "San José",
-        "Casablanca", "Torrero-La Paz", "Sur"
-    ];
-
+    const location = useLocation();
     const navigate = useNavigate();
 
+    const initialBarrio = location.state?.barrio || '';
+    const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
+    const [barrioData, setBarrioData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+
+
+
+    useEffect(() => {
+    if (!selectedBarrio) return;
+
+    setLoading(true);
+
+    fetch(`https://uniliving-backend.onrender.com/publicData/demografia-distrito?distrito=${encodeURIComponent(selectedBarrio)}`)
+        .then(res => {
+            if (!res.ok) throw new Error("Error al cargar datos");
+            return res.json();
+        })
+        .then(data => {
+            setBarrioData(data.data);
+        })
+        .catch(err => console.error(err))
+        .finally(() => {
+            setLoading(false);
+        });
+    }, [selectedBarrio]);
+
     const handleSearch = () => {
-        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS
         navigate('/principal');
     };
 
     const handleCommets = () => {
-        navigate('/analiticas-comentarios');
+        if (selectedBarrio) {
+            navigate('/analiticas-comentarios', { state: { barrio: selectedBarrio } });
+        }
     };
-    
+
     const handleBarrioChange = (e) => {
         const value = e.target.value;
         setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
@@ -52,6 +63,46 @@ const AnalyticsGraphicsPage = () => {
     const searchButtonText = selectedBarrio ? 
         `Buscar piso en ${selectedBarrio}` : 
         'Buscar piso en toda Zaragoza';
+
+    const resumenData = barrioData ? [
+        { name: 'Edad Media', value: barrioData.edadMedia },
+        { name: 'Personas/Hogar', value: barrioData.personasPorHogar },
+        { name: '% Extranjera', value: barrioData.porcentajeExtranjera },
+        { name: '% Mayores 65', value: barrioData.porcentajeMayores },
+        { name: '% Menores 18', value: barrioData.porcentajeJovenes },
+    ] : [];
+
+    const indicesData = barrioData ? [
+        { name: 'Envejecimiento', value: barrioData.indiceEnvejecimiento },
+        { name: 'Dependencia', value: barrioData.indiceDependencia },
+        { name: 'Reemplazo', value: barrioData.indiceReemplazo },
+        { name: 'Maternidad', value: barrioData.indiceMaternidad },
+    ] : [];
+
+
+    let resumenTexto = "";
+
+    if (barrioData) {
+        const { edadMedia, indiceEnvejecimiento, indiceDependencia, porcentajeExtranjera } = barrioData;
+
+        if (edadMedia > 47) {
+            resumenTexto += `La población del barrio es mayor en promedio, con una edad media de ${edadMedia.toFixed(1)} años. `;
+        } else {
+            resumenTexto += `Es un barrio con población joven, con una edad media de ${edadMedia.toFixed(1)} años. `;
+        }
+
+        if (indiceEnvejecimiento > 150) {
+            resumenTexto += `Tiene un índice de envejecimiento alto (${indiceEnvejecimiento.toFixed(1)}), lo que indica una proporción significativa de mayores de 65 años. `;
+        }
+
+        if (indiceDependencia > 50) {
+            resumenTexto += `La carga de dependencia es considerable (${indiceDependencia.toFixed(1)}), es decir, hay muchas personas que no están en edad laboral. `;
+        }
+
+        if (porcentajeExtranjera > 12) {
+            resumenTexto += `Es un barrio con diversidad, ya que el ${porcentajeExtranjera.toFixed(1)}% de la población es extranjera.`;
+        }
+    }
 
     return (
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
@@ -66,7 +117,7 @@ const AnalyticsGraphicsPage = () => {
                                 onChange={handleBarrioChange}
                                 value={selectedBarrio || 'Selecciona un barrio de Zaragoza'}
                             >
-                                <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
+                                <option>Selecciona un barrio de Zaragoza</option>
                                 {barriosZaragoza.map((barrio, index) => (
                                     <option key={index} value={barrio}>{barrio}</option>
                                 ))}
@@ -77,7 +128,6 @@ const AnalyticsGraphicsPage = () => {
 
                 <div className="flex-grow-1 overflow-auto p-3 mx-3"
                     style={{
-                        flexGrow: 1,
                         minHeight: '200px',
                         maxHeight: 'calc(100vh - 210px)',
                         overflowY: 'auto',
@@ -87,81 +137,134 @@ const AnalyticsGraphicsPage = () => {
                         borderRadius: '10px',
                     }}>
                     <Row>
-                        
-                        <Col md={6} className="mb-4">
+                    {!loading && barrioData && (
+                            <>
+                                <Container className="mb-3">
+                                    <Card className="shadow-sm p-3">
+                                        <Card.Body className="d-flex justify-content-between align-items-center">
+                                            <h5 className="mb-0">
+                                                Barrio seleccionado: <strong>{selectedBarrio}</strong>
+                                            </h5>
+                                            <div className="d-flex align-items-center">
+                                                <span className="text-muted me-2">
+                                                    Población total: <h3>{barrioData.totalPoblacion.toLocaleString()}</h3>
+                                                </span>
+                                                <FaQuestionCircle 
+                                                    role="button" 
+                                                    size={30} 
+                                                    className="text-primary" 
+                                                    onClick={() => setShowInfoModal(true)} 
+                                                    title="Información sobre los indicadores"
+                                                />
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                </Container>
+
+                                <Modal show={showInfoModal} onHide={() => setShowInfoModal(false)} centered>
+                                    <Modal.Header closeButton>
+                                        <Modal.Title>¿Qué significan los indicadores?</Modal.Title>
+                                    </Modal.Header>
+                                    <Modal.Body>
+                                        <ul>
+                                            <li><strong>Edad media:</strong> Edad promedio de los residentes.</li>
+                                            <li><strong>Personas por hogar:</strong> Promedio de habitantes por vivienda.</li>
+                                            <li><strong>% Extranjeros:</strong> Porcentaje de residentes nacidos en el extranjero.</li>
+                                            <li><strong>% Mayores/Menores:</strong> Porcentaje de mayores de 65 y menores de 18.</li>
+                                            <li><strong>Índice de envejecimiento:</strong> Relación entre mayores de 65 y menores de 16.</li>
+                                            <li><strong>Índice de dependencia:</strong> Proporción de población dependiente (menores y mayores) respecto a edad laboral.</li>
+                                            <li><strong>Índice de reemplazo:</strong> Capacidad generacional de sustituir población activa.</li>
+                                            <li><strong>Índice de maternidad:</strong> Número medio de hijos por mujer.</li>
+                                        </ul>
+                                    </Modal.Body>
+                                    <Modal.Footer>
+                                        <Button variant="secondary" onClick={() => setShowInfoModal(false)}>Cerrar</Button>
+                                    </Modal.Footer>
+                                </Modal>
+                            </>
+                        )}
+                        <Col md={12} className="mb-4">
                             <Card className="shadow-sm p-2">
                                 <Card.Header className="d-flex justify-content-between align-items-center">
-                                    <span className="fs-4 fw-bold align-self-center">INFO</span>
-                                    <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
-                                        <FaUsers className="align-middle" />
-                                    </span>
-                                </Card.Header>
-                                <Card.Body>
-                                    <ResponsiveContainer width="100%" height={250}>
-                                        <AreaChart data={dataExample}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="mes" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Area type="monotone" dataKey="data" fill="#8884d8" stroke="#8884d8" />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                        
-                        <Col md={6} className="mb-4">
-                            <Card className="shadow-sm p-2">
-                                <Card.Header className="d-flex justify-content-between align-items-center">
-                                    <span className="fs-4 fw-bold align-self-center">INFO</span>
+                                    <span className="fs-4 fw-bold align-self-center">Índices demográficos</span>
                                     <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                                         <FaChartLine className="align-middle" />
                                     </span>
                                 </Card.Header>
                                 <Card.Body>
-                                    <ResponsiveContainer width="100%" height={250}>
-                                        <BarChart data={dataExample}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="mes" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Bar dataKey="data" fill="#82ca9d" />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                        
-                        <Col md={12} className="mb-4">
-                            <Card className="shadow-sm p-2">
-                                <Card.Header className="d-flex justify-content-between align-items-center">
-                                    <span className="fs-4 fw-bold align-self-center">INFO</span>
-                                    <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
-                                        <FaExclamationTriangle className="align-middle" />
-                                    </span>
-                                </Card.Header>
-                                <Card.Body>
-                                    <ResponsiveContainer width="100%" height={250}>
-                                        <LineChart data={dataExample}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="mes" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Line type="monotone" dataKey="data" stroke="#ff7300" />
-                                        </LineChart>
-                                    </ResponsiveContainer>
+                                    {loading ? (
+                                        <div className="d-flex justify-content-center align-items-center" style={{ height: 300 }}>
+                                            <Spinner animation="border" role="status" variant="primary">
+                                                <span className="visually-hidden">Cargando...</span>
+                                            </Spinner>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Gráfico 1: Indicadores básicos */}
+                                            <div className="mb-5">
+                                                <h6 className="fw-bold text-center mb-3">Indicadores de población</h6>
+                                                <ResponsiveContainer width="100%" height={300}>
+                                                    <BarChart data={resumenData}>
+                                                        <CartesianGrid strokeDasharray="3 3" />
+                                                        <XAxis dataKey="name" />
+                                                        <YAxis />
+                                                        <Tooltip />
+                                                        <Bar dataKey="value" fill="#8884d8">
+                                                            {
+                                                                resumenData.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={
+                                                                        ["#8884d8", "#83a6ed", "#8dd1e1", "#ffc658", "#82ca9d"][index % 5]
+                                                                    } />
+                                                                ))
+                                                            }
+                                                        </Bar>
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </div>
+
+                                            {/* Gráfico 2: Índices relacionados */}
+                                            <div>
+                                                <h6 className="fw-bold text-center mb-3">Índices de envejecimiento y dependencia</h6>
+                                                <ResponsiveContainer width="100%" height={300}>
+                                                    <LineChart data={indicesData}>
+                                                        <CartesianGrid strokeDasharray="3 3" />
+                                                        <XAxis dataKey="name" />
+                                                        <YAxis />
+                                                        <Tooltip />
+                                                        <Line type="monotone" dataKey="value" stroke="#ff7300" strokeWidth={3} dot={{ r: 4 }} />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </>
+                                    )}
                                 </Card.Body>
                             </Card>
                         </Col>
                     </Row>
-                </div>
+                    <Container className="mb-4">
+                        <Card className="shadow-sm p-3">
+                            <Card.Body>
+                                <h5 className="fw-bold mb-3">Resumen del barrio</h5>
+                                {loading ? (
+                                    <div className="d-flex justify-content-center align-items-center" style={{ height: 100 }}>
+                                        <Spinner animation="border" role="status" variant="primary">
+                                            <span className="visually-hidden">Cargando...</span>
+                                        </Spinner>
+                                    </div>
+                                ) : resumenTexto ? (
+                                    <p>{resumenTexto}</p>
+                                ) : (
+                                    <p className="text-muted">Selecciona un barrio para ver el resumen.</p>
+                                )}
+                            </Card.Body>
+                        </Card>
+                    </Container>
 
+                </div>
                 <Container fluid className="mt-4 mb-3">
                     <Row className="align-items-center">
-
                         <Col sm={4} className="d-none d-sm-block"></Col>
                         
-                        {/* Center button */}
                         <Col xs={12} sm={4} className="text-center mb-3 mb-sm-0">
                             <Button
                                 onClick={handleSearch}
@@ -179,7 +282,6 @@ const AnalyticsGraphicsPage = () => {
                             </Button>
                         </Col>
                         
-                        {/* Right button */}
                         <Col xs={12} sm={4} className="text-center text-sm-end">
                             <Button 
                                 onClick={handleCommets}
