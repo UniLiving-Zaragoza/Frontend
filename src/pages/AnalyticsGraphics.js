@@ -181,7 +181,6 @@ const AnalyticsGraphicsPage = () => {
                                 <Card.Header className="d-flex justify-content-between align-items-center">
                                     <span className="fs-4 fw-bold align-self-center">Índices demográficos</span>
                                     <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
-                                        <FaChartLine className="align-middle" />
                                     </span>
                                     <FaQuestionCircle 
                                                     role="button" 
