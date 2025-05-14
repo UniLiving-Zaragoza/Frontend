@@ -205,35 +205,80 @@ const AnalyticsGraphicsPage = () => {
                                                 <h6 className="fw-bold text-center mb-3">Indicadores de población</h6>
                                                 <ResponsiveContainer width="100%" height={300}>
                                                     <BarChart data={resumenData}>
-                                                        <CartesianGrid strokeDasharray="3 3" />
-                                                        <XAxis dataKey="name" />
-                                                        <YAxis />
-                                                        <Tooltip />
-                                                        <Bar dataKey="value" fill="#8884d8">
-                                                            {
-                                                                resumenData.map((entry, index) => (
-                                                                    <Cell key={`cell-${index}`} fill={
-                                                                        ["#8884d8", "#83a6ed", "#8dd1e1", "#ffc658", "#82ca9d"][index % 5]
-                                                                    } />
-                                                                ))
-                                                            }
+                                                        <CartesianGrid stroke="#e6e6e6" strokeDasharray="3 3" />
+                                                        <XAxis 
+                                                            dataKey="name" 
+                                                            tick={{ fill: '#444', fontSize: 20, fontStyle: 'bold' }} 
+                                                            axisLine={false} 
+                                                            tickLine={false} 
+                                                        />
+                                                        <YAxis 
+                                                            tick={{ fill: '#444', fontSize: 12 }} 
+                                                            axisLine={false} 
+                                                            tickLine={false} 
+                                                        />
+                                                        <Tooltip 
+                                                            contentStyle={{ 
+                                                                backgroundColor: '#fff', 
+                                                                border: '1px solid #ccc', 
+                                                                borderRadius: 6, 
+                                                                fontSize: 12 
+                                                            }} 
+                                                        />
+                                                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                                                            {resumenData.map((entry, index) => (
+                                                                <Cell 
+                                                                    key={`cell-${index}`} 
+                                                                    fill={["#000842", "#32418f", "#5460b9", "#8792da", "#b6c3f3"][index % 5]} 
+                                                                />
+                                                            ))}
                                                         </Bar>
                                                     </BarChart>
                                                 </ResponsiveContainer>
                                             </div>
-
                                             {/* Gráfico 2: Índices relacionados */}
                                             <div>
-                                                <h6 className="fw-bold text-center mb-3">Índices de envejecimiento y dependencia</h6>
-                                                <ResponsiveContainer width="100%" height={300}>
-                                                    <LineChart data={indicesData}>
-                                                        <CartesianGrid strokeDasharray="3 3" />
-                                                        <XAxis dataKey="name" />
-                                                        <YAxis />
-                                                        <Tooltip />
-                                                        <Line type="monotone" dataKey="value" stroke="#ff7300" strokeWidth={3} dot={{ r: 4 }} />
-                                                    </LineChart>
-                                                </ResponsiveContainer>
+                                            <h6 className="fw-bold text-center mb-3">Índices de envejecimiento y dependencia</h6>
+                                            <ResponsiveContainer width="100%" height={300}>
+                                                <LineChart data={indicesData}>
+                                                <defs>
+                                                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#000842" />
+                                                    <stop offset="25%" stopColor="#32418f" />
+                                                    <stop offset="50%" stopColor="#5460b9" />
+                                                    <stop offset="75%" stopColor="#8792da" />
+                                                    <stop offset="100%" stopColor="#b6c3f3" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid stroke="#e6e6e6" strokeDasharray="3 3" />
+                                                <XAxis 
+                                                    dataKey="name" 
+                                                    tick={{ fill: '#444', fontSize: 12 }} 
+                                                    axisLine={false} 
+                                                    tickLine={false} 
+                                                />
+                                                <YAxis 
+                                                    tick={{ fill: '#444', fontSize: 12 }} 
+                                                    axisLine={false} 
+                                                    tickLine={false} 
+                                                />
+                                                <Tooltip 
+                                                    contentStyle={{ 
+                                                    backgroundColor: '#fff', 
+                                                    border: '1px solid #ccc', 
+                                                    borderRadius: 6, 
+                                                    fontSize: 12 
+                                                    }} 
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="value" 
+                                                    stroke="url(#lineGradient)" 
+                                                    strokeWidth={3} 
+                                                    dot={{ r: 4, stroke: '#5460b9', strokeWidth: 2, fill: '#fff' }} 
+                                                />
+                                                </LineChart>
+                                            </ResponsiveContainer>
                                             </div>
                                         </>
                                     )}
