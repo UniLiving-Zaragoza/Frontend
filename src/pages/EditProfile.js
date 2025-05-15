@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Container, Button, Form, Row, Col, Alert, Spinner } from "react-bootstrap";
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from "../components/CustomNavbar";
 import Accordion from 'react-bootstrap/Accordion';
@@ -21,10 +21,14 @@ const barriosZaragoza = [
 const EditProfile = () => {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const userId = user && user.id;
+    
+    // Verificar si hay datos del usuario desde la navegación
+    const userDataFromProfile = location.state;
 
     // Estados para gestionar los datos y la carga
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!userDataFromProfile);
     const [error, setError] = useState(null);
     const [saveError, setSaveError] = useState(null);
     const [saving, setSaving] = useState(false);
@@ -32,8 +36,48 @@ const EditProfile = () => {
     const [accordionOpen, setAccordionOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-    // Obtener datos del usuario desde la API
+    // Estado del formulario
+    const [formData, setFormData] = useState({
+        nombre: '',
+        apellidos: '',
+        edad: '',
+        genero: '',
+        descripcion: '',
+        estadoLaboral: '',
+        fumador: '',
+        mascotas: '',
+        frecuenciaVisitas: '',
+        preferenciaConvivencia: '',
+        interesesHobbies: '',
+        zonasBusqueda: ''
+    });
+
+    // Inicializar el formulario con los datos del usuario
+    const initFormDataFromUserData = useCallback((userData) => {
+        setFormData({
+            nombre: userData.firstName || '',
+            apellidos: userData.lastName || '',
+            edad: userData.age || '',
+            genero: mapearGenero(userData.gender, 'toSpanish') || '',
+            descripcion: userData.personalDescription || '',
+            estadoLaboral: mapearEstadoLaboral(userData.personalSituation?.employmentStatus, 'toSpanish') || '',
+            fumador: userData.personalSituation?.smoker ? 'Sí' : 'No',
+            mascotas: userData.personalSituation?.pets ? 'Sí' : 'No',
+            frecuenciaVisitas: mapearFrecuenciaVisitas(userData.personalSituation?.visitFrequency, 'toSpanish') || '',
+            preferenciaConvivencia: mapearPreferenciaConvivencia(userData.personalSituation?.livingPreference, 'toSpanish') || '',
+            interesesHobbies: userData.personalSituation?.hobbiesInterests?.join(', ') || '',
+            zonasBusqueda: userData.personalSituation?.zones?.length > 0 ? barriosZaragoza[0] : ''
+        });
+    }, []);
+
+    // Obtener datos del usuario si se han enviado y sino desde la API 
     useEffect(() => {
+        if (userDataFromProfile) {
+            initFormDataFromUserData(userDataFromProfile);
+            return;
+        }
+
+        // Si no hay datos pasados desde el perfil, obtenerlos de la API
         const fetchUserData = async () => {
             try {
                 if (!userId) {
@@ -56,21 +100,7 @@ const EditProfile = () => {
                 });
                 
                 // Inicializar el formulario con los datos del usuario
-                setFormData({
-                    nombre: response.data.firstName || '',
-                    apellidos: response.data.lastName || '',
-                    edad: response.data.age || '',
-                    genero: mapearGenero(response.data.gender, 'toSpanish') || '',
-                    descripcion: response.data.personalDescription || '',
-                    estadoLaboral: mapearEstadoLaboral(response.data.personalSituation?.employmentStatus, 'toSpanish') || '',
-                    fumador: response.data.personalSituation?.smoker ? 'Sí' : 'No',
-                    mascotas: response.data.personalSituation?.pets ? 'Sí' : 'No',
-                    frecuenciaVisitas: mapearFrecuenciaVisitas(response.data.personalSituation?.visitFrequency, 'toSpanish') || '',
-                    preferenciaConvivencia: mapearPreferenciaConvivencia(response.data.personalSituation?.livingPreference, 'toSpanish') || '',
-                    interesesHobbies: response.data.personalSituation?.hobbiesInterests?.join(', ') || '',
-                    zonasBusqueda: response.data.personalSituation?.zones?.length > 0 ? barriosZaragoza[0] : ''
-                });
-                
+                initFormDataFromUserData(response.data);
                 setLoading(false);
             } catch (error) {
                 console.error("Error al obtener datos del usuario:", error);
@@ -80,23 +110,7 @@ const EditProfile = () => {
         };
 
         fetchUserData();
-    }, [userId, navigate, logout]);
-
-    // Estado del formulario
-    const [formData, setFormData] = useState({
-        nombre: '',
-        apellidos: '',
-        edad: '',
-        genero: '',
-        descripcion: '',
-        estadoLaboral: '',
-        fumador: '',
-        mascotas: '',
-        frecuenciaVisitas: '',
-        preferenciaConvivencia: '',
-        interesesHobbies: '',
-        zonasBusqueda: ''
-    });
+    }, [userId, navigate, logout, userDataFromProfile, initFormDataFromUserData]);
 
     // Funciones para mapear valores entre el frontend (español) y el backend (inglés)
     const mapearGenero = (valor, direccion) => {

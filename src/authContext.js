@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
+// HACERLO TODO CON sessionStorage HACE QUE AL RECARGAR O AÑADIR UNA URL A MANO SE BORRE LA SESIÓN
+// PARA EVITAR ESTO SE PUEDE USAR localStorega PERO PUEDE DAR LUGAR A MÁS PROBLEMAS Y FALLAS DE SEGURIDAD
+
 const AuthContext = createContext();
 
 // Función para decodificar el token JWT
