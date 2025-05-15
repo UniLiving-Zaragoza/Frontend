@@ -40,7 +40,12 @@ function IndexRoutes() {
       <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} /> {/* Igual no hay que protegerla para admin ya que cambia en función del rol guardado */}
 
       {/* Páginas con login necesario */}
-      <Route path="/perfil/:id" element={ // No creo que acceder con el id sea lo más seguro, en la propia página se podrían sacar los datos con el id guardado en la sesión
+      <Route path="/perfil" element={
+        <PrivateRoute>
+          <ProfilePage />
+        </PrivateRoute>
+      } />
+      <Route path="/perfil/:id" element={
         <PrivateRoute>
           <ProfilePage />
         </PrivateRoute>

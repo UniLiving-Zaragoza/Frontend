@@ -54,6 +54,7 @@ const ProfilePage = () => {
 
                 const token = sessionStorage.getItem('authToken');
                 if (!token) {
+                    await logout();
                     navigate('/login');
                     return;
                 }
@@ -74,7 +75,7 @@ const ProfilePage = () => {
         };
 
         fetchUserData();
-    }, [userId, navigate]);
+    }, [userId, navigate, logout]);
 
     // Cerrar sesión
     const handleCloseSession = async () => {
@@ -350,7 +351,6 @@ const ProfilePage = () => {
                             // Actualizar el userData localmente para reflejar el cambio sin recargar
                             setUserData({...userData, profilePicture: newImageUrl});
                             handleCloseImageModal();
-                            alert("Foto de perfil actualizada correctamente");
                         } catch (error) {
                             console.error("Error al actualizar la foto de perfil:", error);
                             alert("Error al actualizar la foto de perfil");

@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 
-function CustomModal({ title, currentPhoto, confirmButtonText, onSave, show, onHide }) {
+function CustomModal({ title, confirmButtonText, onSave, show, onHide }) {
     const [newPhoto, setNewPhoto] = useState('');
 
     const handleSave = () => {
@@ -20,13 +20,6 @@ function CustomModal({ title, currentPhoto, confirmButtonText, onSave, show, onH
             </Modal.Header>
 
             <Modal.Body>
-                <div className="mb-3">
-                    <strong>Foto de perfil actual:</strong>
-                    <div className="text-center mt-2">
-                        <img src={currentPhoto} alt="Foto actual" className="rounded" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
-                    </div>
-                </div>
-
                 <div className="mb-3">
                     <strong>Nueva foto de perfil:</strong>
                     <Form.Control

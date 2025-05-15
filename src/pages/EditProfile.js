@@ -92,7 +92,7 @@ const EditProfile = () => {
 
     const handleSaveChanges = () => {
         console.log("Cambios guardados", formData);
-        navigate("/perfil/1");
+        navigate("/perfil");
         handleCloseModal();
     };
 
@@ -332,7 +332,7 @@ const EditProfile = () => {
                                     className="rounded-pill px-4 mx-2"
                                     style={{ width: '200px', borderColor: '#000000' }}
                                     as={Link}
-                                    to="/perfil/1"
+                                    to="/perfil"
                                 >
                                     Cancelar
                                 </Button>

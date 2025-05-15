@@ -53,7 +53,7 @@ const CustomNavbar = () => {
 
         <Form className="d-flex ps-3 ps-lg-0">
           {isAuthenticated ? (
-            <Link to="/perfil/1" className="d-flex align-items-center" //Seria perfil/{userId}
+            <Link to="/perfil" className="d-flex align-items-center"
             >
               <div
                 style={{
