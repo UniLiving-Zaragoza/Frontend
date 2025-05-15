@@ -241,7 +241,7 @@ function RegisterGoogle() {
       lastName: formData.apellidos,
       age: age,
       gender: gender,
-      personalDescription: formData.descripcion || "No description provided",
+      personalDescription: formData.descripcion || "No se ha proporcionado una descripción",
       email: googleProfile.email,
       password: formData.password,
       // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
