@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 
-function CustomModal({ title, confirmButtonText, onSave, show, onHide }) {
+function CustomModal({ title, confirmButtonText, onSave, show, onHide, imageUrl }) {
     const [newPhoto, setNewPhoto] = useState('');
+
+    useEffect(() => {
+        if (show) {
+            setNewPhoto(imageUrl || '');
+        }
+    }, [show, imageUrl]);
 
     const handleSave = () => {
         if (onSave) {
@@ -24,6 +30,7 @@ function CustomModal({ title, confirmButtonText, onSave, show, onHide }) {
                     <strong>Nueva foto de perfil:</strong>
                     <Form.Control
                         type="text"
+                        className="mt-2"
                         placeholder="Introduce el enlace de la nueva foto"
                         value={newPhoto}
                         onChange={(e) => setNewPhoto(e.target.value)}

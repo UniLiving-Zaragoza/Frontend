@@ -335,7 +335,7 @@ const ProfilePage = () => {
                     show={showImageModal}
                     onHide={handleCloseImageModal}
                     title="Cambiar Foto de Perfil"
-                    imageUrl={userData?.profilePicture || "https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"}
+                    imageUrl={userData?.profilePicture}
                     confirmButtonText="Guardar Cambios"
                     onSave={async (newImageUrl) => {
                         try {
