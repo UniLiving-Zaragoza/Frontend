@@ -197,7 +197,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
       lastName: localFormData.apellidos,
       age: age,
       gender: gender,
-      personalDescription: localFormData.descripcion || "No description provided",
+      personalDescription: localFormData.descripcion || "No se ha proporcionado una descripción",
       email: formData.email,
       password: formData.password,
       // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
