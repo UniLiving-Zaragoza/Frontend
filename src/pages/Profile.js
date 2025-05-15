@@ -226,6 +226,11 @@ const ProfilePage = () => {
                                             }
                                         </ListGroup.Item>
                                         <ListGroup.Item>
+                                            Zonas de búsqueda: {userData?.personalSituation?.zones?.length > 0 ? 
+                                                userData.personalSituation.zones.map(zone => zone.name).join(", ") : 
+                                                "No especificadas"}
+                                        </ListGroup.Item>
+                                        <ListGroup.Item>
                                             Intereses y hobbies: {userData?.personalSituation?.hobbiesInterests?.join(", ") || "No especificados"}
                                         </ListGroup.Item>
                                     </ListGroup>
