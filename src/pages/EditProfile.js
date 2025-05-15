@@ -316,6 +316,7 @@ const EditProfile = () => {
                                         value={formData.nombre}
                                         onChange={handleChange}
                                         isInvalid={!!errors.nombre}
+                                        disabled={saving}
                                     />
                                     <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
                                 </Form.Group>
@@ -329,6 +330,7 @@ const EditProfile = () => {
                                         value={formData.apellidos}
                                         onChange={handleChange}
                                         isInvalid={!!errors.apellidos}
+                                        disabled={saving}
                                     />
                                     <Form.Control.Feedback type="invalid">{errors.apellidos}</Form.Control.Feedback>
                                 </Form.Group>
@@ -347,6 +349,7 @@ const EditProfile = () => {
                                         isInvalid={!!errors.edad}
                                         min="18"
                                         max="100"
+                                        disabled={saving}
                                     />
                                     <Form.Control.Feedback type="invalid">{errors.edad}</Form.Control.Feedback>
                                 </Form.Group>
@@ -358,6 +361,7 @@ const EditProfile = () => {
                                         value={formData.genero}
                                         onChange={handleChange}
                                         isInvalid={!!errors.genero}
+                                        disabled={saving}
                                     >
                                         <option value="">Selecciona tu género</option>
                                         <option value="Masculino">Masculino</option>
@@ -378,6 +382,7 @@ const EditProfile = () => {
                                 onChange={handleChange}
                                 isInvalid={!!errors.descripcion}
                                 rows={4}
+                                disabled={saving}
                             />
                             <Form.Control.Feedback type="invalid">{errors.descripcion}</Form.Control.Feedback>
                         </Form.Group>
@@ -394,6 +399,7 @@ const EditProfile = () => {
                                                     value={formData.mascotas}
                                                     onChange={handleChange}
                                                     isInvalid={!!errors.mascotas}
+                                                    disabled={saving}
                                                 >
                                                     <option value="">Selecciona si tienes mascotas</option>
                                                     <option value="Sí">Sí</option>
@@ -410,6 +416,7 @@ const EditProfile = () => {
                                                     value={formData.fumador}
                                                     onChange={handleChange}
                                                     isInvalid={!!errors.fumador}
+                                                    disabled={saving}
                                                 >
                                                     <option value="">Selecciona si eres fumador</option>
                                                     <option value="Sí">Sí</option>
@@ -428,6 +435,7 @@ const EditProfile = () => {
                                                     value={formData.estadoLaboral}
                                                     onChange={handleChange}
                                                     isInvalid={!!errors.estadoLaboral}
+                                                    disabled={saving}
                                                 >
                                                     <option value="">Selecciona tu estado laboral</option>
                                                     <option value="Estudiante">Estudiante</option>
@@ -446,6 +454,7 @@ const EditProfile = () => {
                                                     value={formData.preferenciaConvivencia}
                                                     onChange={handleChange}
                                                     isInvalid={!!errors.preferenciaConvivencia}
+                                                    disabled={saving}
                                                 >
                                                     <option value="">Selecciona preferencia de convivencia</option>
                                                     <option value="Solo">Solo</option>
@@ -466,6 +475,7 @@ const EditProfile = () => {
                                                     value={formData.frecuenciaVisitas}
                                                     onChange={handleChange}
                                                     isInvalid={!!errors.frecuenciaVisitas}
+                                                    disabled={saving}
                                                 >
                                                     <option value="">Selecciona cuando recibes visitas</option>
                                                     <option value="Diarias">Diarias</option>
@@ -485,6 +495,7 @@ const EditProfile = () => {
                                                     value={formData.zonasBusqueda}
                                                     onChange={handleChange}
                                                     isInvalid={!!errors.zonasBusqueda}
+                                                    disabled={saving}
                                                 >
                                                     <option value="">Selecciona la zona donde buscas piso</option>
                                                     {barriosZaragoza.map((barrio, index) => (
@@ -505,6 +516,7 @@ const EditProfile = () => {
                                                     onChange={handleChange}
                                                     placeholder="Intereses y hobbies (separados por comas)"
                                                     isInvalid={!!errors.interesesHobbies}
+                                                    disabled={saving}
                                                 />
                                                 <Form.Control.Feedback type="invalid">{errors.interesesHobbies}</Form.Control.Feedback>
                                             </Form.Group>
@@ -528,6 +540,7 @@ const EditProfile = () => {
                                     style={{ width: '200px', borderColor: '#000000' }}
                                     as={Link}
                                     to="/perfil"
+                                    disabled={saving}
                                 >
                                     Cancelar
                                 </Button>
