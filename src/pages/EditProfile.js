@@ -66,7 +66,7 @@ const EditProfile = () => {
             frecuenciaVisitas: mapearFrecuenciaVisitas(userData.personalSituation?.visitFrequency, 'toSpanish') || '',
             preferenciaConvivencia: mapearPreferenciaConvivencia(userData.personalSituation?.livingPreference, 'toSpanish') || '',
             interesesHobbies: userData.personalSituation?.hobbiesInterests?.join(', ') || '',
-            zonasBusqueda: userData.personalSituation?.zones?.length > 0 ? barriosZaragoza[0] : ''
+            zonasBusqueda: userData.personalSituation.zones?.length > 0 ? userData.personalSituation.zones[0] : ''
         });
     }, []);
 
@@ -256,9 +256,10 @@ const EditProfile = () => {
                     smoker: formData.fumador === 'Sí',
                     pets: formData.mascotas === 'Sí',
                     employmentStatus: mapearEstadoLaboral(formData.estadoLaboral, 'toEnglish'),
-                    visitFrequency: mapearFrecuenciaVisitas(formData.frecuenciaVisitas, 'toEnglish'),
-                    livingPreference: mapearPreferenciaConvivencia(formData.preferenciaConvivencia, 'toEnglish'),
-                    hobbiesInterests: formData.interesesHobbies.split(',').map(item => item.trim()).filter(item => item)
+                    visitFrequency: formData.frecuenciaVisitas === "" ? null : mapearFrecuenciaVisitas(formData.frecuenciaVisitas, 'toEnglish'),
+                    livingPreference: formData.preferenciaConvivencia === "" ? null : mapearPreferenciaConvivencia(formData.preferenciaConvivencia, 'toEnglish'),
+                    hobbiesInterests: formData.interesesHobbies.split(',').map(item => item.trim()).filter(item => item),
+                    zones: formData.zonasBusqueda && formData.zonasBusqueda.trim() !== '' ? [formData.zonasBusqueda] : null
                 }
             };
             
@@ -470,7 +471,7 @@ const EditProfile = () => {
                                                     isInvalid={!!errors.preferenciaConvivencia}
                                                     disabled={saving}
                                                 >
-                                                    <option value="">Selecciona preferencia de convivencia</option>
+                                                    <option value="">Sin preferencia</option>
                                                     <option value="Solo">Solo</option>
                                                     <option value="Compartido">Compartido</option>
                                                     <option value="Familiar">Familiar</option>
@@ -491,7 +492,7 @@ const EditProfile = () => {
                                                     isInvalid={!!errors.frecuenciaVisitas}
                                                     disabled={saving}
                                                 >
-                                                    <option value="">Selecciona cuando recibes visitas</option>
+                                                    <option value="">Sin preferencia</option>
                                                     <option value="Diarias">Diarias</option>
                                                     <option value="Semanales">Semanales</option>
                                                     <option value="Mensuales">Mensuales</option>
@@ -511,7 +512,7 @@ const EditProfile = () => {
                                                     isInvalid={!!errors.zonasBusqueda}
                                                     disabled={saving}
                                                 >
-                                                    <option value="">Selecciona la zona donde buscas piso</option>
+                                                    <option value="">Sin preferencia</option>
                                                     {barriosZaragoza.map((barrio, index) => (
                                                         <option key={index} value={barrio}>{barrio}</option>
                                                     ))}

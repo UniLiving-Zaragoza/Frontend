@@ -215,20 +215,18 @@ const ProfilePage = () => {
                                                 userData?.personalSituation?.visitFrequency === "Daily" ? "Diaria" :
                                                 userData?.personalSituation?.visitFrequency === "Weekly" ? "Semanal" :
                                                 userData?.personalSituation?.visitFrequency === "Monthly" ? "Mensual" :
-                                                userData?.personalSituation?.visitFrequency === "Occasional" ? "Ocasional" : "Nunca"
+                                                userData?.personalSituation?.visitFrequency === "Occasional" ? "Ocasional" : "Sin preferencia"
                                             }
                                         </ListGroup.Item>
                                         <ListGroup.Item>
                                             Preferencia de convivencia: {
                                                 userData?.personalSituation?.livingPreference === "Alone" ? "Solo" :
                                                 userData?.personalSituation?.livingPreference === "Shared" ? "Compartido" :
-                                                userData?.personalSituation?.livingPreference === "Family" ? "Con familia" : "Otro"
+                                                userData?.personalSituation?.livingPreference === "Family" ? "Con familia" : "Sin preferencia"
                                             }
                                         </ListGroup.Item>
                                         <ListGroup.Item>
-                                            Zonas de búsqueda: {userData?.personalSituation?.zones?.length > 0 ? 
-                                                userData.personalSituation.zones.map(zone => zone.name).join(", ") : 
-                                                "No especificadas"}
+                                            Zonas de búsqueda: {userData?.personalSituation?.zones?.length > 0 ? userData.personalSituation.zones.join(', ')  : "Sin preferencia"}
                                         </ListGroup.Item>
                                         <ListGroup.Item>
                                             Intereses y hobbies: {userData?.personalSituation?.hobbiesInterests?.join(", ") || "No especificados"}

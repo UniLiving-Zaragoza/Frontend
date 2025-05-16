@@ -208,7 +208,8 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
         employmentStatus: employmentStatus,
         livingPreference: livingPreference,
         visitFrequency: visitFrequency,
-        hobbiesInterests: hobbiesInterests
+        hobbiesInterests: hobbiesInterests,
+        zones: localFormData.zonasBusqueda && localFormData.zonasBusqueda.trim() !== '' ? [localFormData.zonasBusqueda] : null
       }
     };
   };
@@ -478,7 +479,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           isInvalid={!!errors.preferenciaConvivencia}
                           disabled={isFormDisabled}
                         >
-                          <option value="">Selecciona preferecia de convivencia</option>
+                          <option value="">Sin preferencia</option>
                           <option value="Solo">Solo</option>
                           <option value="Compartido">Compartido</option>
                           <option value="Familiar">Familiar</option>
@@ -500,7 +501,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           isInvalid={!!errors.frecuenciaVisitas}
                           disabled={isFormDisabled}
                         >
-                          <option value="">Selecciona cuando recibes visitas</option>
+                          <option value="">Sin preferencia</option>
                           <option value="Diarias">Diarias</option>
                           <option value="Semanales">Semanales</option>
                           <option value="Mensuales">Mensuales</option>
@@ -521,7 +522,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                           isInvalid={!!errors.zonasBusqueda}
                           disabled={isFormDisabled}
                         >
-                          <option value="">Selecciona la zona donde buscas piso</option>
+                          <option value="">Sin preferencia</option>
                           {barriosZaragoza.map((barrio, index) => (
                             <option key={index} value={barrio}>{barrio}</option>
                           ))}
