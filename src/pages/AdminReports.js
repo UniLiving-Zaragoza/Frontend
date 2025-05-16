@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Container } from 'react-bootstrap';
+import { BsTrash3Fill } from "react-icons/bs";
+import { useAuth } from "../authContext";
 import CustomNavbar from '../components/CustomNavbar';
 import ChatComponent from "../components/ChatComponent";
-import { BsTrash3Fill } from "react-icons/bs";
 import CustomModal from "../components/CustomModal";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const ChatReports = () => {
     const [selectedUser, setSelectedUser] = useState(null);
@@ -17,7 +18,7 @@ const ChatReports = () => {
 
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
-    const isAdmin = sessionStorage.getItem("isAdmin");
+    const { isAdmin } = useAuth();
 
     let messages = [
         {
@@ -79,7 +80,7 @@ const ChatReports = () => {
     ];
 
     // Modificar los ids directamente si el usuario es admin
-    if (isAdmin === "true") {
+    if (isAdmin) {
         messages = messages.map(msg => msg.id === 1 ? { ...msg, id: 999 } : msg);
     }
 
@@ -115,7 +116,7 @@ const ChatReports = () => {
 
     return (
         <div className="App">
-            {isAdmin === "true" ? <CustomNavbarAdmin /> : <CustomNavbar />}
+            {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container className="text-center mt-5">
                 <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
                     <strong>Mensajes reportados</strong>

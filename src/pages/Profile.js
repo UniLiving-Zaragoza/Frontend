@@ -1,29 +1,36 @@
-import React, { useState } from "react";
-import { Container, Button, Card, Row, Col, ListGroup } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Button, Card, Row, Col, Spinner, Alert } from "react-bootstrap";
+import { FaBriefcase, FaSmoking, FaPaw, FaUsers, FaMapMarkerAlt, FaHeart } from 'react-icons/fa';
+import { MdHome } from 'react-icons/md';
 import { PencilSquare } from "react-bootstrap-icons";
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from "../components/CustomNavbar";
-import Accordion from 'react-bootstrap/Accordion';
 import CustomModal from "../components/CustomModal";
 import Newimage from "../components/CustomModalPicture";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
+import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../css/Perfil.css";
 
+const API_URL = 'https://uniliving-backend.onrender.com';
 
 const ProfilePage = () => {
-    const { id } = useParams();
+    const { logout, isAdmin, user } = useAuth();
+    const navigate = useNavigate();
 
+    // Estados para los modales
     const [showModal, setShowModal] = useState(false);
     const [showDissable, setShowDissable] = useState(false);
     const [showEnable, setShowEnable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
 
-    const { logout } = useAuth();
+    // Estados para gestionar los datos del usuario y la carga
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const navigate = useNavigate();
-
+    // Funciones para los modales
     const handleShowModal = () => setShowModal(true);
     const handleShowDissable = () => setShowDissable(true);
     const handleShowEnable = () => setShowEnable(true);
@@ -33,83 +40,123 @@ const ProfilePage = () => {
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
 
+    // ID de usuario
+    const userId = user && user.id;
+
+    // Obtener datos del usuario desde la API
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                if (!userId) {
+                    setError("No se pudo identificar al usuario");
+                    setLoading(false);
+                    return;
+                }
+
+                const token = sessionStorage.getItem('authToken');
+                if (!token) {
+                    await logout();
+                    navigate('/login');
+                    return;
+                }
+
+                const response = await axios.get(`${API_URL}/user/${userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                setUserData(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error al obtener datos del usuario:", error);
+                setError("Error al cargar los datos del usuario. Por favor, inténtalo de nuevo más tarde.");
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, [userId, navigate, logout]);
+
+    // Cerrar sesión
     const handleCloseSession = async () => {
         await logout();
         navigate('/');
         handleCloseModal();
     }
 
+    // Deshabilitar usuario (para admin)
     const handleDissableUser = () => {
         console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
         navigate(-1); // Volver a la página anterior
         handleCloseModal();
     }
 
+    // Habilitar usuario (para admin)
     const handleEnableUser = () => {
         console.log("Habilitar cuenta de usuario"); // Cambiar a habilitar en el backend
         navigate(-1); // Volver a la página anterior
         handleCloseModal();
     }
 
+    // Navegar a la página de edición de perfil
     const handleEditClick = () => {
-        // Enviar los datos de "data" al hacer clic en "Modificar Perfil"
         navigate("/editar-perfil", {
-            state: data
+            state: userData
         });
     };
 
-    const data = {
-        nombre: "Laura",
-        apellidos: "González",
-        edad: 28,
-        paisNacimiento: "Colombia",
-        genero: "Femenino",
-        estadoLaboral: "Trabajando jornada completa",
-        fumador: "No",
-        duracionEstancia: "Indefinida",
-        mascotas: "No",
-        frecuenciaVisitas: "Mensual",
-        zonasBusqueda: "Actur, Las fuentes",
-        preferenciaConvivencia: "Poco ruido",
-        interesesHobbies: "Deportes, Viajar",
-        deshabilitado: (id % 2 !== 0),
-        textoPerfil: `
-          Hola, soy Laura González, tengo 28 años y trabajo como diseñadora UX/UI en una startup tecnológica.
-          Actualmente estoy buscando un piso en Madrid, preferiblemente en una zona bien conectada con el centro,
-          ya que trabajo en remoto tres días a la semana y necesito un espacio cómodo para ello.
-      
-          Busco un piso con una habitación independiente, buena iluminación natural y, si es posible, un pequeño
-          espacio de trabajo. Me gustaría que estuviera en un barrio tranquilo, pero con acceso a cafeterías,
-          gimnasios y transporte público.
-      
-          Mi presupuesto máximo es de 1.000 euros al mes y, aunque prefiero vivir sola, estoy abierta a compartir
-          piso si encuentro compañeros con los que me sienta cómoda. También me interesa que el piso tenga buena
-          conexión a internet y, si es posible, que esté amueblado.
-      
-          Si conoces algún piso que encaje con lo que busco, ¡me encantaría saber más!
-        `
-    };
+    // Renderizar spinner mientras se cargan los datos
+    if (loading) {
+        return (
+            <div className="App">
+                {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
+                <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "70vh" }}>
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Cargando...</span>
+                    </Spinner>
+                </Container>
+            </div>
+        );
+    }
+
+    // Renderizar mensaje de error si hay algún problema
+    if (error) {
+        return (
+            <div className="App">
+                {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
+                <Container className="mt-4">
+                    <Alert variant="danger">
+                        {error}
+                    </Alert>
+                </Container>
+            </div>
+        );
+    }
+
+    // Renderizar la página de perfil con los datos del usuario
     return (
         <div className="App">
-            {sessionStorage.getItem("isAdmin") === "true" && (
+            {isAdmin && (
                 <CustomNavbarAdmin />
             )}
-            {sessionStorage.getItem("isAdmin") !== "true" && (
+            {!isAdmin && (
                 <CustomNavbar />
             )}
             <Container className="mt-4">
                 {/* Cabecera */}
-                <Row className="d-flex justify-content-center text-center">
-                    <Col xs={12} md={6} className="d-flex align-items-center">
+                <Row className="justify-content-center text-center">
+                    <Col xs="auto">
+                        <div className="d-flex flex-column flex-md-row align-items-center justify-content-center">
                         <div className="position-relative">
                             <img
-                                src="https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"
+                                src={userData?.profilePicture || "https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg"}
                                 alt="Perfil"
                                 className="rounded-circle img-fluid"
-                                style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                                style={{ width: "140px", height: "140px", objectFit: "cover", border: "2px solid #000842" }}
                             />
                             {/* Icono de edición */}
-                            {id === "1" && (  //Deberia ser si Userid === ID
+                            {user && user.id === userId && (
                                 <PencilSquare
                                     className="position-absolute bg-light text-dark p-1 rounded-circle shadow"
                                     style={{
@@ -123,56 +170,127 @@ const ProfilePage = () => {
                                 />
                             )}
                         </div>
-                        <div className="text-start ms-3">
-                            <h4>{data.nombre} {data.apellidos}</h4>
+                        <div className="ms-md-5 mt-3 mt-md-0 text-md-start text-center">
+                            <h4>{userData?.firstName} {userData?.lastName}</h4>
                             <p>
-                                Género: {data.genero} | Edad: {data.edad} | País de nacimiento: {data.paisNacimiento}
+                                Género: {userData?.gender === "Male" ? "Masculino" : userData?.gender === "Female" ? "Femenino" : "Otro"} | Edad: {userData?.age}
                             </p>
+                        </div>
                         </div>
                     </Col>
                 </Row>
 
-                {/* Cuadro de Texto Central */}
-                <Row className="justify-content-center mt-4">
+                {/* Descripción personal */}
+                <Row className="justify-content-center mt-5">
                     <Col md={10}>
                         <Card className="p-3 text-center mb-4">
-                            <Card.Text> {data.textoPerfil.split('\n').map((line, index) => (
-                                <span key={index}>
-                                    {line}
-                                    <br />
-                                </span>
-                            ))}
+                            <Card.Text> 
+                                {userData?.personalDescription.split('\n').map((line, index) => (
+                                    <span key={index}>
+                                        {line}
+                                        <br />
+                                    </span>
+                                ))}
                             </Card.Text>
                         </Card>
                     </Col>
                 </Row>
 
-                <Row className="justify-content-center">
+               <Row className="justify-content-center mt-4">
                     <Col md={10}>
-                        <Accordion className="mt-3">
-                            <Accordion.Item eventKey="0">
-                                <Accordion.Header>Situación personal</Accordion.Header>
-                                <Accordion.Body>
-                                    <ListGroup className="custom-list">
-                                        <ListGroup.Item>Estado laboral: {data.estadoLaboral}</ListGroup.Item>
-                                        <ListGroup.Item>Fumador: {data.fumador}</ListGroup.Item>
-                                        <ListGroup.Item>Duración de la estancia: {data.duracionEstancia}</ListGroup.Item>
-                                        <ListGroup.Item>Mascotas: {data.mascotas}</ListGroup.Item>
-                                        <ListGroup.Item>Frecuencia de visitas: {data.frecuenciaVisitas}</ListGroup.Item>
-                                        <ListGroup.Item>Zonas de búsqueda: {data.zonasBusqueda}</ListGroup.Item>
-                                        <ListGroup.Item>Preferencia de convivencia: {data.preferenciaConvivencia}</ListGroup.Item>
-                                        <ListGroup.Item>Intereses y hobbies: {data.interesesHobbies}</ListGroup.Item>
-                                    </ListGroup>
-                                </Accordion.Body>
-                            </Accordion.Item>
-                        </Accordion>
+                        <h5 className="mb-3">Situación Personal</h5>
+                        <Card className="p-4 shadow-sm rounded-4">
+
+                        {/* Fila 1 */}
+                        <Row className="mb-1">
+                            <Col md={4}>
+                            <FaBriefcase className="me-2 text-primary" />
+                            <strong>Estado laboral:</strong>{' '}
+                            {
+                                userData?.personalSituation?.employmentStatus === 'Employed'
+                                ? 'Trabajando'
+                                : userData?.personalSituation?.employmentStatus === 'Student'
+                                ? 'Estudiante'
+                                : userData?.personalSituation?.employmentStatus === 'Unemployed'
+                                ? 'Desempleado'
+                                : 'Otro'
+                            }
+                            </Col>
+                            <Col md={4}>
+                            <FaSmoking className="me-2 text-danger" />
+                            <strong>Fumador:</strong>{' '}
+                            {userData?.personalSituation?.smoker ? 'Sí' : 'No'}
+                            </Col>
+                            <Col md={4}>
+                            <FaPaw className="me-2 text-warning" />
+                            <strong>Mascotas:</strong>{' '}
+                            {userData?.personalSituation?.pets ? 'Sí' : 'No'}
+                            </Col>
+                        </Row>
+                        <hr />
+
+                        {/* Fila 2 */}
+                        <Row className="mb-1">
+                            <Col md={4}>
+                            <FaUsers className="me-2 text-info" />
+                            <strong>Visitas:</strong>{' '}
+                            {
+                                userData?.personalSituation?.visitFrequency === 'Daily'
+                                ? 'Diaria'
+                                : userData?.personalSituation?.visitFrequency === 'Weekly'
+                                ? 'Semanal'
+                                : userData?.personalSituation?.visitFrequency === 'Monthly'
+                                ? 'Mensual'
+                                : userData?.personalSituation?.visitFrequency === 'Occasional'
+                                ? 'Ocasional'
+                                : 'Sin preferencia'
+                            }
+                            </Col>
+                            <Col md={4}>
+                            <MdHome className="me-2 text-success" />
+                            <strong>Convivencia:</strong>{' '}
+                            {
+                                userData?.personalSituation?.livingPreference === 'Alone'
+                                ? 'Solo'
+                                : userData?.personalSituation?.livingPreference === 'Shared'
+                                ? 'Compartido'
+                                : userData?.personalSituation?.livingPreference === 'Family'
+                                ? 'Con familia'
+                                : 'Sin preferencia'
+                            }
+                            </Col>
+                            <Col md={4}>
+                            <FaMapMarkerAlt className="me-2 text-secondary" />
+                            <strong>Zonas de búsqueda:</strong>{' '}
+                            {
+                                userData?.personalSituation?.zones?.length > 0
+                                ? userData.personalSituation.zones.join(', ')
+                                : 'Sin preferencia'
+                            }
+                            </Col>
+                        </Row>
+                        <hr />
+
+                        {/* Fila 3 */}
+                        <Row>
+                            <Col>
+                            <FaHeart className="me-2 text-danger" />
+                            <strong>Intereses y hobbies:</strong>{' '}
+                            {
+                                userData?.personalSituation?.hobbiesInterests?.length > 0
+                                ? userData.personalSituation.hobbiesInterests.join(', ')
+                                : 'No especificados'
+                            }
+                            </Col>
+                        </Row>
+                        </Card>
                     </Col>
                 </Row>
 
-                {/* Botones Inferiores */}
-                {id === "1" && (   //Deberia ser si Userid === ID
+                {/* Botones para usuario viendo su propio perfil */}
+                {user && user.id === userId && (
                     <>
-                        <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                        <Row className="mt-5 d-flex justify-content-center mb-4 gap-3">
                             <Col xs={12} md="auto" className="d-flex justify-content-center">
                                 <Button
                                     variant="danger"
@@ -208,52 +326,50 @@ const ProfilePage = () => {
                     </>
                 )}
 
-                {/* Botón de deshabilitar o habilitar dependiendo del estado de deshabilitado */}
-                {(data.deshabilitado === false || !data.deshabilitado) && sessionStorage.getItem("isAdmin") === "true" && (
+                {/* Botones de admin para habilitar/deshabilitar */}
+                {isAdmin && userData && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
-                            <Button
-                                variant="danger"
-                                className="rounded-pill px-4 mx-2"
-                                style={{ width: '200px' }}
-                                onClick={handleShowDissable}
-                            >
-                                Deshabilitar cuenta
-                            </Button>
+                            {userData.status !== "Disabled" ? (
+                                <Button
+                                    variant="danger"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px' }}
+                                    onClick={handleShowDissable}
+                                >
+                                    Deshabilitar cuenta
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="success"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px', backgroundColor: "#000842" }}
+                                    onClick={handleShowEnable}
+                                >
+                                    Habilitar cuenta
+                                </Button>
+                            )}
                         </Col>
                     </Row>
                 )}
-
-                {data.deshabilitado === true && sessionStorage.getItem("isAdmin") === "true" && (
-                    <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
-                        <Col xs={12} md="auto" className="d-flex justify-content-center">
-                            <Button
-                                variant="success"
-                                className="rounded-pill px-4 mx-2"
-                                style={{ width: '200px', backgroundColor: "#000842" }}
-                                onClick={handleShowEnable}
-                            >
-                                Habilitar cuenta
-                            </Button>
-                        </Col>
-                    </Row>
-                )}
+                
                 <div style={{ marginBottom: '30px' }}></div>
-                {/* Usar el CustomModal */}
+                
+                {/* Modales */}
                 <CustomModal
-                    show={showModal}               // Controlar la visibilidad
-                    onHide={handleCloseModal}      // Función para cerrar el modal
-                    title="Cerrar Sesión"       // Título del modal
-                    bodyText="¿Quieres cerrar sesión?"  // Cuerpo del modal
-                    confirmButtonText="Cerrar Sesión"    // Texto del botón de confirmar
-                    onSave={handleCloseSession}     // Acción que se ejecuta al guardar
+                    show={showModal}
+                    onHide={handleCloseModal}
+                    title="Cerrar Sesión"
+                    bodyText="¿Quieres cerrar sesión?"
+                    confirmButtonText="Cerrar Sesión"
+                    onSave={handleCloseSession}
                 />
 
                 <CustomModal
                     show={showDissable}
                     onHide={handleCloseDissable}
-                    title={`Deshabilitar la cuenta de ${data.nombre} ${data.apellidos}`}
-                    bodyText={`Vas a deshabilitar la cuenta de ${data.nombre} ${data.apellidos}, no podrá volver a acceder a ella ¿Continuar?`}  // Cuerpo del modal
+                    title={`Deshabilitar la cuenta de ${userData?.firstName} ${userData?.lastName}`}
+                    bodyText={`Vas a deshabilitar la cuenta de ${userData?.firstName} ${userData?.lastName}, no podrá volver a acceder a ella ¿Continuar?`}
                     confirmButtonText="Deshabilitar"
                     onSave={handleDissableUser}
                 />
@@ -261,8 +377,8 @@ const ProfilePage = () => {
                 <CustomModal
                     show={showEnable}
                     onHide={handleCloseEnable}
-                    title={`Habilitar la cuenta de ${data.nombre} ${data.apellidos}`}
-                    bodyText={`Vas a habilitar la cuenta de ${data.nombre} ${data.apellidos}, podrá volver a acceder a ella ¿Continuar?`}  // Cuerpo del modal
+                    title={`Habilitar la cuenta de ${userData?.firstName} ${userData?.lastName}`}
+                    bodyText={`Vas a habilitar la cuenta de ${userData?.firstName} ${userData?.lastName}, podrá volver a acceder a ella ¿Continuar?`}
                     confirmButtonText="Habilitar"
                     onSave={handleEnableUser}
                 />
@@ -271,9 +387,27 @@ const ProfilePage = () => {
                     show={showImageModal}
                     onHide={handleCloseImageModal}
                     title="Cambiar Foto de Perfil"
-                    imageUrl="https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"
+                    imageUrl={userData?.profilePicture}
                     confirmButtonText="Guardar Cambios"
-                    onSave={(newImage) => console.log(newImage)}
+                    onSave={async (newImageUrl) => {
+                        try {
+                            const token = sessionStorage.getItem('authToken');
+                            await axios.put(`${API_URL}/user/${userId}`, 
+                                { userId: userId, profilePicture: newImageUrl },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`
+                                    }
+                                }
+                            );
+                            // Actualizar el userData localmente para reflejar el cambio sin recargar
+                            setUserData({...userData, profilePicture: newImageUrl});
+                            handleCloseImageModal();
+                        } catch (error) {
+                            console.error("Error al actualizar la foto de perfil:", error);
+                            alert("Error al actualizar la foto de perfil");
+                        }
+                    }}
                 />
             </Container>
         </div>

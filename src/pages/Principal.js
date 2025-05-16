@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'leaflet/dist/leaflet.css';
 import { Filter, MessageCircle, RefreshCcw } from 'lucide-react';
-import InfoPiso from '../components/CustomModalHouse';
 import { MapContainer, TileLayer, ZoomControl, Marker } from 'react-leaflet';
-import L from 'leaflet';
-import CustomNavbar from '../components/CustomNavbar';
 import { Link } from 'react-router-dom';
 import { Accordion, Button, Form } from 'react-bootstrap';
+import { useAuth } from '../authContext';
+import CustomNavbar from '../components/CustomNavbar';
+import InfoPiso from '../components/CustomModalHouse';
+import L from 'leaflet';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+import 'leaflet/dist/leaflet.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const pisos = [
   {
@@ -81,6 +84,13 @@ const pisos = [
   }
 ];
 
+const barriosZaragoza = [
+  "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
+  "Miralbueno", "Oliver-Valdefierro", "Delicias", "Casco Histórico",
+  "Centro", "Las Fuentes", "Universidad", "San José",
+  "Casablanca", "Torrero-La Paz", "Sur"
+];
+
 const createIcon = (price) => {
   return L.divIcon({
     className: 'custom-icon',
@@ -93,7 +103,18 @@ const Principal = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPiso, setSelectedPiso] = useState(null);
   const [filteredPisos, setFilteredPisos] = useState(pisos);
-  const [filters, setFilters] = useState({ precio: '', tamaño: '', habitaciones: '', barrio: '' });
+  const [filters, setFilters] = useState({
+    precio: '',
+    precioMin: '',
+    tamaño: '',
+    tamañoMax: '',
+    habitaciones: '',
+    baños: '',
+    barrio: '',
+    furnished: '',
+    parking: '',
+    shared: ''
+  });
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -103,19 +124,36 @@ const Principal = () => {
     setFilteredPisos(
       pisos.filter(piso =>
         (!filters.habitaciones || piso.habitaciones === parseInt(filters.habitaciones)) &&
+        (!filters.baños || piso.baños === parseInt(filters.baños)) &&
         (!filters.barrio || piso.barrio === filters.barrio) &&
         (!filters.precio || piso.precio <= parseInt(filters.precio)) &&
-        (!filters.tamaño || piso.metros >= parseInt(filters.tamaño))
+        (!filters.precioMin || piso.precio >= parseInt(filters.precioMin)) &&
+        (!filters.tamaño || piso.metros >= parseInt(filters.tamaño)) &&
+        (!filters.tamañoMax || piso.metros <= parseInt(filters.tamañoMax)) &&
+        (!filters.furnished || piso.furnished?.toString() === filters.furnished) &&
+        (!filters.parking || piso.parking?.toString() === filters.parking) &&
+        (!filters.shared || piso.shared?.toString() === filters.shared)
       )
     );
-  };
+  };  
 
   const resetFilters = () => {
-    setFilters({ precio: '', tamaño: '', habitaciones: '', barrio: '' });
+    setFilters({
+      precio: '',
+      precioMin: '',
+      tamaño: '',
+      tamañoMax: '',
+      habitaciones: '',
+      baños: '',
+      barrio: '',
+      furnished: '',
+      parking: '',
+      shared: ''
+    });
     setFilteredPisos(pisos);
-  };
+  };  
 
-  const isAuthenticated = sessionStorage.getItem("isAuthenticated");
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="App position-relative" style={{ height: '100vh', overflow: 'hidden' }}>
@@ -143,15 +181,20 @@ const Principal = () => {
       <MapContainer
         center={[41.675, -0.889]}
         zoom={16}
+        minZoom={10}
+        maxZoom={18}
+        maxBounds={[[41.55, -1.0], [41.75, -0.75]]} 
+        maxBoundsViscosity={1.0}
         zoomControl={false}
         style={{
-          height: 'calc(100vh - 56px)',
-          width: '100%',
           position: 'absolute',
-          top: '56px',
-          zIndex: 1,
-          left: 0,
-          right: 0
+          top: '0',
+          bottom: '0',
+          left: '0',
+          right: '0',
+          height: '100%',
+          width: '100%',
+          zIndex: 1
         }}
       >
         <TileLayer
@@ -191,7 +234,19 @@ const Principal = () => {
 
       {/* Filtros */}
       {showFilters && (
-        <div className="position-absolute start-0 bg-white p-3 shadow" style={{ zIndex: 1001, top: '100px', margin: '0.5rem', left: '0' }}>
+        <div
+        className="position-absolute start-0 bg-white p-3 shadow"
+        style={{
+          zIndex: 1001,
+          top: '100px',
+          margin: '0.5rem',
+          left: '0',
+          width: '300px',
+          maxHeight: 'calc(100vh - 120px)',
+          overflowY: 'auto',
+          borderRadius: '10px'
+        }}
+        >      
           <Accordion>
             <Accordion.Item eventKey="0">
               <Accordion.Header>
@@ -199,20 +254,77 @@ const Principal = () => {
               </Accordion.Header>
               <Accordion.Body>
                 <Form>
-                  <Form.Group>
-                    <Form.Label>Precio</Form.Label>
-                    <Form.Control type="number" name="precio" value={filters.precio} onChange={handleFilterChange} placeholder="Precio máximo" />
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Label>Tamaño</Form.Label>
-                    <Form.Control type="number" name="tamaño" value={filters.tamaño} onChange={handleFilterChange} placeholder="Tamaño mínimo" />
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Label>Habitaciones</Form.Label>
-                    <Form.Control type="number" name="habitaciones" value={filters.habitaciones} onChange={handleFilterChange} placeholder="Número de habitaciones" />
-                  </Form.Group>
+
+                <Form.Group>
+                  <Form.Label>Rango de precio: {filters.precioMin || 0}€ - {filters.precio || 2500}€</Form.Label>
+                  <Slider
+                    range
+                    min={0}
+                    max={2500}
+                    step={50}
+                    defaultValue={[filters.precioMin || 0, filters.precio || 2500]}
+                    onChange={([min, max]) => setFilters({ ...filters, precioMin: min, precio: max })}
+                  />
+                </Form.Group>
+
+                <Form.Group className="mt-2">
+                  <Form.Label>Tamaño máximo</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    name="tamañoMax" 
+                    min={0}
+                    value={filters.tamañoMax} 
+                    onChange={handleFilterChange} 
+                    placeholder="Tamaño máximo (m²)" 
+                  />
+                </Form.Group>
+
+                <Form.Group className="mt-2">
+                  <Form.Label>Baños</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    name="baños" 
+                    min={0}
+                    value={filters.baños} 
+                    onChange={handleFilterChange} 
+                    placeholder="Número de baños" 
+                  />
+                </Form.Group>
+
+                <Form.Group className="mt-2">
+                  <Form.Check 
+                    type="checkbox" 
+                    id="furnished-check"
+                    name="furnished" 
+                    label="Amueblado" 
+                    checked={filters.furnished === 'true'} 
+                    onChange={(e) => setFilters({ ...filters, furnished: e.target.checked ? 'true' : '' })} 
+                  />
+                </Form.Group>
+
+                <Form.Group className="mt-1">
+                  <Form.Check 
+                    type="checkbox" 
+                    id="parking-check"
+                    name="parking" 
+                    label="Estacionamiento" 
+                    checked={filters.parking === 'true'} 
+                    onChange={(e) => setFilters({ ...filters, parking: e.target.checked ? 'true' : '' })} 
+                  />
+                </Form.Group>
+
+                <Form.Group className="mt-1">
+                  <Form.Check 
+                    type="checkbox" 
+                    id="shared-check"
+                    name="shared" 
+                    label="Compartido" 
+                    checked={filters.shared === 'true'} 
+                    onChange={(e) => setFilters({ ...filters, shared: e.target.checked ? 'true' : '' })} 
+                  />
+                </Form.Group>
+
                 </Form>
-                {/* En el futuro, añadir más filtros */}
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="1">
@@ -220,19 +332,21 @@ const Principal = () => {
                 <span style={{ marginRight: "15px" }}>Datos de la Ciudad</span>
               </Accordion.Header>
               <Accordion.Body>
-                <Form.Group>
-                  <Form.Label>Barrio</Form.Label>
-                  <Form.Select name="barrio" value={filters.barrio} onChange={handleFilterChange}>
-                    <option value="">Selecciona un barrio</option>
-                    <option value="Actur">Actur</option>
-                    <option value="Delicias">Delicias</option>
-                    <option value="Centro">Centro</option>
-                  </Form.Select>
-                </Form.Group>
-                {/* En el futuro, añadir más filtros */}
+              <Form.Group>
+                {/*HABRÍA QUE AÑADIR ALGÚN CAMPO CON LA INFORMACIÓN DE ZARAGOZA*/}
+                <Form.Label>Barrio</Form.Label>
+                <Form.Select name="barrio" value={filters.barriosZaragoza} onChange={handleFilterChange}>
+                  <option value="">Selecciona un barrio</option>
+                  {barriosZaragoza.map((barrio, index) => (
+                    <option key={index} value={barrio}>
+                      {barrio}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
               </Accordion.Body>
             </Accordion.Item>
-            <div className="d-flex justify-content-center mt-2">
+            <div className="d-flex justify-content-center mt-3">
               <Link to="/analiticas" style={{ color: 'blue', textDecoration: 'none' }}>
                 Ver datos de las zonas
               </Link>

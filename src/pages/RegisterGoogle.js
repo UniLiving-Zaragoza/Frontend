@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import Accordion from 'react-bootstrap/Accordion';
+import { Container, Form, Button, Card, Alert, Row, Col, Accordion } from 'react-bootstrap';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-function RegisterInfo({ formData, onFormChange, prevStep }) {
-
+function RegisterGoogle() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const googleProfile = location.state?.googleProfile || {};
 
   const API_URL = 'https://uniliving-backend.onrender.com';
-
-  const RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY
+  const RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
 
   const barriosZaragoza = [
     "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -20,21 +19,22 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     "Casablanca", "Torrero-La Paz", "Sur"
   ];
 
-  const [localFormData, setLocalFormData] = useState({
-    nombre: formData.nombre || '',
-    apellidos: formData.apellidos || '',
-    edad: formData.edad || '',
-    genero: formData.genero || '',
-    pais: formData.pais || '',
-    descripcion: formData.descripcion || '',
-    estadoLaboral: formData.estadoLaboral || '',
-    fumador: formData.fumador || '',
-    duracionEstancia: formData.duracionEstancia || '',
-    mascotas: formData.mascotas || '',
-    frecuenciaVisitas: formData.frecuenciaVisitas || '',
-    zonasBusqueda: formData.zonasBusqueda || '',
-    preferenciaConvivencia: formData.preferenciaConvivencia || '',
-    interesesHobbies: formData.interesesHobbies || ''
+  const [formData, setFormData] = useState({
+    nombre: googleProfile.firstName || googleProfile.name?.split(' ')[0] || '',
+    apellidos: googleProfile.lastName || googleProfile.name?.split(' ').slice(1).join(' ') || '',
+    edad: '',
+    genero: '',
+    password: '',
+    pais: '',
+    descripcion: '',
+    estadoLaboral: '',
+    fumador: '',
+    duracionEstancia: '',
+    mascotas: '',
+    frecuenciaVisitas: '',
+    zonasBusqueda: '',
+    preferenciaConvivencia: '',
+    interesesHobbies: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -43,10 +43,11 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [apiError, setApiError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-
-  // Variables para el capcha
   const [captchaValue, setCaptchaValue] = useState(null);
   const [captchaError, setCaptchaError] = useState('');
+  const [passwordFeedback, setPasswordFeedback] = useState([]);
+  
+  // Variables para el manejo de intentos fallidos del captcha
   const [attemptCount, setAttemptCount] = useState(0);
   const MAX_ATTEMPTS = 5;
   const [temporarilyBlocked, setTemporarilyBlocked] = useState(false);
@@ -58,15 +59,55 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     'apellidos',
     'edad',
     'genero',
+    'password',
     'fumador',
     'mascotas',
     'estadoLaboral'
   ];
 
+  const validatePassword = (password) => {
+    const errors = [];
+    
+    if (!password) {
+      return ['Contraseña es requerida'];
+    }
+    
+    if (password.length < 8) {
+      errors.push('Mínimo 8 caracteres');
+    }
+    
+    if (password.length > 128) {
+      errors.push('Máximo 128 caracteres');
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Debe contener al menos una mayúscula');
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.push('Debe contener al menos una minúscula');
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.push('Debe contener al menos un número');
+    }
+    
+    return errors;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'password') {
+      const passwordErrors = validatePassword(value);
+      setPasswordFeedback(passwordErrors);
+      if (passwordErrors.length > 0) {
+        setErrors(prev => ({ ...prev, password: 'La contraseña no cumple con los requisitos' }));
+      } else {
+        setErrors(prev => ({ ...prev, password: null }));
+      }
+    } else if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
@@ -74,30 +115,6 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
     setCaptchaError('');
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    requiredFields.forEach(field => {
-      if (!localFormData[field] || localFormData[field].trim() === '') {
-        newErrors[field] = 'Este campo es obligatorio';
-      }
-    });
-
-    // Verificar captcha
-    if (!captchaValue) {
-      setCaptchaError('Por favor, complete el captcha');
-      return false;
-    }
-
-    // Abrir acordeón si algún campo dentro de él tiene error
-    const accordedFields = ['estadoLaboral', 'fumador', 'mascotas', 'duracionEstancia', 'frecuenciaVisitas', 'zonasBusqueda', 'preferenciaConvivencia', 'interesesHobbies'];
-    const shouldOpenAccordion = accordedFields.some(field => newErrors[field]);
-
-    setAccordionOpen(shouldOpenAccordion);
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
   };
 
   // Función para iniciar bloqueo temporal
@@ -119,14 +136,41 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     }, 1000);
   };
 
-  const mapFormDataToApiModel = () => {
+  const validateForm = () => {
+    const newErrors = {};
+    requiredFields.forEach(field => {
+      if (!formData[field] || formData[field].trim() === '') {
+        newErrors[field] = 'Este campo es obligatorio';
+      }
+    });
 
-    const age = parseInt(localFormData.edad, 10);
-    const smoker = localFormData.fumador === 'Sí';
-    const pets = localFormData.mascotas === 'Sí';
+    // Validar contraseña
+    const passwordErrors = validatePassword(formData.password);
+    if (passwordErrors.length > 0) {
+      newErrors.password = 'La contraseña no cumple con los requisitos';
+    }
+
+    if (!captchaValue) {
+      setCaptchaError('Por favor, complete el captcha');
+      return false;
+    }
+
+    const accordedFields = ['estadoLaboral', 'fumador', 'mascotas', 'duracionEstancia', 'frecuenciaVisitas', 'zonasBusqueda', 'preferenciaConvivencia', 'interesesHobbies'];
+    const shouldOpenAccordion = accordedFields.some(field => newErrors[field]);
+
+    setAccordionOpen(shouldOpenAccordion);
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const mapFormDataToApiModel = () => {
+    const age = parseInt(formData.edad, 10);
+    const smoker = formData.fumador === 'Sí';
+    const pets = formData.mascotas === 'Sí';
     
     let gender;
-    switch(localFormData.genero) {
+    switch(formData.genero) {
       case 'Masculino':
         gender = 'Male';
         break;
@@ -138,7 +182,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     }
 
     let employmentStatus;
-    switch(localFormData.estadoLaboral) {
+    switch(formData.estadoLaboral) {
       case 'Estudiante':
         employmentStatus = 'Student';
         break;
@@ -153,7 +197,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     }
 
     let livingPreference;
-    switch(localFormData.preferenciaConvivencia) {
+    switch(formData.preferenciaConvivencia) {
       case 'Solo':
         livingPreference = 'Alone';
         break;
@@ -168,7 +212,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     }
 
     let visitFrequency;
-    switch(localFormData.frecuenciaVisitas) {
+    switch(formData.frecuenciaVisitas) {
       case 'Diarias':
         visitFrequency = 'Daily';
         break;
@@ -188,17 +232,17 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
         visitFrequency = 'Occasional';
     }
 
-    const hobbiesInterests = localFormData.interesesHobbies 
-      ? localFormData.interesesHobbies.split(',').map(item => item.trim()) 
+    const hobbiesInterests = formData.interesesHobbies 
+      ? formData.interesesHobbies.split(',').map(item => item.trim()) 
       : [];
 
     return {
-      firstName: localFormData.nombre,
-      lastName: localFormData.apellidos,
+      firstName: formData.nombre,
+      lastName: formData.apellidos,
       age: age,
       gender: gender,
-      personalDescription: localFormData.descripcion || "No se ha proporcionado una descripción",
-      email: formData.email,
+      personalDescription: formData.descripcion || "No se ha proporcionado una descripción",
+      email: googleProfile.email,
       password: formData.password,
       // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
       // captchaToken: captchaValue,
@@ -209,12 +253,12 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
         livingPreference: livingPreference,
         visitFrequency: visitFrequency,
         hobbiesInterests: hobbiesInterests,
-        zones: localFormData.zonasBusqueda && localFormData.zonasBusqueda.trim() !== '' ? [localFormData.zonasBusqueda] : null
+        zones: formData.zonasBusqueda && formData.zonasBusqueda.trim() !== '' ? [formData.zonasBusqueda] : null
       }
     };
   };
 
-  // Función para verificar el captcha en el servidor (DEMOMENTO SIMULADO) ************************************
+  // Función para verificar el captcha en el servidor (DEMOMENTO SIMULADO) **************************************
   const verifyCaptcha = async (token) => {
     try {
       // En un caso real, este endpoint verificaría el token con la API de Google
@@ -264,19 +308,17 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
       
       const response = await axios.post(`${API_URL}/user/register`, userData);
       
-      console.log('Respuesta del registro:', response.data);
+      console.log('Respuesta del registro con Google:', response.data);
       
       setRegistrationSuccess(true);
       setIsRedirecting(true);
-      
-      onFormChange(localFormData);
       
       setTimeout(() => {
         navigate("/login");
       }, 3000);
       
     } catch (error) {
-      console.error("Error durante el registro:", error);
+      console.error("Error durante el registro con Google:", error);
       
       const newAttemptCount = attemptCount + 1;
       setAttemptCount(newAttemptCount);
@@ -285,7 +327,6 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
         startTemporaryBlock();
       }
       
-      // Manejo de errores
       if (error.response) {
         if (error.response.status === 400 && error.response.data.message) {
           setApiError(error.response.data.message);
@@ -304,11 +345,6 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     }
   };
 
-  const handleGoBack = () => {
-    onFormChange(localFormData);
-    prevStep();
-  };
-
   // Determinar si los controles deben estar deshabilitados
   const isFormDisabled = isSubmitting || temporarilyBlocked || isRedirecting;
 
@@ -316,8 +352,8 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card style={{ width: '850px', maxHeight: '90vh', padding: '2rem' }} className="shadow">
         <div style={{ height: '100%', overflowY: 'auto', paddingRight: '10px' }}>
-  
-          <h3 className="text-center mb-5">Crear una cuenta</h3>
+
+          <h3 className="text-center mb-5">Completa tu información de perfil</h3>
           
           <Form onSubmit={handleSubmit} className="container">
             <Row>
@@ -328,7 +364,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     type="text"
                     placeholder="Ingresa tu nombre"
                     name="nombre"
-                    value={localFormData.nombre}
+                    value={formData.nombre}
                     onChange={handleChange}
                     isInvalid={!!errors.nombre}
                     disabled={isFormDisabled}
@@ -343,7 +379,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     type="text"
                     placeholder="Ingresa tus apellidos"
                     name="apellidos"
-                    value={localFormData.apellidos}
+                    value={formData.apellidos}
                     onChange={handleChange}
                     isInvalid={!!errors.apellidos}
                     disabled={isFormDisabled}
@@ -361,7 +397,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                     type="number"
                     placeholder="Ingresa tu edad"
                     name="edad"
-                    value={localFormData.edad}
+                    value={formData.edad}
                     onChange={handleChange}
                     isInvalid={!!errors.edad}
                     min="18"
@@ -376,7 +412,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                   <Form.Label>Género</Form.Label>
                   <Form.Select
                     name="genero"
-                    value={localFormData.genero}
+                    value={formData.genero}
                     onChange={handleChange}
                     isInvalid={!!errors.genero}
                     disabled={isFormDisabled}
@@ -391,13 +427,38 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               </Col>
             </Row>
 
+            <Form.Group className="mb-2" controlId="password">
+              <Form.Label>Contraseña</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Ingresa tu contraseña"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                isInvalid={!!errors.password}
+                disabled={isFormDisabled}
+              />
+              <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+              
+              {/* Requisitos de contraseña */}
+              {formData.password && 
+                <div className="mt-2">
+                  <ul className="small ps-4 mb-0">
+                    {passwordFeedback.map((error, index) => (
+                      <li key={index} className="text-danger">{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              }
+            </Form.Group>
+
             <Form.Group className="mb-3" controlId="descripcion">
               <Form.Label>Descripción personal</Form.Label>
               <Form.Control
                 as="textarea"
                 placeholder="Ingresa una descripción personal (mínimo 10 caracteres)"
                 name="descripcion"
-                value={localFormData.descripcion}
+                value={formData.descripcion}
                 onChange={handleChange}
                 isInvalid={!!errors.descripcion}
                 disabled={isFormDisabled}
@@ -416,7 +477,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         <Form.Label>Mascotas</Form.Label>
                         <Form.Select
                           name="mascotas"
-                          value={localFormData.mascotas}
+                          value={formData.mascotas}
                           onChange={handleChange}
                           isInvalid={!!errors.mascotas}
                           disabled={isFormDisabled}
@@ -434,7 +495,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         <Form.Label>Fumador</Form.Label>
                         <Form.Select
                           name="fumador"
-                          value={localFormData.fumador}
+                          value={formData.fumador}
                           onChange={handleChange}
                           isInvalid={!!errors.fumador}
                           disabled={isFormDisabled}
@@ -454,7 +515,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         <Form.Label>Estado Laboral</Form.Label>
                         <Form.Select
                           name="estadoLaboral"
-                          value={localFormData.estadoLaboral}
+                          value={formData.estadoLaboral}
                           onChange={handleChange}
                           isInvalid={!!errors.estadoLaboral}
                           disabled={isFormDisabled}
@@ -474,7 +535,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         <Form.Label>Preferencias de convivencia</Form.Label>
                         <Form.Select
                           name="preferenciaConvivencia"
-                          value={localFormData.preferenciaConvivencia}
+                          value={formData.preferenciaConvivencia}
                           onChange={handleChange}
                           isInvalid={!!errors.preferenciaConvivencia}
                           disabled={isFormDisabled}
@@ -496,7 +557,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         <Form.Label>Frecuencia de visitas</Form.Label>
                         <Form.Select
                           name="frecuenciaVisitas"
-                          value={localFormData.frecuenciaVisitas}
+                          value={formData.frecuenciaVisitas}
                           onChange={handleChange}
                           isInvalid={!!errors.frecuenciaVisitas}
                           disabled={isFormDisabled}
@@ -517,7 +578,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                         <Form.Label>Zona de búsqueda</Form.Label>
                         <Form.Select
                           name="zonasBusqueda"
-                          value={localFormData.zonasBusqueda}
+                          value={formData.zonasBusqueda}
                           onChange={handleChange}
                           isInvalid={!!errors.zonasBusqueda}
                           disabled={isFormDisabled}
@@ -538,7 +599,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                       <Form.Control
                         id="interesesHobbies"
                         name="interesesHobbies"
-                        value={localFormData.interesesHobbies}
+                        value={formData.interesesHobbies}
                         onChange={handleChange}
                         placeholder="Ej: Leer, Deporte, Cocinar"
                         aria-label="Intereses y hobbies"
@@ -560,7 +621,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
                 disabled={isFormDisabled}
               />
             </div>
-
+            
             {/* Mostrar mensaje de bloqueo temporal si aplica */}
             {temporarilyBlocked && (
               <Alert variant="danger" className="mb-3">
@@ -575,7 +636,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               </div>
             )}
 
-            {/* Mensaje de exito */}
+            {/* Mensaje de éxito */}
             {registrationSuccess && (
               <Alert variant="success" className="mb-3 mt-3">
                 ¡Cuenta creada exitosamente! Redirigiendo al inicio de sesión...
@@ -596,14 +657,7 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
               </Alert>
             )}
 
-            <div className="d-flex justify-content-between mt-4">
-              <Button 
-                variant="secondary" 
-                onClick={handleGoBack}
-                disabled={isFormDisabled}
-              >
-                Atrás
-              </Button>
+            <div className="d-flex justify-content-end mt-4">
               <Button
                 variant="primary"
                 type="submit"
@@ -625,4 +679,4 @@ function RegisterInfo({ formData, onFormChange, prevStep }) {
   );
 }
 
-export default RegisterInfo;
+export default RegisterGoogle;

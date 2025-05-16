@@ -1,53 +1,93 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import LogoGrande from "../assets/LogoGrande.png";
 
-function RegisterPage() {
-
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+function Register({ formData, onFormChange, nextStep }) {
+  const [email, setEmail] = useState(formData.email || '');
+  const [password, setPassword] = useState(formData.password || '');
+  const [confirmPassword, setConfirmPassword] = useState(formData.confirmPassword || '');
   const [errors, setErrors] = useState({});
   const [validated, setValidated] = useState(false);
 
-  // HABRÁ QUE AÑADIR NUEVAS VERIFICACIONES CON LA API *********
+  const validatePassword = (password) => {
+    const errors = [];
+    
+    if (!password) {
+      return ['Contraseña es requerida'];
+    }
+    
+    if (password.length < 8) {
+      errors.push('Mínimo 8 caracteres');
+    }
+    
+    if (password.length > 128) {
+      errors.push('Máximo 128 caracteres');
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Debe contener al menos una mayúscula');
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.push('Debe contener al menos una minúscula');
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.push('Debe contener al menos un número');
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     
     const newErrors = {};
     if (!email) {
-        newErrors.email = 'Email es requerido';
+      newErrors.email = 'Email es requerido';
     }
     else if (!/\S+@\S+/.test(email)){
-        newErrors.email = 'Email no válido';
+      newErrors.email = 'Email no válido';
     }
     
-    if (!password){
-        newErrors.password = 'Contraseña es requerida';
-    } 
-    else if (password.length < 6) {
-        newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    const passwordErrors = validatePassword(password);
+
+    if (passwordErrors.length > 0) {
+      newErrors.password = passwordErrors;
     }
 
     if (!confirmPassword) {
-        newErrors.confirmPassword = 'Por favor confirma tu contraseña';
+      newErrors.confirmPassword = 'Por favor confirma tu contraseña';
     } 
     else if (password !== confirmPassword) {
-        newErrors.confirmPassword = 'Las contraseñas no coinciden';
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
 
     setErrors(newErrors);
     
     if (form.checkValidity() && Object.keys(newErrors).length === 0) {
-      // FALTA LÓGICA DE AUTENTICACIÓN DEL BACKEND - EN REGISTER INFO MEJOR
-      navigate('/registro-info');
+      onFormChange({ email, password, confirmPassword });
+      nextStep();
     }
     
     setValidated(true);
+  };
+
+  // Renderiza los errores de la contraseña como una lista
+  const renderPasswordErrors = () => {
+    if (!errors.password || !Array.isArray(errors.password)) {
+      return errors.password;
+    }
+    
+    return (
+      <ul className="mb-0 ps-3">
+        {errors.password.map((error, index) => (
+          <li key={index}>{error}</li>
+        ))}
+      </ul>
+    );
   };
 
   return (
@@ -62,17 +102,17 @@ function RegisterPage() {
             style={{ 
               maxWidth: "100%", 
               height: "auto", 
-              maxHeight: "120px" 
+              maxHeight: "110px" 
             }} 
           />
         </div>
         
-        <h4 className="text-center mb-4">Crear una cuenta</h4>
+        <h4 className="text-center mb-3">Crear una cuenta</h4>
                 
         {/* Inicio de sesión con email */}
         
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
-          <Form.Group className="mb-3" controlId="formBasicEmail">
+          <Form.Group className="mb-2" controlId="formBasicEmail">
             <Form.Label>Email</Form.Label>
             <Form.Control
               type="email"
@@ -88,7 +128,7 @@ function RegisterPage() {
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className="mb-4" controlId="formBasicPassword">
+          <Form.Group className="mb-2" controlId="formBasicPassword">
             <Form.Label>Contraseña</Form.Label>
             <Form.Control
               type="password"
@@ -98,14 +138,15 @@ function RegisterPage() {
               isInvalid={!!errors.password}
               isValid={validated && !errors.password}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={128}
             />
             <Form.Control.Feedback type="invalid">
-              {errors.password}
+              {renderPasswordErrors()}
             </Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className="mb-4" controlId="formConfirmPassword">
+          <Form.Group className="mb-3" controlId="formConfirmPassword">
             <Form.Label>Confirmar contraseña</Form.Label>
             <Form.Control
               type="password"
@@ -115,7 +156,8 @@ function RegisterPage() {
               isInvalid={!!errors.confirmPassword}
               isValid={validated && !errors.confirmPassword && confirmPassword.length > 0}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={128}
             />
             <Form.Control.Feedback type="invalid">
               {errors.confirmPassword}
@@ -143,7 +185,7 @@ function RegisterPage() {
         </Form>
         
         {/* Acceso al área de registro */}
-        <div className="text-center mt-3">
+        <div className="text-center mt-2">
           <span style={{ color: '#6c757d' }}>
             ¿Ya tienes cuenta? <Link to="/login" style={{ textDecoration: 'none' }}>Inicia sesión</Link>
           </span>
@@ -153,4 +195,4 @@ function RegisterPage() {
   );
 }
 
-export default RegisterPage;
+export default Register;

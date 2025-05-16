@@ -1,8 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
-import RegisterInfoPage from './pages/RegisterInfo';
+import RegisterFlow from './pages/RegisterFlow';
+import GoogleCallbackHandler from './pages/GoogleCallbackHandler';
+import RegisterGoogle from './pages/RegisterGoogle';
 import PrincipalPage from './pages/Principal';
 import ProfilePage from './pages/Profile';
 import EditProfilePage from './pages/EditProfile';
@@ -29,8 +30,9 @@ function IndexRoutes() {
       {/* Páginas sin login necesario */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/registro" element={<RegisterPage />} />
-      <Route path="/registro-info" element={<RegisterInfoPage />} />
+      <Route path="/registro" element={<RegisterFlow />} />
+      <Route path="/auth/google/callback" element={<GoogleCallbackHandler />} />
+      <Route path="/registro-google" element={<RegisterGoogle />} />
       <Route path="/principal" element={<PrincipalPage />} />
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />
@@ -38,7 +40,12 @@ function IndexRoutes() {
       <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} /> {/* Igual no hay que protegerla para admin ya que cambia en función del rol guardado */}
 
       {/* Páginas con login necesario */}
-      <Route path="/perfil/:id" element={ // No creo que acceder con el id sea lo más seguro, en la propia página se podrían sacar los datos con el id guardado en la sesión
+      <Route path="/perfil" element={
+        <PrivateRoute>
+          <ProfilePage />
+        </PrivateRoute>
+      } />
+      <Route path="/perfil/:id" element={
         <PrivateRoute>
           <ProfilePage />
         </PrivateRoute>
