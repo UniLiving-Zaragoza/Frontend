@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Container, Button, Card, Row, Col, ListGroup, Spinner, Alert } from "react-bootstrap";
+import { Container, Button, Card, Row, Col, Spinner, Alert } from "react-bootstrap";
+import { FaBriefcase, FaSmoking, FaPaw, FaUsers, FaMapMarkerAlt, FaHeart } from 'react-icons/fa';
+import { MdHome } from 'react-icons/md';
 import { PencilSquare } from "react-bootstrap-icons";
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from "../components/CustomNavbar";
-import Accordion from 'react-bootstrap/Accordion';
 import CustomModal from "../components/CustomModal";
 import Newimage from "../components/CustomModalPicture";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
@@ -144,14 +145,15 @@ const ProfilePage = () => {
             )}
             <Container className="mt-4">
                 {/* Cabecera */}
-                <Row className="d-flex justify-content-center text-center">
-                    <Col xs={12} md={6} className="d-flex align-items-center">
+                <Row className="justify-content-center text-center">
+                    <Col xs="auto">
+                        <div className="d-flex flex-column flex-md-row align-items-center justify-content-center">
                         <div className="position-relative">
                             <img
-                                src={userData?.profilePicture || "https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360"}
+                                src={userData?.profilePicture || "https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg"}
                                 alt="Perfil"
                                 className="rounded-circle img-fluid"
-                                style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                                style={{ width: "140px", height: "140px", objectFit: "cover", border: "2px solid #000842" }}
                             />
                             {/* Icono de edición */}
                             {user && user.id === userId && (
@@ -168,17 +170,18 @@ const ProfilePage = () => {
                                 />
                             )}
                         </div>
-                        <div className="text-start ms-3">
+                        <div className="ms-md-5 mt-3 mt-md-0 text-md-start text-center">
                             <h4>{userData?.firstName} {userData?.lastName}</h4>
                             <p>
                                 Género: {userData?.gender === "Male" ? "Masculino" : userData?.gender === "Female" ? "Femenino" : "Otro"} | Edad: {userData?.age}
                             </p>
                         </div>
+                        </div>
                     </Col>
                 </Row>
 
                 {/* Descripción personal */}
-                <Row className="justify-content-center mt-4">
+                <Row className="justify-content-center mt-5">
                     <Col md={10}>
                         <Card className="p-3 text-center mb-4">
                             <Card.Text> 
@@ -193,55 +196,101 @@ const ProfilePage = () => {
                     </Col>
                 </Row>
 
-                {/* Información detallada */}
-                <Row className="justify-content-center">
+               <Row className="justify-content-center mt-4">
                     <Col md={10}>
-                        <Accordion className="mt-3">
-                            <Accordion.Item eventKey="0">
-                                <Accordion.Header>Situación personal</Accordion.Header>
-                                <Accordion.Body>
-                                    <ListGroup className="custom-list">
-                                        <ListGroup.Item>
-                                            Estado laboral: {
-                                                userData?.personalSituation?.employmentStatus === "Employed" ? "Trabajando" :
-                                                userData?.personalSituation?.employmentStatus === "Student" ? "Estudiante" :
-                                                userData?.personalSituation?.employmentStatus === "Unemployed" ? "Desempleado" : "Otro"
-                                            }
-                                        </ListGroup.Item>
-                                        <ListGroup.Item>Fumador: {userData?.personalSituation?.smoker ? "Sí" : "No"}</ListGroup.Item>
-                                        <ListGroup.Item>Mascotas: {userData?.personalSituation?.pets ? "Sí" : "No"}</ListGroup.Item>
-                                        <ListGroup.Item>
-                                            Frecuencia de visitas: {
-                                                userData?.personalSituation?.visitFrequency === "Daily" ? "Diaria" :
-                                                userData?.personalSituation?.visitFrequency === "Weekly" ? "Semanal" :
-                                                userData?.personalSituation?.visitFrequency === "Monthly" ? "Mensual" :
-                                                userData?.personalSituation?.visitFrequency === "Occasional" ? "Ocasional" : "Sin preferencia"
-                                            }
-                                        </ListGroup.Item>
-                                        <ListGroup.Item>
-                                            Preferencia de convivencia: {
-                                                userData?.personalSituation?.livingPreference === "Alone" ? "Solo" :
-                                                userData?.personalSituation?.livingPreference === "Shared" ? "Compartido" :
-                                                userData?.personalSituation?.livingPreference === "Family" ? "Con familia" : "Sin preferencia"
-                                            }
-                                        </ListGroup.Item>
-                                        <ListGroup.Item>
-                                            Zonas de búsqueda: {userData?.personalSituation?.zones?.length > 0 ? userData.personalSituation.zones.join(', ')  : "Sin preferencia"}
-                                        </ListGroup.Item>
-                                        <ListGroup.Item>
-                                            Intereses y hobbies: {userData?.personalSituation?.hobbiesInterests?.join(", ") || "No especificados"}
-                                        </ListGroup.Item>
-                                    </ListGroup>
-                                </Accordion.Body>
-                            </Accordion.Item>
-                        </Accordion>
+                        <h5 className="mb-3">Situación Personal</h5>
+                        <Card className="p-4 shadow-sm rounded-4">
+
+                        {/* Fila 1 */}
+                        <Row className="mb-1">
+                            <Col md={4}>
+                            <FaBriefcase className="me-2 text-primary" />
+                            <strong>Estado laboral:</strong>{' '}
+                            {
+                                userData?.personalSituation?.employmentStatus === 'Employed'
+                                ? 'Trabajando'
+                                : userData?.personalSituation?.employmentStatus === 'Student'
+                                ? 'Estudiante'
+                                : userData?.personalSituation?.employmentStatus === 'Unemployed'
+                                ? 'Desempleado'
+                                : 'Otro'
+                            }
+                            </Col>
+                            <Col md={4}>
+                            <FaSmoking className="me-2 text-danger" />
+                            <strong>Fumador:</strong>{' '}
+                            {userData?.personalSituation?.smoker ? 'Sí' : 'No'}
+                            </Col>
+                            <Col md={4}>
+                            <FaPaw className="me-2 text-warning" />
+                            <strong>Mascotas:</strong>{' '}
+                            {userData?.personalSituation?.pets ? 'Sí' : 'No'}
+                            </Col>
+                        </Row>
+                        <hr />
+
+                        {/* Fila 2 */}
+                        <Row className="mb-1">
+                            <Col md={4}>
+                            <FaUsers className="me-2 text-info" />
+                            <strong>Visitas:</strong>{' '}
+                            {
+                                userData?.personalSituation?.visitFrequency === 'Daily'
+                                ? 'Diaria'
+                                : userData?.personalSituation?.visitFrequency === 'Weekly'
+                                ? 'Semanal'
+                                : userData?.personalSituation?.visitFrequency === 'Monthly'
+                                ? 'Mensual'
+                                : userData?.personalSituation?.visitFrequency === 'Occasional'
+                                ? 'Ocasional'
+                                : 'Sin preferencia'
+                            }
+                            </Col>
+                            <Col md={4}>
+                            <MdHome className="me-2 text-success" />
+                            <strong>Convivencia:</strong>{' '}
+                            {
+                                userData?.personalSituation?.livingPreference === 'Alone'
+                                ? 'Solo'
+                                : userData?.personalSituation?.livingPreference === 'Shared'
+                                ? 'Compartido'
+                                : userData?.personalSituation?.livingPreference === 'Family'
+                                ? 'Con familia'
+                                : 'Sin preferencia'
+                            }
+                            </Col>
+                            <Col md={4}>
+                            <FaMapMarkerAlt className="me-2 text-secondary" />
+                            <strong>Zonas de búsqueda:</strong>{' '}
+                            {
+                                userData?.personalSituation?.zones?.length > 0
+                                ? userData.personalSituation.zones.join(', ')
+                                : 'Sin preferencia'
+                            }
+                            </Col>
+                        </Row>
+                        <hr />
+
+                        {/* Fila 3 */}
+                        <Row>
+                            <Col>
+                            <FaHeart className="me-2 text-danger" />
+                            <strong>Intereses y hobbies:</strong>{' '}
+                            {
+                                userData?.personalSituation?.hobbiesInterests?.length > 0
+                                ? userData.personalSituation.hobbiesInterests.join(', ')
+                                : 'No especificados'
+                            }
+                            </Col>
+                        </Row>
+                        </Card>
                     </Col>
                 </Row>
 
                 {/* Botones para usuario viendo su propio perfil */}
                 {user && user.id === userId && (
                     <>
-                        <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                        <Row className="mt-5 d-flex justify-content-center mb-4 gap-3">
                             <Col xs={12} md="auto" className="d-flex justify-content-center">
                                 <Button
                                     variant="danger"
