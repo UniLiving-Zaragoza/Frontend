@@ -1,24 +1,30 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, Form, InputGroup } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Button, Form, InputGroup  } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation} from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import Pagination from "../components/CustomPagination";
 import CustomModal from '../components/CustomModal';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+import { io } from "socket.io-client";
 
 const AnalyticsCommentsPage = () => {
-    const [searchQuery] = useState('');
+    const location = useLocation();
     const [currentPage, setCurrentPage] = useState(1);
     const [newComment, setNewComment] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedBarrio, setSelectedBarrio] = useState('');
-    const usersPerPage = 5;
+    const initialBarrio = location.state?.barrio || '';
+    const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
+    const [comments, setComments] = useState([]);
+    const [selectedCommentId, setSelectedCommentId] = useState(null);
+    const usersPerPage = 5; //TODO: Ampliar en producción
+    const socket = io("https://uniliving-backend.onrender.com");
 
-    const { isAuthenticated, isAdmin } = useAuth();
+    const { isAuthenticated, isAdmin, user, token } = useAuth();
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -27,23 +33,51 @@ const AnalyticsCommentsPage = () => {
         "Casablanca", "Torrero-La Paz", "Sur"
     ];
 
-    const data = [
-        { id: 10, nombre: "Paco González", comentario: "comentario", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png" },
-        { id: 2, nombre: "Carlos Martínez", comentario: "comentario", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png" },
-        { id: 3, nombre: "María Pérez", comentario: "comentario", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/8068/8068125.png" },
-        { id: 4, nombre: "Luis Rodríguez", comentario: "comentario", URL_foto_perfil: "https://upload.wikimedia.org/wikipedia/commons/5/59/4NumberFourInCircle.png" },
-        { id: 5, nombre: "Sofía Ramírez", comentario: "comentario", URL_foto_perfil: "https://static.vecteezy.com/system/resources/previews/026/468/774/non_2x/number-5-icon-circle-illustration-on-isolated-white-background-number-five-icon-free-vector.jpg" },
-        { id: 6, nombre: "Paco González", comentario: "comentario", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png" },
-        { id: 7, nombre: "Carlos Martínez", comentario: "comentario", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png" },
-        { id: 8, nombre: "María Pérez", comentario: "comentario", URL_foto_perfil: "https://cdn-icons-png.flaticon.com/512/8068/8068125.png" },
-        { id: 9, nombre: "Luis Rodríguez", comentario: "comentario", URL_foto_perfil: "https://upload.wikimedia.org/wikipedia/commons/5/59/4NumberFourInCircle.png" },
-    ];
+    useEffect(() => {
+    if (selectedBarrio) {
+        axios
+        .get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comment/Visible`)
+        .then((res) => {
+            const sortedComments = res.data.data.sort(
+            (a, b) =>  new Date(b.createdAt) - new Date(a.createdAt) 
+            );
+            setComments(sortedComments);
+            console.log("Comentarios ordenados:", sortedComments);
+            setCurrentPage(1);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+    } else {
+        setComments([]);
+    }
+    }, [selectedBarrio,socket]);
+    
+    useEffect(() => {
+        if (selectedBarrio) {
+            socket.emit('joinZone', selectedBarrio);
+        }
+    }, [selectedBarrio]);
 
-    const filteredData = data.filter(user =>
-        user.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    useEffect(() => {
+        if (!selectedBarrio) return;
 
-    const totalPages = Math.ceil(filteredData.length / usersPerPage);
+        const eventName = `zone:commentAdded:${selectedBarrio}`;
+
+        const handler = (newComment) => {
+            setComments((prev) => [newComment, ...prev]); 
+        };
+
+        socket.on(eventName, handler);
+
+        return () => {
+            socket.off(eventName, handler); // limpia al cambiar de zona
+        };
+    }, [selectedBarrio, socket]);
+
+
+
+    const totalPages = Math.ceil(comments.length / usersPerPage);
 
     const paginate = (pageNumber) => {
         if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -53,11 +87,37 @@ const AnalyticsCommentsPage = () => {
 
     const navigate = useNavigate();
 
-    const handleCommentSubmit = (e) => {
-        e.preventDefault();
-        console.log("Comentario enviado:", newComment);
-        setNewComment('');
+    const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+
+        if (!newComment.trim()) return; // Evita enviar comentarios vacíos
+
+        try {
+            const response = await fetch(`https://uniliving-backend.onrender.com/zones/name/${selectedBarrio}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    content: newComment,
+                    userId: user.id, // Asumiendo que tienes un currentUser definido
+                }),
+            });
+
+            if (!response.ok) throw new Error('Error al enviar el comentario');
+
+            const savedComment = await response.json();
+
+            setNewComment('');
+            setComments(prev => [...prev, savedComment]); // Asumiendo que tienes `setComments`
+
+        } catch (error) {
+            console.error('Fallo al enviar el comentario:', error.message);
+            // Podrías mostrar una alerta al usuario si lo deseas
+        }
     };
+
 
     const handleDeleteClick = (user) => {
         setSelectedUser(user);
@@ -70,11 +130,12 @@ const AnalyticsCommentsPage = () => {
     };
 
     const handleSearch = () => {
-        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS
+        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS TODO
         navigate('/principal');
     };
 
     const handleGraphics = () => {
+        //TODO: Implementar la lógica para redirigir a la página de gráficos
         navigate('/analiticas-graficos');
     };
 
@@ -83,9 +144,10 @@ const AnalyticsCommentsPage = () => {
         setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
     };
 
-    const indexOfLastUser = currentPage * usersPerPage;
-    const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = filteredData.slice(indexOfFirstUser, indexOfLastUser);
+    const indexOfLast = currentPage * usersPerPage;
+    const indexOfFirst = indexOfLast - usersPerPage;
+    const currentComments = comments.slice(indexOfFirst, indexOfLast);
+
 
     const commentsContainerMaxHeight =
         isAuthenticated && isAdmin
@@ -134,6 +196,7 @@ const AnalyticsCommentsPage = () => {
                                 <Button 
                                     type="submit" 
                                     variant="outline-light"
+                                    disabled={!newComment.trim()}
                                     style={{
                                         backgroundColor: '#000842',
                                         borderRadius: '0 5px 5px 0'
@@ -150,7 +213,7 @@ const AnalyticsCommentsPage = () => {
                 )}
                 
                 {/* Contenedor de comentarios con altura ajustada dinámicamente */}
-                <div className="flex-grow-1 overflow-auto p-3 mx-3"
+               <div className="flex-grow-1 overflow-auto p-3 mx-3"
                     style={{
                         flexGrow: 1,
                         minHeight: '200px',
@@ -162,72 +225,95 @@ const AnalyticsCommentsPage = () => {
                         borderRadius: '10px',
                     }}>
                     <Row className="p-3">
-                        {currentUsers.map(user => (
-                            <Col xs={12} key={user.id} className="mb-4">
-                                <div className="d-flex align-items-center">
-                                    <Link to={`/perfil/${user.id}`}>
-                                    <img
-                                        src={user.URL_foto_perfil}
-                                        alt={user.nombre}
-                                        className="rounded-circle"
-                                        style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                                    />
-                                    </Link>
+                        {comments.length === 0 ? (
+                            <Col xs={12}>
+                                <p className="text-center text-muted">No hay comentarios disponibles.</p>
+                            </Col>
+                        ) : (
+                            [...currentComments].reverse().map(comment => (
+                                <Col xs={12} key={comment._id} className="mb-4">
+                                    <div className="d-flex align-items-center">
+                                        <Link to={`/perfil/${comment.user._id}`}>
+                                            <img
+                                                src={comment.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'}
+                                                alt={`${comment.user.firstName} ${comment.user.lastName}`}
+                                                className="rounded-circle"
+                                                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                            />
+                                        </Link>
 
-                                    <div
-                                        className="d-flex align-items-center justify-content-between flex-grow-1 ms-3 px-3"
-                                        style={{
-                                            backgroundColor: '#D6EAFF',
-                                            border: '0.5px solid #ddd',
-                                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
-                                            borderRadius: '10px',
-                                            minHeight: '55px',
-                                            overflow: 'visible',
-                                            flexWrap: 'wrap'     
-                                        }}
-                                    >
-                                        <div className="d-flex flex-column">
+                                        <div
+                                            className="d-flex align-items-center justify-content-between flex-grow-1 ms-3 px-3"
+                                            style={{
+                                                backgroundColor: '#D6EAFF',
+                                                border: '0.5px solid #ddd',
+                                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+                                                borderRadius: '10px',
+                                                minHeight: '55px',
+                                                overflow: 'visible',
+                                                flexWrap: 'wrap'
+                                            }}
+                                        >
+                                            <div className="d-flex flex-column">
                                             <Link
-                                                to={`/perfil/${user.id}`}
+                                                to={`/perfil/${comment.user._id}`}
                                                 style={{
-                                                textDecoration: 'none',
-                                                color: 'inherit',
+                                                    textDecoration: 'none',
+                                                    color: 'inherit',
                                                 }}
                                             >
-                                                <span className="fw-semibold">{user.nombre}</span>
+                                                <span className="fw-semibold">
+                                                    {comment.user.firstName} {comment.user.lastName}
+                                                </span>
                                             </Link>
 
                                             <span
                                                 className="text-muted"
                                                 style={{
-                                                whiteSpace: 'normal',        
-                                                overflowWrap: 'break-word', 
-                                                wordBreak: 'break-word'     
+                                                    whiteSpace: 'normal',
+                                                    overflowWrap: 'break-word',
+                                                    wordBreak: 'break-word'
                                                 }}
                                             >
-                                                {user.comentario || 'Sin comentarios'}
+                                                {comment.content}
+                                            </span>
+
+                                            <span className="text-muted" style={{ fontSize: '0.8rem' }}>
+                                                {(() => {
+                                                    const date = new Date(comment.createdAt);
+                                                    const today = new Date();
+                                                    const isToday =
+                                                        date.getDate() === today.getDate() &&
+                                                        date.getMonth() === today.getMonth() &&
+                                                        date.getFullYear() === today.getFullYear();
+
+                                                    return isToday
+                                                        ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                        : date.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+                                                })()}
                                             </span>
                                         </div>
-                                        {isAdmin && (
-                                            <Button
-                                                variant="outline-light"
-                                                size="sm"
-                                                className="ms-2"
-                                                onClick={() => handleDeleteClick(user)}
-                                                style={{
-                                                    backgroundColor: 'white',
-                                                    color: 'white',
-                                                    borderRadius: '6px',
-                                                    padding: '4px 8px',
-                                                }}
-                                            >
-                                                <FaTrash style={{ color: 'red' }} />
-                                            </Button>
-                                        )}
+                                            {isAdmin && (
+                                                <Button
+                                                    variant="outline-light"
+                                                    size="sm"
+                                                    className="ms-2"
+                                                    onClick={() => handleDeleteClick(comment)}
+                                                    style={{
+                                                        backgroundColor: 'white',
+                                                        color: 'white',
+                                                        borderRadius: '6px',
+                                                        padding: '4px 8px',
+                                                    }}
+                                                >
+                                                    <FaTrash style={{ color: 'red' }} />
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </Col>
-                        ))}
+                                </Col>
+                            ))
+                        )}
                     </Row>
                 </div>
 
