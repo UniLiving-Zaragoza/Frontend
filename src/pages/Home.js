@@ -71,19 +71,9 @@ const HomePage = () => {
           <Col md={4}>
             <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="fw-bold text-center mb-3">Área de información 1</Card.Title>
+                <Card.Title className="fw-bold text-center mb-3">🏠 Encuentra tu piso ideal en Zaragoza</Card.Title>
                 <Card.Text className="flex-grow-1">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis hendrerit tellus vitae odio pellentesque, vel cursus urna pellentesque. Fusce vel sagittis nisl. Nulla ultricies risus sed magna euismod, vel efficitur lectus molestie. In hac habitasse platea dictumst. Sed blandit arcu.                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={4}>
-            <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
-              <Card.Body className="d-flex flex-column">
-                <Card.Title className="fw-bold text-center mb-3">Área de información 2</Card.Title>
-                <Card.Text className="flex-grow-1">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque metus magna, ornare a pretium eget, efficitur consectetur quam. Curabitur feugiat semper lacus, non eleifend nibh vulputate id. Etiam id nisi.
+                  Explora cientos de pisos en alquiler adaptados a tus preferencias. Filtra por características del inmueble y elige la zona que más encaje contigo. Nuestra plataforma te ayuda a tomar decisiones informadas para encontrar tu próximo hogar con total confianza. 
                 </Card.Text>
               </Card.Body>
             </Card>
@@ -92,9 +82,20 @@ const HomePage = () => {
           <Col md={4}>
             <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="fw-bold text-center mb-3">Área de información 3</Card.Title>
+                <Card.Title className="fw-bold text-center mb-3">📊 Analiza cada zona con datos reales y opiniones</Card.Title>
                 <Card.Text className="flex-grow-1">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris a augue sed dui varius eleifend vel sit amet mauris. Sed consequat enim erat, in scelerisque massa congue eu. Vestibulum fringilla purus eu tristique blandit. Suspendisse ut venenatis neque, ut faucibus odio. Sed tempor condimentum commodo. Aliquam erat volutpat. Curabitur nec egestas enim. Aenean hendrerit imperdiet lacinia.
+                  Conoce a fondo los barrios de Zaragoza antes de mudarte. Accede a estadísticas útiles, mapas interactivos y comentarios reales de otros usuarios sobre cada zona. Así, puedes elegir no solo el piso perfecto, sino también el entorno ideal para ti.                
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={4}>
+            <Card className="h-100" style={{ backgroundColor: "#D6EAFF" }}>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="fw-bold text-center mb-3">🤝 Conecta con compañeros de piso compatibles</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  ¿Buscas compartir piso? Encuentra personas con intereses y hábitos afines gracias a nuestro sistema de emparejamiento. Habla por chat privado o únete al chat general de Zaragoza para conectar, compartir y convivir mejor desde el primer día.                
                 </Card.Text>
               </Card.Body>
             </Card>
