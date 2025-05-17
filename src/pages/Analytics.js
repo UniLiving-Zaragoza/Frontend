@@ -23,6 +23,8 @@ const barriosZaragoza = [
 
 const AnalyticsPage = () => {
     const [geoData, setGeoData] = useState(null);
+    const [selectedBarrio, setSelectedBarrio] = useState("");
+    const [showValidation, setShowValidation] = useState(false);
 
     useEffect(() => {
         fetch("/BarriosZaragoza.geojson")
@@ -45,8 +47,10 @@ const AnalyticsPage = () => {
                 e.target.setStyle(geoJsonStyle);
             },
             click: () => {
-                console.log(`Barrio seleccionado: ${feature.properties.name}`);
-                navigate('/analiticas-graficos');
+                const barrio = feature.properties.name;
+                console.log(`Barrio seleccionado: ${barrio}`);
+                setSelectedBarrio(barrio);
+                navigate('/analiticas-graficos', { state: { barrio } });
             }
         });
     };
@@ -54,12 +58,23 @@ const AnalyticsPage = () => {
     const navigate = useNavigate();
 
     const handleChartClick = () => {
-        navigate('/analiticas-graficos');
+        if (!selectedBarrio) {
+            setShowValidation(true);
+            return;
+        }
+        navigate('/analiticas-graficos', { state: { barrio: selectedBarrio } });
     };
-    
+
     const handleCommentsClick = () => {
-        navigate('/analiticas-comentarios');
+        if (!selectedBarrio) {
+            setShowValidation(true);
+            return;
+        }
+        navigate('/analiticas-comentarios', { state: { barrio: selectedBarrio } });
     };
+
+    
+
 
     return (
         <div className="App d-flex flex-column vh-100">
@@ -100,14 +115,25 @@ const AnalyticsPage = () => {
                                     <div className="d-flex justify-content-center">
                                         <div style={{ width: '80%', maxWidth: '700px' }}>
                                             <Form.Select 
-                                                aria-label="Selector de barrios" 
-                                                className="mb-3 shadow-sm"
-                                            >
-                                                <option style={{ fontWeight: 'bold' }}>Selecciona un barrio de Zaragoza</option>
+                                                    aria-label="Selector de barrios" 
+                                                    className="mb-3 shadow-sm"
+                                                    value={selectedBarrio}
+                                                    isInvalid={showValidation && !selectedBarrio}
+                                                    onChange={(e) => {
+                                                        setSelectedBarrio(e.target.value);
+                                                        if (e.target.value) {
+                                                            setShowValidation(false);
+                                                        }
+                                                    }}
+                                                >
+                                                <option value="">Selecciona un barrio de Zaragoza</option>
                                                 {barriosZaragoza.map((barrio, index) => (
                                                     <option key={index} value={barrio}>{barrio}</option>
                                                 ))}
                                             </Form.Select>
+                                            <Form.Control.Feedback type="invalid">
+                                                Por favor, selecciona un barrio antes de continuar.
+                                            </Form.Control.Feedback>
                                         </div>
                                     </div>
                                 </Container>

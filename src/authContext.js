@@ -30,6 +30,7 @@ export function AuthProvider({ children }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState(null);
   
   const axiosInterceptorId = useRef(null);
   
@@ -69,6 +70,7 @@ export function AuthProvider({ children }) {
       }
   
       setUser(userData);
+      setToken(token);
       setIsLoading(false);
     } catch (error) {
       console.error('Error al obtener datos del usuario:', error);
@@ -180,7 +182,8 @@ export function AuthProvider({ children }) {
         logout,
         isLoading,
         isTokenValid,
-        setAuthToken
+        setAuthToken,
+        token
       }}
     >
       {children}
