@@ -151,7 +151,6 @@ const AnalyticsCommentsPage = () => {
     };
 
     const handleGraphics = () => {
-        //TODO: Implementar la lógica para redirigir a la página de gráficos
         navigate('/analiticas-graficos', { state: { barrio: selectedBarrio } });
     };
 
