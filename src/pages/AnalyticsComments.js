@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Form, InputGroup  } from 'react-bootstrap';
+import React, { useState, useEffect,useRef  } from 'react';
+import { Container, Row, Col, Button, Form, InputGroup, Spinner  } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import { useNavigate, Link, useLocation} from 'react-router-dom';
 import { useAuth } from '../authContext';
@@ -20,11 +20,21 @@ const AnalyticsCommentsPage = () => {
     const initialBarrio = location.state?.barrio || '';
     const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
     const [comments, setComments] = useState([]);
-    const [selectedCommentId, setSelectedCommentId] = useState(null);
-    const usersPerPage = 5; //TODO: Ampliar en producción
-    const socket = io("https://uniliving-backend.onrender.com");
-
+    const usersPerPage = 5; 
     const { isAuthenticated, isAdmin, user, token } = useAuth();
+    const socketRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [reportModalOpen, setReportModalOpen] = useState(false);
+
+    useEffect(() => {
+        // Establece la conexión solo una vez al montar
+        socketRef.current = io("https://uniliving-backend.onrender.com");
+
+        return () => {
+            // Cierra la conexión al desmontar el componente
+            socketRef.current.disconnect();
+        };
+    }, []);
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -35,8 +45,9 @@ const AnalyticsCommentsPage = () => {
 
     useEffect(() => {
     if (selectedBarrio) {
+        setIsLoading(true);
         axios
-        .get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comment/Visible`)
+        .get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comments`)
         .then((res) => {
             const sortedComments = res.data.data.sort(
             (a, b) =>  new Date(b.createdAt) - new Date(a.createdAt) 
@@ -47,33 +58,38 @@ const AnalyticsCommentsPage = () => {
         })
         .catch((err) => {
             console.error(err);
+        }).finally(() => {
+            setIsLoading(false);
         });
     } else {
         setComments([]);
     }
-    }, [selectedBarrio,socket]);
+    }, [selectedBarrio]);
     
     useEffect(() => {
-        if (selectedBarrio) {
-            socket.emit('joinZone', selectedBarrio);
-        }
-    }, [selectedBarrio]);
+        const socket = socketRef.current;
+        if (!socket || !selectedBarrio) return;
 
-    useEffect(() => {
-        if (!selectedBarrio) return;
+        // Unirse a la sala del barrio
+        socket.emit('joinZone', selectedBarrio);
 
         const eventName = `zone:commentAdded:${selectedBarrio}`;
 
-        const handler = (newComment) => {
-            setComments((prev) => [newComment, ...prev]); 
+        const handleNewComment = (newComment) => {
+            // Evita duplicados si ya fue añadido desde el POST
+            setComments(prev => {
+                if (prev.find(c => c._id === newComment._id)) return prev;
+                return [newComment, ...prev];
+            });
         };
 
-        socket.on(eventName, handler);
+        socket.on(eventName, handleNewComment);
 
         return () => {
-            socket.off(eventName, handler); // limpia al cambiar de zona
+            socket.off(eventName, handleNewComment);
+            socket.emit('leaveZone', selectedBarrio); // Por si implementas leave en el servidor
         };
-    }, [selectedBarrio, socket]);
+    }, [selectedBarrio]);
 
 
 
@@ -135,13 +151,38 @@ const AnalyticsCommentsPage = () => {
     };
 
     const handleGraphics = () => {
-        //TODO: Implementar la lógica para redirigir a la página de gráficos
-        navigate('/analiticas-graficos');
+        navigate('/analiticas-graficos', { state: { barrio: selectedBarrio } });
     };
 
     const handleBarrioChange = (e) => {
         const value = e.target.value;
         setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
+    };
+
+    const handleReportComment = async (commentId) => {
+    try {
+        console.log("Reportando comentario:", commentId);
+        console.log("ID de usuario:", user.id);
+        console.log("Token:", token);
+
+        await axios.put(
+        `https://uniliving-backend.onrender.com/zones/comments/report`,
+        {
+            commentId: commentId,
+            userId: user.id, // Asegúrate de incluirlo si es requerido por el backend
+        },
+        {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        }
+        );
+
+        setReportModalOpen(true); // Mostrar modal
+    } catch (error) {
+        console.error("Error al reportar comentario:", error);
+        alert("No se pudo reportar el comentario.");
+    }
     };
 
     const indexOfLast = currentPage * usersPerPage;
@@ -182,6 +223,33 @@ const AnalyticsCommentsPage = () => {
                     </div>
                 </Container>
                 
+                {/* Modal de reporte */}
+                {reportModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white p-4 rounded-xl shadow-xl w-4/5 max-w-xs text-center border border-gray-200">
+                        <h2 className="text-md font-semibold text-gray-800 mb-2">Comentario reportado</h2>
+                        <p className="text-gray-600 text-sm">
+                            Gracias por hacérnoslo saber. Revisaremos el comentario lo antes posible.
+                        </p>
+                        <button
+                            onClick={() => setReportModalOpen(false)}
+                            style={{
+                            backgroundColor: '#000842',
+                            color: 'white',
+                            borderRadius: '10px',
+                            padding: '6px 16px',
+                            width: 'auto',
+                            maxWidth: 'none',
+                            marginTop: '12px',
+                            fontSize: '0.875rem'
+                            }}
+                        >
+                            Entendido
+                        </button>
+                        </div>
+                    </div>
+                    )}
+            
                 {/* Campo de comentario para usuarios logueados */}
                 {isAuthenticated && !isAdmin && (
                     <Container className="mb-3 px-4">
@@ -225,12 +293,24 @@ const AnalyticsCommentsPage = () => {
                         borderRadius: '10px',
                     }}>
                     <Row className="p-3">
-                        {comments.length === 0 ? (
+                        {isLoading ? (
+                            <Col xs={12} className="text-center">
+                                <Spinner animation="border" role="status" variant="primary">
+                                    <span className="visually-hidden">Cargando comentarios...</span>
+                                </Spinner>
+                                <p className="mt-2 text-muted">Cargando comentarios...</p>
+                            </Col>
+                        ) : comments.length === 0 ? (
                             <Col xs={12}>
                                 <p className="text-center text-muted">No hay comentarios disponibles.</p>
                             </Col>
                         ) : (
-                            [...currentComments].reverse().map(comment => (
+                            <>
+                            <Col xs={12} className="text-end mb-2">
+                                <h4 className="text-muted">{comments.length} comentarios</h4>
+                            </Col>
+                            
+                            {[...currentComments].reverse().map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <Link to={`/perfil/${comment.user._id}`}>
@@ -243,15 +323,15 @@ const AnalyticsCommentsPage = () => {
                                         </Link>
 
                                         <div
-                                            className="d-flex align-items-center justify-content-between flex-grow-1 ms-3 px-3"
+                                            className="d-flex align-items-start justify-content-between flex-grow-1 ms-3 px-3"
                                             style={{
                                                 backgroundColor: '#D6EAFF',
                                                 border: '0.5px solid #ddd',
                                                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
                                                 borderRadius: '10px',
                                                 minHeight: '55px',
-                                                overflow: 'visible',
-                                                flexWrap: 'wrap'
+                                                width: '100%',
+                                                gap: '1rem'
                                             }}
                                         >
                                             <div className="d-flex flex-column">
@@ -292,7 +372,26 @@ const AnalyticsCommentsPage = () => {
                                                         : date.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
                                                 })()}
                                             </span>
+                                            {/* Botón Reportar a la derecha */}
                                         </div>
+                                            {isAuthenticated && !isAdmin && (
+                                                        <Button 
+                                                            variant="outline-danger" 
+                                                            size="sm"
+                                                            className="ms-2"
+                                                            style={{
+                                                                height: '25px',
+                                                                fontSize: '0.75rem',
+                                                                padding: '2px 8px',
+                                                                whiteSpace: 'nowrap',
+                                                                alignSelf: 'start',
+                                                                marginTop: '18px' // puedes ajustar este valor
+                                                            }}
+                                                            onClick={() => handleReportComment(comment._id)}
+                                                        >
+                                                            Reportar
+                                                        </Button>
+                                            )}
                                             {isAdmin && (
                                                 <Button
                                                     variant="outline-light"
@@ -313,6 +412,8 @@ const AnalyticsCommentsPage = () => {
                                     </div>
                                 </Col>
                             ))
+                        }
+                            </>
                         )}
                     </Row>
                 </div>
