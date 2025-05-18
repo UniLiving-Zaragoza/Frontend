@@ -76,10 +76,11 @@ const AnalyticsCommentsPage = () => {
         const eventName = `zone:commentAdded:${selectedBarrio}`;
 
         const handleNewComment = (newComment) => {
-            // Evita duplicados si ya fue añadido desde el POST
+            const liveComment = { ...newComment, isLive: true };
+
             setComments(prev => {
                 if (prev.find(c => c._id === newComment._id)) return prev;
-                return [newComment, ...prev];
+                return [liveComment, ...prev];
             });
         };
 
@@ -87,7 +88,7 @@ const AnalyticsCommentsPage = () => {
 
         return () => {
             socket.off(eventName, handleNewComment);
-            socket.emit('leaveZone', selectedBarrio); // Por si implementas leave en el servidor
+            socket.emit('leaveZone', selectedBarrio);
         };
     }, [selectedBarrio]);
 
@@ -343,8 +344,9 @@ const AnalyticsCommentsPage = () => {
                                                 }}
                                             >
                                                 <span className="fw-semibold">
-                                                    {comment.user.firstName} {comment.user.lastName}
+                                                {comment.isLive ? 'Recién escrito' : `${comment.user.firstName} ${comment.user.lastName}`}
                                                 </span>
+
                                             </Link>
 
                                             <span
