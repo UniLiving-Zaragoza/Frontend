@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Form, InputGroup  } from 'react-bootstrap';
+import React, { useState, useEffect,useRef  } from 'react';
+import { Container, Row, Col, Button, Form, InputGroup, Spinner  } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import { useNavigate, Link, useLocation} from 'react-router-dom';
 import { useAuth } from '../authContext';
@@ -21,10 +21,20 @@ const AnalyticsCommentsPage = () => {
     const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
     const [comments, setComments] = useState([]);
     const [selectedCommentId, setSelectedCommentId] = useState(null);
-    const usersPerPage = 5; //TODO: Ampliar en producción
-    const socket = io("https://uniliving-backend.onrender.com");
-
+    const usersPerPage = 5; 
     const { isAuthenticated, isAdmin, user, token } = useAuth();
+    const socketRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        // Establece la conexión solo una vez al montar
+        socketRef.current = io("https://uniliving-backend.onrender.com");
+
+        return () => {
+            // Cierra la conexión al desmontar el componente
+            socketRef.current.disconnect();
+        };
+    }, []);
 
     const barriosZaragoza = [
         "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -35,8 +45,9 @@ const AnalyticsCommentsPage = () => {
 
     useEffect(() => {
     if (selectedBarrio) {
+        setIsLoading(true);
         axios
-        .get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comment/Visible`)
+        .get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comments`)
         .then((res) => {
             const sortedComments = res.data.data.sort(
             (a, b) =>  new Date(b.createdAt) - new Date(a.createdAt) 
@@ -47,33 +58,38 @@ const AnalyticsCommentsPage = () => {
         })
         .catch((err) => {
             console.error(err);
+        }).finally(() => {
+            setIsLoading(false);
         });
     } else {
         setComments([]);
     }
-    }, [selectedBarrio,socket]);
+    }, [selectedBarrio]);
     
     useEffect(() => {
-        if (selectedBarrio) {
-            socket.emit('joinZone', selectedBarrio);
-        }
-    }, [selectedBarrio]);
+        const socket = socketRef.current;
+        if (!socket || !selectedBarrio) return;
 
-    useEffect(() => {
-        if (!selectedBarrio) return;
+        // Unirse a la sala del barrio
+        socket.emit('joinZone', selectedBarrio);
 
         const eventName = `zone:commentAdded:${selectedBarrio}`;
 
-        const handler = (newComment) => {
-            setComments((prev) => [newComment, ...prev]); 
+        const handleNewComment = (newComment) => {
+            // Evita duplicados si ya fue añadido desde el POST
+            setComments(prev => {
+                if (prev.find(c => c._id === newComment._id)) return prev;
+                return [newComment, ...prev];
+            });
         };
 
-        socket.on(eventName, handler);
+        socket.on(eventName, handleNewComment);
 
         return () => {
-            socket.off(eventName, handler); // limpia al cambiar de zona
+            socket.off(eventName, handleNewComment);
+            socket.emit('leaveZone', selectedBarrio); // Por si implementas leave en el servidor
         };
-    }, [selectedBarrio, socket]);
+    }, [selectedBarrio]);
 
 
 
@@ -136,7 +152,7 @@ const AnalyticsCommentsPage = () => {
 
     const handleGraphics = () => {
         //TODO: Implementar la lógica para redirigir a la página de gráficos
-        navigate('/analiticas-graficos');
+        navigate('/analiticas-graficos', { state: { barrio: selectedBarrio } });
     };
 
     const handleBarrioChange = (e) => {
@@ -225,12 +241,23 @@ const AnalyticsCommentsPage = () => {
                         borderRadius: '10px',
                     }}>
                     <Row className="p-3">
-                        {comments.length === 0 ? (
+                        {isLoading ? (
+                            <Col xs={12} className="text-center">
+                                <Spinner animation="border" role="status" variant="primary">
+                                    <span className="visually-hidden">Cargando comentarios...</span>
+                                </Spinner>
+                                <p className="mt-2 text-muted">Cargando comentarios...</p>
+                            </Col>
+                        ) : comments.length === 0 ? (
                             <Col xs={12}>
                                 <p className="text-center text-muted">No hay comentarios disponibles.</p>
                             </Col>
                         ) : (
-                            [...currentComments].reverse().map(comment => (
+                            <>
+                            <Col xs={12} className="text-end mb-2">
+                                <h4 className="text-muted">{comments.length} comentarios</h4>
+                            </Col>
+                            {[...currentComments].reverse().map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <Link to={`/perfil/${comment.user._id}`}>
@@ -313,6 +340,8 @@ const AnalyticsCommentsPage = () => {
                                     </div>
                                 </Col>
                             ))
+                        }
+                            </>
                         )}
                     </Row>
                 </div>
