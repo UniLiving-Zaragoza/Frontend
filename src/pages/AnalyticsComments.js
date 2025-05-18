@@ -20,11 +20,11 @@ const AnalyticsCommentsPage = () => {
     const initialBarrio = location.state?.barrio || '';
     const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
     const [comments, setComments] = useState([]);
-    const [selectedCommentId, setSelectedCommentId] = useState(null);
     const usersPerPage = 5; 
     const { isAuthenticated, isAdmin, user, token } = useAuth();
     const socketRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [reportModalOpen, setReportModalOpen] = useState(false);
 
     useEffect(() => {
         // Establece la conexión solo una vez al montar
@@ -159,6 +159,32 @@ const AnalyticsCommentsPage = () => {
         setSelectedBarrio(value === 'Selecciona un barrio de Zaragoza' ? '' : value);
     };
 
+    const handleReportComment = async (commentId) => {
+    try {
+        console.log("Reportando comentario:", commentId);
+        console.log("ID de usuario:", user.id);
+        console.log("Token:", token);
+
+        await axios.put(
+        `https://uniliving-backend.onrender.com/zones/comments/report`,
+        {
+            commentId: commentId,
+            userId: user.id, // Asegúrate de incluirlo si es requerido por el backend
+        },
+        {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        }
+        );
+
+        setReportModalOpen(true); // Mostrar modal
+    } catch (error) {
+        console.error("Error al reportar comentario:", error);
+        alert("No se pudo reportar el comentario.");
+    }
+    };
+
     const indexOfLast = currentPage * usersPerPage;
     const indexOfFirst = indexOfLast - usersPerPage;
     const currentComments = comments.slice(indexOfFirst, indexOfLast);
@@ -197,6 +223,33 @@ const AnalyticsCommentsPage = () => {
                     </div>
                 </Container>
                 
+                {/* Modal de reporte */}
+                {reportModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white p-4 rounded-xl shadow-xl w-4/5 max-w-xs text-center border border-gray-200">
+                        <h2 className="text-md font-semibold text-gray-800 mb-2">Comentario reportado</h2>
+                        <p className="text-gray-600 text-sm">
+                            Gracias por hacérnoslo saber. Revisaremos el comentario lo antes posible.
+                        </p>
+                        <button
+                            onClick={() => setReportModalOpen(false)}
+                            style={{
+                            backgroundColor: '#000842',
+                            color: 'white',
+                            borderRadius: '10px',
+                            padding: '6px 16px',
+                            width: 'auto',
+                            maxWidth: 'none',
+                            marginTop: '12px',
+                            fontSize: '0.875rem'
+                            }}
+                        >
+                            Entendido
+                        </button>
+                        </div>
+                    </div>
+                    )}
+            
                 {/* Campo de comentario para usuarios logueados */}
                 {isAuthenticated && !isAdmin && (
                     <Container className="mb-3 px-4">
@@ -256,6 +309,7 @@ const AnalyticsCommentsPage = () => {
                             <Col xs={12} className="text-end mb-2">
                                 <h4 className="text-muted">{comments.length} comentarios</h4>
                             </Col>
+                            
                             {[...currentComments].reverse().map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
@@ -269,15 +323,15 @@ const AnalyticsCommentsPage = () => {
                                         </Link>
 
                                         <div
-                                            className="d-flex align-items-center justify-content-between flex-grow-1 ms-3 px-3"
+                                            className="d-flex align-items-start justify-content-between flex-grow-1 ms-3 px-3"
                                             style={{
                                                 backgroundColor: '#D6EAFF',
                                                 border: '0.5px solid #ddd',
                                                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
                                                 borderRadius: '10px',
                                                 minHeight: '55px',
-                                                overflow: 'visible',
-                                                flexWrap: 'wrap'
+                                                width: '100%',
+                                                gap: '1rem'
                                             }}
                                         >
                                             <div className="d-flex flex-column">
@@ -318,7 +372,26 @@ const AnalyticsCommentsPage = () => {
                                                         : date.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
                                                 })()}
                                             </span>
+                                            {/* Botón Reportar a la derecha */}
                                         </div>
+                                            {isAuthenticated && !isAdmin && (
+                                                        <Button 
+                                                            variant="outline-danger" 
+                                                            size="sm"
+                                                            className="ms-2"
+                                                            style={{
+                                                                height: '25px',
+                                                                fontSize: '0.75rem',
+                                                                padding: '2px 8px',
+                                                                whiteSpace: 'nowrap',
+                                                                alignSelf: 'start',
+                                                                marginTop: '18px' // puedes ajustar este valor
+                                                            }}
+                                                            onClick={() => handleReportComment(comment._id)}
+                                                        >
+                                                            Reportar
+                                                        </Button>
+                                            )}
                                             {isAdmin && (
                                                 <Button
                                                     variant="outline-light"
