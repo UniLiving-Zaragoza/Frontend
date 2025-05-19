@@ -198,7 +198,7 @@ const AnalyticsCommentsPage = () => {
     };
 
     const handleApproveComment = async (comment) => {
-        console.log("Selected barrio:", selectedBarrio);
+        console.log("Selected barrio:", comment.zone);
         try {
         await axios.put(
         `https://uniliving-backend.onrender.com/zones/${comment.zone}/comment`,
@@ -208,7 +208,7 @@ const AnalyticsCommentsPage = () => {
             },
             body: JSON.stringify({
                 commentId: comment._id,
-                status: 'Visible',
+                status: 'Visible'
             }),
         }
         );
@@ -225,18 +225,14 @@ const AnalyticsCommentsPage = () => {
 
         try {
             await axios.put(
-                `https://uniliving-backend.onrender.com/zones/${encodeURIComponent(selectedBarrio)}/comment`,
-                {
-                    commentId: selectedComment,
-                    status: 'Disabled',
-                },
+                `https://uniliving-backend.onrender.com/zones/${encodeURIComponent(selectedComment.zone)}/comment`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
-                        commentId: selectedComment,
-                        status: 'Visible',
+                        commentId: selectedComment._id,
+                        status: 'Visible'
                     }),
                 }
             );
@@ -477,7 +473,7 @@ const AnalyticsCommentsPage = () => {
                                                             marginTop: '18px'
                                                         }}
                                                         onClick={() => 
-                                                            setSelectedComment(comment._id) ||
+                                                            setSelectedComment(comment) ||
                                                             handleApproveComment(comment)
                                                         }
                                                     >
