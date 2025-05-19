@@ -23,11 +23,16 @@ const isTokenExpired = (token) => {
 };
 
 export function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  const initialToken = localStorage.getItem('authToken');
+  const initialIsAuthenticated = initialToken && !isTokenExpired(initialToken);
+  const initialIsAdmin = localStorage.getItem('isAdmin') === 'true';
+
+  const [isAuthenticated, setIsAuthenticated] = useState(initialIsAuthenticated);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(initialToken);
   
   const axiosInterceptorId = useRef(null);
   
@@ -45,9 +50,7 @@ export function AuthProvider({ children }) {
         }
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
     );
   };
 
@@ -77,18 +80,11 @@ export function AuthProvider({ children }) {
   
   // Efecto de inicialización
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const adminFlag = localStorage.getItem('isAdmin') === 'true';
-    
-    if (token && !isTokenExpired(token)) {
-      setIsAuthenticated(true);
-      setIsAdmin(adminFlag);
-      setupAxiosInterceptors(token);
+    if (initialIsAuthenticated) {
+      setupAxiosInterceptors(initialToken);
       fetchUserData();
-    } else if (token) {
-      // Token existe pero está expirado
-      logout();
     } else {
+      logout();
       setIsLoading(false);
     }
     
@@ -107,7 +103,7 @@ export function AuthProvider({ children }) {
         axios.interceptors.request.eject(axiosInterceptorId.current);
       }
     };
-  }, [fetchUserData]);
+  }, [fetchUserData, initialToken, initialIsAuthenticated]);
 
   // Método para guardar el token y establecer estado de autenticación
   const setAuthToken = useCallback((token, isAdminUser = false) => {
@@ -151,6 +147,7 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
     setIsAdmin(false);
     setUser(null);
+    setToken(null);
   };
 
   // Método para verificar si el token actual es válido
