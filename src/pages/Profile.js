@@ -16,7 +16,7 @@ import "../css/Perfil.css";
 const API_URL = 'https://uniliving-backend.onrender.com';
 
 const ProfilePage = () => {
-    const { logout, isAdmin, user } = useAuth();
+    const { logout, isAdmin, user, token } = useAuth();
     const navigate = useNavigate();
 
     // Estados para los modales
@@ -53,7 +53,6 @@ const ProfilePage = () => {
                     return;
                 }
 
-                const token = sessionStorage.getItem('authToken');
                 if (!token) {
                     await logout();
                     navigate('/login');
@@ -76,7 +75,7 @@ const ProfilePage = () => {
         };
 
         fetchUserData();
-    }, [userId, navigate, logout]);
+    }, [userId, navigate, logout, token]);
 
     // Cerrar sesión
     const handleCloseSession = async () => {
@@ -391,7 +390,6 @@ const ProfilePage = () => {
                     confirmButtonText="Guardar Cambios"
                     onSave={async (newImageUrl) => {
                         try {
-                            const token = sessionStorage.getItem('authToken');
                             await axios.put(`${API_URL}/user/${userId}`, 
                                 { userId: userId, profilePicture: newImageUrl },
                                 {

@@ -19,7 +19,7 @@ const barriosZaragoza = [
 ];
 
 const EditProfile = () => {
-    const { logout, user } = useAuth();
+    const { logout, user, token } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const userId = user && user.id;
@@ -86,7 +86,6 @@ const EditProfile = () => {
                     return;
                 }
 
-                const token = sessionStorage.getItem('authToken');
                 if (!token) {
                     await logout();
                     navigate('/login');
@@ -110,7 +109,7 @@ const EditProfile = () => {
         };
 
         fetchUserData();
-    }, [userId, navigate, logout, userDataFromProfile, initFormDataFromUserData]);
+    }, [userId, navigate, logout, userDataFromProfile, initFormDataFromUserData, token]);
 
     // Funciones para mapear valores entre el frontend (español) y el backend (inglés)
     const mapearGenero = (valor, direccion) => {
@@ -238,7 +237,6 @@ const EditProfile = () => {
         setSaveError(null);
         
         try {
-            const token = sessionStorage.getItem('authToken');
             if (!token) {
                 navigate('/login');
                 return;

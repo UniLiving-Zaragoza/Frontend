@@ -1,9 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
-// HACERLO TODO CON sessionStorage HACE QUE AL RECARGAR O AÑADIR UNA URL A MANO SE BORRE LA SESIÓN
-// PARA EVITAR ESTO SE PUEDE USAR localStorega PERO PUEDE DAR LUGAR A MÁS PROBLEMAS Y FALLAS DE SEGURIDAD
-
 const AuthContext = createContext();
 
 // Función para decodificar el token JWT
@@ -57,7 +54,7 @@ export function AuthProvider({ children }) {
   // Función para obtener datos del usuario actual
   const fetchUserData = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken');
       if (!token) {
         setIsLoading(false);
         return;
@@ -80,8 +77,8 @@ export function AuthProvider({ children }) {
   
   // Efecto de inicialización
   useEffect(() => {
-    const token = sessionStorage.getItem('authToken');
-    const adminFlag = sessionStorage.getItem('isAdmin') === 'true';
+    const token = localStorage.getItem('authToken');
+    const adminFlag = localStorage.getItem('isAdmin') === 'true';
     
     if (token && !isTokenExpired(token)) {
       setIsAuthenticated(true);
@@ -97,7 +94,7 @@ export function AuthProvider({ children }) {
     
     // Configurar un intervalo para revisar la expiración periódicamente
     const checkTokenInterval = setInterval(() => {
-      const currentToken = sessionStorage.getItem('authToken');
+      const currentToken = localStorage.getItem('authToken');
       if (currentToken && isTokenExpired(currentToken)) {
         logout();
         alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
@@ -115,12 +112,12 @@ export function AuthProvider({ children }) {
   // Método para guardar el token y establecer estado de autenticación
   const setAuthToken = useCallback((token, isAdminUser = false) => {
     if (token) {
-      sessionStorage.setItem('authToken', token);
+      localStorage.setItem('authToken', token);
       
       if (isAdminUser) {
-        sessionStorage.setItem('isAdmin', 'true');
+        localStorage.setItem('isAdmin', 'true');
       } else {
-        sessionStorage.removeItem('isAdmin');
+        localStorage.removeItem('isAdmin');
       }
       
       setIsAuthenticated(true);
@@ -139,19 +136,10 @@ export function AuthProvider({ children }) {
     return false;
   }, [fetchUserData, setAuthToken]);
 
-  // FUNCIÓN NO NECESARIA YA QUE TRAS EL REGISTRO NO SE INICIA SESIÓN
-  /*const register = async (token) => {
-    if (setAuthToken(token, false)) {
-      await fetchUserData();
-      return true;
-    }
-    return false;
-  };*/
-
   const logout = () => {
     // Eliminar el token y la información de la sesión
-    sessionStorage.removeItem('authToken');
-    sessionStorage.removeItem('isAdmin');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('isAdmin');
     
     // Eliminar el interceptor de Axios
     if (axiosInterceptorId.current !== null) {
@@ -167,7 +155,7 @@ export function AuthProvider({ children }) {
 
   // Método para verificar si el token actual es válido
   const isTokenValid = () => {
-    const token = sessionStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
     return token && !isTokenExpired(token);
   };
 
@@ -178,7 +166,6 @@ export function AuthProvider({ children }) {
         isAdmin, 
         user,
         login, 
-        //register, 
         logout,
         isLoading,
         isTokenValid,
