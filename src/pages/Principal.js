@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, MessageCircle, RefreshCcw } from 'lucide-react';
+import { Filter, MessageCircle, RefreshCcw, X } from 'lucide-react';
 import { MapContainer, TileLayer, ZoomControl, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
-import { Accordion, Button, Form } from 'react-bootstrap';
+import { Accordion, Button, Form, Offcanvas, Row, Col, Badge } from 'react-bootstrap';
 import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
 import InfoPiso from '../components/CustomModalHouse';
@@ -75,6 +75,7 @@ const Principal = () => {
   const [filteredApartments, setFilteredApartments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [filters, setFilters] = useState({
     precio: '',
     precioMin: '',
@@ -110,6 +111,21 @@ const Principal = () => {
     fetchApartments();
   }, [token]);
 
+  useEffect(() => {
+    let count = 0;
+    if (filters.precio) count++;
+    if (filters.precioMin) count++;
+    if (filters.tamaño) count++;
+    if (filters.tamañoMax) count++;
+    if (filters.habitaciones) count++;
+    if (filters.baños) count++;
+    if (filters.barrio) count++;
+    if (filters.furnished) count++;
+    if (filters.parking) count++;
+    if (filters.shared) count++;
+    setActiveFiltersCount(count);
+  }, [filters]);
+
   // Función para limpiar caracteres corruptos
   const cleanText = (text) => {
     if (!text) return '';
@@ -130,7 +146,7 @@ const Principal = () => {
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
     
     return cleaned;
-};
+  };
 
   const transformApartmentData = (apartment) => {
     return {
@@ -182,6 +198,7 @@ const Principal = () => {
         );
       })
     );
+    setShowFilters(false);
   };  
 
   const resetFilters = () => {
@@ -206,7 +223,7 @@ const Principal = () => {
 
       {/* Botón filtros */}
       <button
-        className="btn position-absolute start-0"
+        className="btn position-absolute start-0 d-flex align-items-center"
         style={{
           backgroundColor: '#000842',
           color: 'white',
@@ -220,6 +237,15 @@ const Principal = () => {
       >
         <Filter className="me-2" />
         Filtros
+        {activeFiltersCount > 0 && (
+          <Badge 
+            bg="danger" 
+            className="ms-2"
+            style={{ fontSize: '0.75rem' }}
+          >
+            {activeFiltersCount}
+          </Badge>
+        )}
       </button>
 
       {/* Mapa centrado en Zaragoza */}
@@ -276,30 +302,24 @@ const Principal = () => {
         </button>
       </Link>
 
-      {/* Filtros */}
-      {showFilters && (
-        <div
-        className="position-absolute start-0 bg-white p-3 shadow"
-        style={{
-          zIndex: 1001,
-          top: '100px',
-          margin: '0.5rem',
-          left: '0',
-          width: '300px',
-          maxHeight: 'calc(100vh - 120px)',
-          overflowY: 'auto',
-          borderRadius: '10px'
-        }}
-        >      
-          <Accordion>
+      {/* Panel de filtros lateral */}
+      <Offcanvas 
+        show={showFilters} 
+        onHide={() => setShowFilters(false)} 
+        placement="start"
+        style={{ maxWidth: '330px' }}
+      >
+        <Offcanvas.Header closeButton style={{ backgroundColor: '#000842', color: 'white' }}>
+          <Offcanvas.Title>Filtros de búsqueda</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Accordion defaultActiveKey="0">
             <Accordion.Item eventKey="0">
               <Accordion.Header>
-                <span style={{ marginRight: "15px" }}>Datos del Piso</span>
+                <span>Precio y Tamaño</span>
               </Accordion.Header>
               <Accordion.Body>
-                <Form>
-
-                <Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Rango de precio: {filters.precioMin || 0}€ - {filters.precio || 2500}€</Form.Label>
                   <Slider
                     range
@@ -311,122 +331,192 @@ const Principal = () => {
                   />
                 </Form.Group>
 
-                <Form.Group className="mt-2">
-                  <Form.Label>Tamaño mínimo</Form.Label>
-                  <Form.Control 
-                    type="number" 
-                    name="tamaño" 
-                    min={0}
-                    value={filters.tamaño} 
-                    onChange={handleFilterChange} 
-                    placeholder="Tamaño mínimo (m²)" 
-                  />
-                </Form.Group>
-
-                <Form.Group className="mt-2">
-                  <Form.Label>Tamaño máximo</Form.Label>
-                  <Form.Control 
-                    type="number" 
-                    name="tamañoMax" 
-                    min={0}
-                    value={filters.tamañoMax} 
-                    onChange={handleFilterChange} 
-                    placeholder="Tamaño máximo (m²)" 
-                  />
-                </Form.Group>
-
-                <Form.Group className="mt-2">
-                  <Form.Label>Habitaciones</Form.Label>
-                  <Form.Control 
-                    type="number" 
-                    name="habitaciones" 
-                    min={0}
-                    value={filters.habitaciones} 
-                    onChange={handleFilterChange} 
-                    placeholder="Número de habitaciones" 
-                  />
-                </Form.Group>
-
-                <Form.Group className="mt-2">
-                  <Form.Label>Baños</Form.Label>
-                  <Form.Control 
-                    type="number" 
-                    name="baños" 
-                    min={0}
-                    value={filters.baños} 
-                    onChange={handleFilterChange} 
-                    placeholder="Número de baños" 
-                  />
-                </Form.Group>
-
-                <Form.Group className="mt-2">
-                  <Form.Check 
-                    type="checkbox" 
-                    id="furnished-check"
-                    name="furnished" 
-                    label="Amueblado" 
-                    checked={filters.furnished === 'true'} 
-                    onChange={(e) => setFilters({ ...filters, furnished: e.target.checked ? 'true' : '' })} 
-                  />
-                </Form.Group>
-
-                <Form.Group className="mt-1">
-                  <Form.Check 
-                    type="checkbox" 
-                    id="parking-check"
-                    name="parking" 
-                    label="Estacionamiento" 
-                    checked={filters.parking === 'true'} 
-                    onChange={(e) => setFilters({ ...filters, parking: e.target.checked ? 'true' : '' })} 
-                  />
-                </Form.Group>
-
-                <Form.Group className="mt-1">
-                  <Form.Check 
-                    type="checkbox" 
-                    id="shared-check"
-                    name="shared" 
-                    label="Compartido" 
-                    checked={filters.shared === 'true'} 
-                    onChange={(e) => setFilters({ ...filters, shared: e.target.checked ? 'true' : '' })} 
-                  />
-                </Form.Group>
-
-                </Form>
+                <Row>
+                  <Col xs={6}>
+                    <Form.Group>
+                      <Form.Label>Tamaño mín. (m²)</Form.Label>
+                      <Form.Control 
+                        type="number" 
+                        name="tamaño" 
+                        min={0}
+                        value={filters.tamaño} 
+                        onChange={handleFilterChange}
+                        size="sm"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col xs={6}>
+                    <Form.Group>
+                      <Form.Label>Tamaño máx. (m²)</Form.Label>
+                      <Form.Control 
+                        type="number" 
+                        name="tamañoMax" 
+                        min={0}
+                        value={filters.tamañoMax} 
+                        onChange={handleFilterChange}
+                        size="sm"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
               </Accordion.Body>
             </Accordion.Item>
+            
             <Accordion.Item eventKey="1">
               <Accordion.Header>
-                <span style={{ marginRight: "15px" }}>Datos de la Ciudad</span>
+                <span>Características</span>
               </Accordion.Header>
               <Accordion.Body>
-              <Form.Group>
-                <Form.Label>Barrio</Form.Label>
-                <Form.Select name="barrio" value={filters.barrio} onChange={handleFilterChange}>
-                  <option value="">Selecciona un barrio</option>
-                  {barriosZaragoza.map((barrio, index) => (
-                    <option key={index} value={barrio}>
-                      {barrio}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+                <Row>
+                  <Col xs={6}>
+                    <Form.Group>
+                      <Form.Label>Habitaciones</Form.Label>
+                      <Form.Select 
+                        name="habitaciones" 
+                        value={filters.habitaciones} 
+                        onChange={handleFilterChange}
+                        size="sm"
+                      >
+                        <option value="">Cualquiera</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4+</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col xs={6}>
+                    <Form.Group>
+                      <Form.Label>Baños</Form.Label>
+                      <Form.Select 
+                        name="baños" 
+                        value={filters.baños} 
+                        onChange={handleFilterChange}
+                        size="sm"
+                      >
+                        <option value="">Cualquiera</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <div className="mt-3">
+                  <Form.Group className="mb-2">
+                    <Form.Check 
+                      type="checkbox" 
+                      id="furnished-check"
+                      name="furnished" 
+                      label="Amueblado" 
+                      checked={filters.furnished === 'true'} 
+                      onChange={(e) => setFilters({ ...filters, furnished: e.target.checked ? 'true' : '' })} 
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Check 
+                      type="checkbox" 
+                      id="parking-check"
+                      name="parking" 
+                      label="Estacionamiento" 
+                      checked={filters.parking === 'true'} 
+                      onChange={(e) => setFilters({ ...filters, parking: e.target.checked ? 'true' : '' })} 
+                    />
+                  </Form.Group>
+
+                  <Form.Group>
+                    <Form.Check 
+                      type="checkbox" 
+                      id="shared-check"
+                      name="shared" 
+                      label="Compartido" 
+                      checked={filters.shared === 'true'} 
+                      onChange={(e) => setFilters({ ...filters, shared: e.target.checked ? 'true' : '' })} 
+                    />
+                  </Form.Group>
+                </div>
               </Accordion.Body>
             </Accordion.Item>
-            <div className="d-flex justify-content-center mt-3">
-              <Link to="/analiticas" style={{ color: 'blue', textDecoration: 'none' }}>
-                Ver datos de las zonas
-              </Link>
-            </div>
+            
+            <Accordion.Item eventKey="2">
+              <Accordion.Header>
+                <span>Ubicación</span>
+              </Accordion.Header>
+              <Accordion.Body>
+                <Form.Group>
+                  <Form.Label>Barrio</Form.Label>
+                  <Form.Select 
+                    name="barrio" 
+                    value={filters.barrio} 
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Todos los barrios</option>
+                    {barriosZaragoza.map((barrio, index) => (
+                      <option key={index} value={barrio}>
+                        {barrio}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+                <div className="d-flex justify-content-center mt-3">
+                  <Link to="/analiticas" style={{ color: 'blue', textDecoration: 'none' }}>
+                    Ver datos de las zonas
+                  </Link>
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
           </Accordion>
-          <div className="d-flex justify-content-between mt-3">
-            <Button variant="primary" style={{ backgroundColor: "#000842" }} onClick={applyFilters}>Aplicar</Button>
-            <Button variant="secondary" style={{ backgroundColor: "#000842" }} onClick={resetFilters}>
-              <RefreshCcw size={20} />
+          
+          <div className="d-grid gap-2 mt-4">
+            <Button 
+              variant="primary" 
+              style={{ backgroundColor: "#000842", borderColor: "#000842" }} 
+              onClick={applyFilters}
+            >
+              Aplicar filtros
+            </Button>
+            <Button 
+              variant="outline-secondary" 
+              onClick={resetFilters} 
+              className="d-flex align-items-center justify-content-center"
+            >
+              <RefreshCcw size={16} className="me-2" />
+              Restablecer filtros
             </Button>
           </div>
+        </Offcanvas.Body>
+      </Offcanvas>
+
+      {/* Indicador de filtros activos */}
+      {activeFiltersCount > 0 && (
+        <div 
+          className="position-absolute start-0 bg-white p-2 shadow d-flex align-items-center"
+          style={{
+            zIndex: 999,
+            top: '100px',
+            margin: '0.5rem',
+            left: '0',
+            borderRadius: '5px',
+            fontSize: '0.9rem'
+          }}
+        >
+          <Badge bg="primary" style={{ backgroundColor: "#000842" }}>
+            {filteredApartments.length} resultados
+          </Badge>
+          <span className="ms-2">{activeFiltersCount} filtros aplicados</span>
+          <Button 
+            variant="link" 
+            className="p-0 ms-2" 
+            onClick={resetFilters}
+            style={{ color: '#000842' }}
+          >
+            <X size={16} />
+          </Button>
         </div>
       )}
+
       {/* Modal de piso */}
       {selectedPiso && (
         <InfoPiso
