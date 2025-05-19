@@ -130,7 +130,7 @@ const Dashboard = () => {
             <Card className="shadow-sm p-2">
               <Card.Header 
                 as={Link} 
-                to="/principal-admin" 
+                to="/reportes-admin" 
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
