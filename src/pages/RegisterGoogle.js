@@ -244,8 +244,6 @@ function RegisterGoogle() {
       personalDescription: formData.descripcion || "No se ha proporcionado una descripción",
       email: googleProfile.email,
       password: formData.password,
-      // FALTA AGREGAR EL TOKEN DE CAPTCHA AL MODELO **************************************
-      // captchaToken: captchaValue,
       personalSituation: {
         smoker: smoker,
         pets: pets,
@@ -258,17 +256,25 @@ function RegisterGoogle() {
     };
   };
 
-  // Función para verificar el captcha en el servidor (DEMOMENTO SIMULADO) **************************************
+  // Función para verificar el captcha en el servidor
   const verifyCaptcha = async (token) => {
     try {
-      // En un caso real, este endpoint verificaría el token con la API de Google
-      // const response = await axios.post(`${API_URL}/verify-captcha`, { token });
-      // return response.data.success;
-      
-      // Para esta implementación, se simula la respuesta
-      return true;
+      const response = await axios.post(`${API_URL}/captcha/verify`, { token });
+      return response.data.success;
     } catch (error) {
       console.error("Error al verificar captcha:", error);
+      
+      // Error en la respuesta del captcha
+      if (error.response) {
+        if (error.response.status === 403) {
+          setCaptchaError('Captcha inválido. Por favor, intente nuevamente.');
+        } else {
+          setCaptchaError('Error en la verificación del captcha.');
+        }
+      } else {
+        setCaptchaError('No se pudo conectar con el servidor para verificar el captcha.');
+      }
+      
       return false;
     }
   };
@@ -290,7 +296,6 @@ function RegisterGoogle() {
       const isCaptchaValid = await verifyCaptcha(captchaValue);
       
       if (!isCaptchaValid) {
-        setCaptchaError('Error al validar el captcha. Por favor, inténtelo de nuevo.');
 
         const newAttemptCount = attemptCount + 1;
         setAttemptCount(newAttemptCount);

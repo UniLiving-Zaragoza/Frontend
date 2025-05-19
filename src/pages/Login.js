@@ -70,13 +70,17 @@ function LoginPage() {
             navigate(isAdminLogin ? "/principal-admin" : "/principal");
           } else {
             setApiError('Error al procesar la autenticación.');
+            setValidated(false);
           }
         } else {
           setApiError('No se recibió un token válido del servidor.');
+          setValidated(false);
         }
       } catch (error) {
         console.error('Error de inicio de sesión:', error);
         
+        setValidated(false);
+             
         // Manejo de errores
         if (error.response) {
           switch(error.response.status) {
@@ -100,9 +104,9 @@ function LoginPage() {
       } finally {
         setIsLoading(false);
       }
+    } else {
+      setValidated(true);
     }
-
-    setValidated(true);
   };
 
   return (
@@ -154,7 +158,7 @@ function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               isInvalid={!!errors.email}
-              isValid={validated && !errors.email}
+              isValid={validated && !errors.email && !apiError}
               required
             />
             <Form.Control.Feedback type="invalid">
@@ -170,7 +174,7 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               isInvalid={!!errors.password}
-              isValid={validated && !errors.password}
+              isValid={validated && !errors.password && !apiError}
               required
               minLength={isAdminLogin ? 8 : 6}
             />
