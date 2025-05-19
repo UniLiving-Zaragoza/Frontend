@@ -110,18 +110,40 @@ const Principal = () => {
     fetchApartments();
   }, [token]);
 
+  // Función para limpiar caracteres corruptos
+  const cleanText = (text) => {
+    if (!text) return '';
+    
+    let cleaned = text.replace(/�/g, '');
+    
+    cleaned = cleaned.replace(/[\u{0080}-\u{FFFF}]/gu, (match) => {
+      const normalizations = {
+        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+        'ñ': 'n', 'Ñ': 'N',
+        '€': 'EUR'
+      };
+      
+      return normalizations[match] || match;
+    });
+    
+    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+    
+    return cleaned;
+};
+
   const transformApartmentData = (apartment) => {
     return {
       id: apartment.id,
       precio: apartment.price,
-      direccion: apartment.description?.split('.')[0] || 'Dirección no disponible',
+      nombre: 'Nombre del apartamento',
       coordenadas: [apartment.latitude, apartment.longitude],
       foto: apartment.images && apartment.images.length > 0 ? apartment.images[0].url : 'https://via.placeholder.com/300',
-      descripcion: apartment.description || 'Sin descripción',
+      descripcion: cleanText(apartment.description) || 'Sin descripción',
       habitaciones: apartment.numRooms || 0,
       metros: apartment.size || 0,
       baño: apartment.numBathrooms || 0,
-      barrio: apartment.district || '',
+      barrio: cleanText(apartment.district) || '',
       galeria: apartment.images ? apartment.images.map(img => img.url) : [],
       idealistaUrl: apartment.idealistaUrl || '',
       furnished: apartment.furnished || false,

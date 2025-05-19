@@ -20,7 +20,7 @@ function InfoPiso({ show, onHide, piso }) {
                         className="img-fluid mb-3" 
                         style={{ maxHeight: '200px', objectFit: 'contain' }}
                     />
-                    <h3 className="text-center">Piso en {piso.direccion}</h3>
+                    <h3 className="text-center">{piso.nombre}</h3>
                     <h4 className="text-center">{piso.precio}€ / mes</h4>
                     <p className="text-center">{piso.descripcion && piso.descripcion.length > 100 
                         ? piso.descripcion.substring(0, 100) + '...' 

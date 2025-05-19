@@ -87,8 +87,8 @@ function DetallePiso() {
                             )}
                         />
                         <Card.Body className="text-center">
-                            <Card.Title className="fs-4">{piso.direccion}</Card.Title>
-                            <Card.Subtitle className="fs-5">{piso.precio}€ por mes</Card.Subtitle>
+                            <Card.Title className="fs-4">{piso.nombre}</Card.Title>
+                            <Card.Subtitle className="fs-5 mt-3 mb-2">{piso.precio}€ por mes</Card.Subtitle>
                             
                             <div className="d-flex justify-content-center gap-2 my-2">
                                 {piso.shared && <Badge bg="info">Compartido</Badge>}
@@ -114,7 +114,10 @@ function DetallePiso() {
                                 </a>
                             )}
                             
-                            <Card.Text className="fs-5 mt-3">{piso.descripcion}</Card.Text>
+                            <div className="mt-4">
+                                <hr />
+                                <Card.Text className="fs-6">{piso.descripcion}</Card.Text>
+                            </div>
                         </Card.Body>
                     </Card>
 
@@ -131,7 +134,7 @@ function DetallePiso() {
                             <hr />
                             <div className="row">
                                 <div className="col-md-4 mb-3">
-                                    <div className="d-flex align-items-center">
+                                    <div className="d-flex align-items-center justify-content-center">
                                         <FontAwesomeIcon 
                                             icon={piso.furnished ? faCheck : faTimes} 
                                             className={`me-2 ${piso.furnished ? 'text-success' : 'text-danger'}`} 
@@ -140,7 +143,7 @@ function DetallePiso() {
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-3">
-                                    <div className="d-flex align-items-center">
+                                    <div className="d-flex align-items-center justify-content-center">
                                         <FontAwesomeIcon 
                                             icon={piso.parking ? faCheck : faTimes} 
                                             className={`me-2 ${piso.parking ? 'text-success' : 'text-danger'}`} 
@@ -149,7 +152,7 @@ function DetallePiso() {
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-3">
-                                    <div className="d-flex align-items-center">
+                                    <div className="d-flex align-items-center justify-content-center">
                                         <FontAwesomeIcon 
                                             icon={piso.shared ? faCheck : faTimes} 
                                             className={`me-2 ${piso.shared ? 'text-success' : 'text-danger'}`} 
