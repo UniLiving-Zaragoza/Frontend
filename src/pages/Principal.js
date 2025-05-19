@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, MessageCircle, RefreshCcw } from 'lucide-react';
-import { MapContainer, TileLayer, ZoomControl, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, ZoomControl, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 import { Accordion, Button, Form } from 'react-bootstrap';
 import { useAuth } from '../authContext';
@@ -12,6 +12,9 @@ import axios from 'axios';
 import 'rc-slider/assets/index.css';
 import 'leaflet/dist/leaflet.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
 
 const barriosZaragoza = [
   "Actur-Rey Fernando", "El Rabal", "Santa Isabel", "La Almozara",
@@ -28,8 +31,44 @@ const createIcon = (price) => {
   });
 };
 
-const Principal = () => {
+// Componente para manejar los clusters de marcadores
+const ClusterLayer = ({ apartments, transformApartmentData, setSelectedPiso }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    const markerClusterGroup = L.markerClusterGroup({
+      disableClusteringAtZoom: 16,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      maxClusterRadius: function(zoom) {
+        if (zoom < 13) return 80;
+        if (zoom < 15) return 50;
+        return 30;
+      }
+    });
+    
+    apartments.forEach((apartment) => {
+      const transformedApartment = transformApartmentData(apartment);
+      const marker = L.marker(
+        transformedApartment.coordenadas,
+        { icon: createIcon(transformedApartment.precio + '€') }
+      ).on('click', () => setSelectedPiso(transformedApartment));
+      
+      markerClusterGroup.addLayer(marker);
+    });
+    
+    map.addLayer(markerClusterGroup);
+    
+    return () => {
+      map.removeLayer(markerClusterGroup);
+    };
+  }, [apartments, map, transformApartmentData, setSelectedPiso]);
+  
+  return null;
+};
 
+const Principal = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPiso, setSelectedPiso] = useState(null);
   const [apartments, setApartments] = useState([]);
@@ -187,23 +226,13 @@ const Principal = () => {
         />
         <ZoomControl position="bottomleft" />
 
-        {/* Marcadores de pisos */}
-        {isLoading ? (
-          <div className="loading-overlay">Cargando apartamentos...</div>
-        ) : error ? (
-          <div className="error-message">{error}</div>
-        ) : (
-          filteredApartments.map((apartment, index) => {
-            const transformedApartment = transformApartmentData(apartment);
-            return (
-              <Marker
-                key={apartment.id || index}
-                position={transformedApartment.coordenadas}
-                icon={createIcon(transformedApartment.precio + '€')}
-                eventHandlers={{ click: () => setSelectedPiso(transformedApartment) }}
-              />
-            );
-          })
+        {/* Marcadores de pisos con clustering */}
+        {!isLoading && !error && (
+          <ClusterLayer 
+            apartments={filteredApartments} 
+            transformApartmentData={transformApartmentData} 
+            setSelectedPiso={setSelectedPiso}
+          />
         )}
       </MapContainer>
 
