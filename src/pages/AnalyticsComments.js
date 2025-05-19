@@ -25,6 +25,7 @@ const AnalyticsCommentsPage = () => {
     const socketRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
     const [reportModalOpen, setReportModalOpen] = useState(false);
+    const [selectedComment, setSelectedComment] = useState(null);
 
     useEffect(() => {
         // Establece la conexión solo una vez al montar
@@ -44,27 +45,36 @@ const AnalyticsCommentsPage = () => {
     ];
 
     useEffect(() => {
-    if (selectedBarrio) {
         setIsLoading(true);
-        axios
-        .get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comments`)
-        .then((res) => {
-            const sortedComments = res.data.data.sort(
-            (a, b) =>  new Date(b.createdAt) - new Date(a.createdAt) 
-            );
-            setComments(sortedComments);
-            console.log("Comentarios ordenados:", sortedComments);
-            setCurrentPage(1);
-        })
-        .catch((err) => {
-            console.error(err);
-        }).finally(() => {
-            setIsLoading(false);
-        });
-    } else {
-        setComments([]);
-    }
-    }, [selectedBarrio]);
+
+        const fetchComments = async () => {
+            try {
+                let res;
+                if (isAdmin) {
+                    res = await axios.get('https://uniliving-backend.onrender.com/zones/comments/reported', {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                } else if (selectedBarrio) {
+                    res = await axios.get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comments`);
+                } else {
+                    setComments([]);
+                    return;
+                }
+
+                const sorted = res.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                setComments(sorted);
+                setCurrentPage(1);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchComments();
+    }, [selectedBarrio, isAdmin, token]);
+
     
     useEffect(() => {
         const socket = socketRef.current;
@@ -141,10 +151,15 @@ const AnalyticsCommentsPage = () => {
         setShowModal(true);
     };
 
-    const handleCloseModal = () => {
+    const handleCloseModal = async (confirmed = false) => {
+        
+        if (confirmed && selectedUser) {
+            await handleDisableComment();
+        }
         setShowModal(false);
         setSelectedUser(null);
     };
+
 
     const handleSearch = () => {
         //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS TODO
@@ -162,20 +177,16 @@ const AnalyticsCommentsPage = () => {
 
     const handleReportComment = async (commentId) => {
     try {
-        console.log("Reportando comentario:", commentId);
-        console.log("ID de usuario:", user.id);
-        console.log("Token:", token);
-
         await axios.put(
         `https://uniliving-backend.onrender.com/zones/comments/report`,
-        {
-            commentId: commentId,
-            userId: user.id, // Asegúrate de incluirlo si es requerido por el backend
-        },
         {
             headers: {
             Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({
+                commentId: commentId,
+                status: 'Reported',
+            }),
         }
         );
 
@@ -185,6 +196,63 @@ const AnalyticsCommentsPage = () => {
         alert("No se pudo reportar el comentario.");
     }
     };
+
+    const handleApproveComment = async (comment) => {
+        console.log("Selected barrio:", selectedBarrio);
+        try {
+        await axios.put(
+        `https://uniliving-backend.onrender.com/zones/${comment.zone}/comment`,
+        {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                commentId: comment._id,
+                status: 'Visible',
+            }),
+        }
+        );
+
+        setReportModalOpen(true); // Mostrar modal
+    } catch (error) {
+        console.error("Error al reportar comentario:", error);
+        alert("No se pudo reportar el comentario.");
+    }
+    };
+
+    const handleDisableComment = async () => {
+        if (!token) return;
+
+        try {
+            await axios.put(
+                `https://uniliving-backend.onrender.com/zones/${encodeURIComponent(selectedBarrio)}/comment`,
+                {
+                    commentId: selectedComment,
+                    status: 'Disabled',
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        commentId: selectedComment,
+                        status: 'Visible',
+                    }),
+                }
+            );
+
+            // Opcional: Actualiza localmente el estado
+            setComments(prev =>
+                prev.filter(c => c._id !== selectedComment)
+            );
+
+            console.log("Comentario deshabilitado correctamente");
+        } catch (error) {
+            console.error("Error al deshabilitar comentario:", error);
+        }
+    };
+
+
 
     const indexOfLast = currentPage * usersPerPage;
     const indexOfFirst = indexOfLast - usersPerPage;
@@ -394,22 +462,44 @@ const AnalyticsCommentsPage = () => {
                                                             Reportar
                                                         </Button>
                                             )}
-                                            {isAdmin && (
-                                                <Button
-                                                    variant="outline-light"
-                                                    size="sm"
-                                                    className="ms-2"
-                                                    onClick={() => handleDeleteClick(comment)}
-                                                    style={{
-                                                        backgroundColor: 'white',
-                                                        color: 'white',
-                                                        borderRadius: '6px',
-                                                        padding: '4px 8px',
-                                                    }}
-                                                >
-                                                    <FaTrash style={{ color: 'red' }} />
-                                                </Button>
+                                           {isAdmin && (
+                                                <>
+                                                    <Button
+                                                        variant="outline-success"
+                                                        size="sm"
+                                                        className="ms-2"
+                                                        style={{
+                                                            height: '25px',
+                                                            fontSize: '0.75rem',
+                                                            padding: '2px 8px',
+                                                            whiteSpace: 'nowrap',
+                                                            alignSelf: 'start',
+                                                            marginTop: '18px'
+                                                        }}
+                                                        onClick={() => 
+                                                            setSelectedComment(comment._id) ||
+                                                            handleApproveComment(comment)
+                                                        }
+                                                    >
+                                                        ✔
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline-light"
+                                                        size="sm"
+                                                        className="ms-2"
+                                                        onClick={() => setSelectedComment(comment._id) || handleDeleteClick(comment)}
+                                                        style={{
+                                                            color: 'white',
+                                                            borderRadius: '6px',
+                                                            padding: '4px 8px',
+                                                            marginTop: '18px'
+                                                        }}
+                                                    >
+                                                        <FaTrash style={{ color: 'red' }} />
+                                                    </Button>
+                                                </>
                                             )}
+
                                         </div>
                                     </div>
                                 </Col>
@@ -473,11 +563,11 @@ const AnalyticsCommentsPage = () => {
 
             <CustomModal
                 show={showModal}
-                onHide={handleCloseModal}
-                title={selectedUser ? `Eliminar comentario de ${selectedUser.nombre}` : "Eliminar comentario"}
-                bodyText={selectedUser ? `¿Estás seguro que deseas eliminar el comentario de ${selectedUser.nombre}?` : "¿Estás seguro que deseas eliminar el comentario?"}
+                onHide={() => handleCloseModal(false)}
+                title={selectedUser ? `Eliminar comentario de ${selectedUser.user.firstName}` : "Eliminar comentario"}
+                bodyText={selectedUser ? `¿Estás seguro que deseas eliminar el comentario de ${selectedUser.user.firstName}?` : "¿Estás seguro que deseas eliminar el comentario?"}
                 confirmButtonText="Eliminar comentario"
-                onSave={handleCloseModal}
+                onSave={() => handleCloseModal(true)}
             />
         </div>
     );
