@@ -57,8 +57,7 @@ const Principal = () => {
     const fetchApartments = async () => {
       try {
         setIsLoading(true);
-        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-        const response = await axios.get(`${API_URL}/apartments`, config);
+        const response = await axios.get(`${API_URL}/apartments`);
         setApartments(response.data);
         setFilteredApartments(response.data);
         setIsLoading(false);
