@@ -165,15 +165,7 @@ const Principal = () => {
       idealistaUrl: apartment.idealistaUrl || '',
       furnished: apartment.furnished || false,
       parking: apartment.parking || false,
-      shared: apartment.shared || false,
-      sitiosInteres: [
-        { nombre: "Campus Río Ebro", distancia: "Calculando..." },
-        { nombre: "Ciudad Universitaria", distancia: "Calculando..." },
-        { nombre: "Estación Delicias", distancia: "Calculando..." },
-        { nombre: "Supermercado", distancia: "Calculando..." },
-        { nombre: "Casco histórico", distancia: "Calculando..." },
-        { nombre: "Centro de Salud", distancia: "Calculando..." }
-      ]
+      shared: apartment.shared || false
     };
   };
 

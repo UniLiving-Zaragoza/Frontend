@@ -1,10 +1,11 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGraduationCap, faTrain, faShoppingCart, faGlassCheers, faHospital, faHome, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useEffect } from 'react';
-import { Card, ListGroup, Badge } from 'react-bootstrap';
+import { faGraduationCap, faTrain, faShoppingCart, faGlassCheers, faHospital, faHome, faCheck, faTimes, faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
+import { useState, useEffect } from 'react';
+import { Card, ListGroup, Badge, Spinner } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
 import Gallery from 'react-image-gallery';
+import axios from 'axios';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import '../css/gallery.css';
 
@@ -12,11 +13,73 @@ function DetallePiso() {
     const location = useLocation();
     const navigate = useNavigate();
     const piso = location.state?.piso;
+    const [sitiosInteres, setSitiosInteres] = useState([]);
+    const [loadingPOI, setLoadingPOI] = useState(false);
+    const [errorPOI, setErrorPOI] = useState(null);
+    
+    const API_URL = 'https://uniliving-backend.onrender.com';
 
     useEffect(() => {
         if (!piso) {
             navigate('/principal', { replace: true });
+            return;
         }
+        
+        const fetchNearbyEquipments = async () => {
+            if (!piso.coordenadas || !piso.coordenadas[0] || !piso.coordenadas[1]) return;
+            
+            try {
+                setLoadingPOI(true);
+                setErrorPOI(null);
+                
+                const response = await axios.get(`${API_URL}/apartments/equipamientos-cercanos`, {
+                    params: {
+                        lat: piso.coordenadas[0],
+                        lon: piso.coordenadas[1]
+                    }
+                });
+                
+                if (response.data) {
+
+                    const poiCategories = Object.keys(response.data);
+                    
+                    let allPOIs = [];
+                    
+                    poiCategories.forEach(category => {
+                        if (Array.isArray(response.data[category]) && response.data[category].length > 0) {
+
+                            const closestPOI = response.data[category][0];
+                            
+                            allPOIs.push({
+                                nombre: closestPOI.title,
+                                distancia: `${(closestPOI.distance).toFixed(2)} km`,
+                                enlace: closestPOI.link || closestPOI.url,
+                                categoria: category,
+                                coordenadas: closestPOI.geometry ? closestPOI.geometry.coordinates : null
+                            });
+                        }
+                    });
+                    
+                    allPOIs.sort((a, b) => {
+                        const distA = parseFloat(a.distancia);
+                        const distB = parseFloat(b.distancia);
+                        return distA - distB;
+                    });
+                    
+                    allPOIs = allPOIs.slice(0, 5);
+                    
+                    setSitiosInteres(allPOIs);
+                }
+                
+                setLoadingPOI(false);
+            } catch (error) {
+                console.error('Error fetching nearby equipments:', error);
+                setErrorPOI('No se pudieron cargar los sitios de interés cercanos');
+                setLoadingPOI(false);
+            }
+        };
+        
+        fetchNearbyEquipments();
     }, [piso, navigate]);
 
     if (!piso) {
@@ -34,23 +97,18 @@ function DetallePiso() {
             thumbnail: 'https://via.placeholder.com/100x67?text=No+hay+imagen+disponible'
         }];
 
-    const sitiosInteres = piso.sitiosInteres || [
-        { nombre: "Campus Río Ebro", distancia: "No disponible" },
-        { nombre: "Ciudad Universitaria", distancia: "No disponible" },
-        { nombre: "Estación Delicias", distancia: "No disponible" },
-        { nombre: "Supermercado", distancia: "No disponible" },
-        { nombre: "Casco histórico", distancia: "No disponible" },
-        { nombre: "Centro de Salud", distancia: "No disponible" }
-    ];
-
-    const sitioIcons = [
-        faGraduationCap,
-        faGraduationCap,
-        faTrain,
-        faShoppingCart,
-        faGlassCheers,
-        faHospital
-    ];
+    
+    const getCategoryIcon = (index) => {
+        const icons = [
+            faGraduationCap,
+            faHospital,
+            faShoppingCart,
+            faGlassCheers,
+            faTrain
+        ];
+        
+        return icons[index % icons.length];
+    };
 
     return (
         <div className="App position-relative">
@@ -162,17 +220,43 @@ function DetallePiso() {
                             </div>
                             <Card.Title className="text-center fw-bold mt-4">Sitios de interés cercanos</Card.Title>
                             <hr />
-                            <ListGroup className="h-100">
-                                {sitiosInteres.map((sitio, index) => (
-                                    <ListGroup.Item key={index} className="d-flex align-items-center p-3 border-bottom">
-                                        <FontAwesomeIcon icon={sitioIcons[index]} size="2x" className="me-3" />
-                                        <div className="w-100 d-flex justify-content-between">
-                                            <p className="fs-5 fw-bold mb-0">{sitio.nombre}</p>
-                                            <p className="fs-5 fw-bold mb-0 text-end">{sitio.distancia}</p>
-                                        </div>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
+                            
+                            {loadingPOI ? (
+                                <div className="d-flex justify-content-center p-4">
+                                    <Spinner animation="border" role="status" variant="primary">
+                                        <span className="visually-hidden">Cargando...</span>
+                                    </Spinner>
+                                </div>
+                            ) : errorPOI ? (
+                                <div className="alert alert-warning text-center">{errorPOI}</div>
+                            ) : sitiosInteres.length === 0 ? (
+                                <div className="alert alert-info text-center">No se encontraron sitios de interés cercanos</div>
+                            ) : (
+                                <ListGroup className="h-100">
+                                    {sitiosInteres.map((sitio, index) => (
+                                        <ListGroup.Item key={index} className="d-flex align-items-center p-3 border-bottom">
+                                            <FontAwesomeIcon icon={getCategoryIcon(index)} size="2x" className="me-3" />
+                                            <div className="w-100 d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <p className="fs-5 fw-bold mb-0">{sitio.nombre}</p>
+                                                    {sitio.enlace && (
+                                                        <a 
+                                                            href={sitio.enlace} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="text-primary"
+                                                            style={{ fontSize: '0.85rem' }}
+                                                        >
+                                                            Más información <FontAwesomeIcon icon={faExternalLinkAlt} size="xs" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                                <p className="fs-5 mb-0 text-end">{sitio.distancia}</p>
+                                            </div>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            )}
                         </Card.Body>
                     </Card>
                     <div className="d-flex justify-content-center mt-2">
