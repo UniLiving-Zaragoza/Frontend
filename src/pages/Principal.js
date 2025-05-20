@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, MessageCircle, RefreshCcw, X } from 'lucide-react';
 import { MapContainer, TileLayer, ZoomControl, useMap } from 'react-leaflet';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Accordion, Button, Form, Offcanvas, Row, Col, Badge } from 'react-bootstrap';
 import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
@@ -71,6 +71,7 @@ const ClusterLayer = ({ apartments, transformApartmentData, setSelectedPiso }) =
 };
 
 const Principal = () => {
+  const location = useLocation();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPiso, setSelectedPiso] = useState(null);
   const [apartments, setApartments] = useState([]);
@@ -96,6 +97,15 @@ const Principal = () => {
   const { isAuthenticated, token } = useAuth();
 
   useEffect(() => {
+    if (location.state?.barrio) {
+      setFilters(prevFilters => ({
+        ...prevFilters,
+        barrio: location.state.barrio
+      }));
+    }
+  }, [location.state]);
+
+  useEffect(() => {
     const fetchApartments = async () => {
       try {
         setIsLoading(true);
@@ -112,6 +122,13 @@ const Principal = () => {
 
     fetchApartments();
   }, [token]);
+
+  useEffect(() => {
+    if (apartments.length > 0) {
+      applyFilters();
+    }
+    // eslint-disable-next-line
+  }, [apartments, filters.barrio]);
 
   useEffect(() => {
     let count = 0;

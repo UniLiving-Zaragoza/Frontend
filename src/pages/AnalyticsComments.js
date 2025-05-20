@@ -160,8 +160,11 @@ const AnalyticsCommentsPage = () => {
 
 
     const handleSearch = () => {
-        //LUEGO HABRA QUE REDIRIGIR A LA PRINCIPAL APLICANDO LOS FILTROS TODO
-        navigate('/principal');
+        navigate('/principal', { 
+            state: { 
+                barrio: selectedBarrio 
+            } 
+        });
     };
 
     const handleGraphics = () => {

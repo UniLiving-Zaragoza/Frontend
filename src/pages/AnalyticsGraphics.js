@@ -46,7 +46,11 @@ const AnalyticsGraphicsPage = () => {
     }, [selectedBarrio]);
 
     const handleSearch = () => {
-        navigate('/principal');
+        navigate('/principal', { 
+            state: { 
+                barrio: selectedBarrio 
+            } 
+        });
     };
 
     const handleCommets = () => {
