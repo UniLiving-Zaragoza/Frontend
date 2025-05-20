@@ -87,8 +87,7 @@ function DetallePiso() {
                             )}
                         />
                         <Card.Body className="text-center">
-                            <Card.Title className="fs-4">{piso.nombre}</Card.Title>
-                            <Card.Subtitle className="fs-5 mt-3 mb-2">{piso.precio}€ por mes</Card.Subtitle>
+                            <Card.Subtitle className="fs-4 mt-2 mb-4">{piso.precio}€ por mes</Card.Subtitle>
                             
                             <div className="d-flex justify-content-center gap-2 my-2">
                                 {piso.shared && <Badge bg="info">Compartido</Badge>}

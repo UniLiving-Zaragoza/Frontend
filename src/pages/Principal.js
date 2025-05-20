@@ -152,7 +152,6 @@ const Principal = () => {
     return {
       id: apartment.id,
       precio: apartment.price,
-      nombre: 'Nombre del apartamento',
       coordenadas: [apartment.latitude, apartment.longitude],
       foto: apartment.images && apartment.images.length > 0 ? apartment.images[0].url : 'https://via.placeholder.com/300',
       descripcion: cleanText(apartment.description) || 'Sin descripción',
