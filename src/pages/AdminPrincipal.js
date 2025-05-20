@@ -174,6 +174,33 @@ const Dashboard = () => {
 
           <Col md={6} lg={6} className="mb-4">
             <Card className="shadow-sm p-2">
+                <Card.Header 
+                  as={Link} 
+                  to="/analiticas-comentarios" 
+                  className="d-flex justify-content-between align-items-center"
+                  style={{ textDecoration: 'none', cursor: 'pointer' }}
+                >
+                <span> Comentarios Totales <span className="fs-4 fw-bold align-self-center">{commentStats.total.toLocaleString()}</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                    <FaCommentDots className="align-middle" />
+                </span>
+              </Card.Header>
+              <Card.Body>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={commentStats.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mes" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="comentarios" stroke="#d62728" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={6} lg={6} className="mb-4">
+            <Card className="shadow-sm p-2">
               <Card.Header 
                 as={Link} 
                 to="/reportes-admin" 
@@ -201,33 +228,7 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-
-          <Col md={6} lg={6} className="mb-4">
-            <Card className="shadow-sm p-2">
-                <Card.Header 
-                  as={Link} 
-                  to="/analiticas-comentarios" 
-                  className="d-flex justify-content-between align-items-center"
-                  style={{ textDecoration: 'none', cursor: 'pointer' }}
-                >
-                <span> Comentarios Totales <span className="fs-4 fw-bold align-self-center">{commentStats.total.toLocaleString()}</span></span>
-                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
-                    <FaCommentDots className="align-middle" />
-                </span>
-              </Card.Header>
-              <Card.Body>
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={commentStats.monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="comentarios" stroke="#d62728" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card.Body>
-            </Card>
-          </Col>
+          
         </Row>
       </Container>
     </div>
