@@ -57,6 +57,7 @@ const AnalyticsCommentsPage = () => {
                         }
                     });
                 } else if (selectedBarrio) {
+                    console.log("Cambiando de barrio", selectedBarrio);
                     res = await axios.get(`https://uniliving-backend.onrender.com/zones/by-name/${encodeURIComponent(selectedBarrio)}/comments`);
                 } else {
                     setComments([]);
@@ -134,10 +135,7 @@ const AnalyticsCommentsPage = () => {
 
             if (!response.ok) throw new Error('Error al enviar el comentario');
 
-            const savedComment = await response.json();
-
             setNewComment('');
-            setComments(prev => [...prev, savedComment]); // Asumiendo que tienes `setComments`
 
         } catch (error) {
             console.error('Fallo al enviar el comentario:', error.message);
@@ -384,7 +382,7 @@ const AnalyticsCommentsPage = () => {
                             {[...currentComments].reverse().map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
-                                        <Link to={`/perfil/${comment.user._id}`}>
+                                        <Link to={`/perfil/${comment.user._id || comment.user}`}>
                                             <img
                                                 src={comment.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'}
                                                 alt={`${comment.user.firstName} ${comment.user.lastName}`}
@@ -406,8 +404,7 @@ const AnalyticsCommentsPage = () => {
                                             }}
                                         >
                                             <div className="d-flex flex-column">
-                                            <Link
-                                                to={`/perfil/${comment.user._id}`}
+                                            <Link to={`/perfil/${comment.user._id || comment.user}`}
                                                 style={{
                                                     textDecoration: 'none',
                                                     color: 'inherit',
