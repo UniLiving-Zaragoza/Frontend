@@ -10,6 +10,54 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const API_URL = 'https://uniliving-backend.onrender.com';
 
+// Mapeo de números de mes a nombres abreviados
+const monthNames = {
+  "1": "Ene",
+  "2": "Feb",
+  "3": "Mar",
+  "4": "Abr",
+  "5": "May",
+  "6": "Jun",
+  "7": "Jul",
+  "8": "Ago",
+  "9": "Sep",
+  "10": "Oct",
+  "11": "Nov",
+  "12": "Dic"
+};
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const fullMonthNames = {
+      "1": "Enero",
+      "2": "Febrero",
+      "3": "Marzo",
+      "4": "Abril",
+      "5": "Mayo",
+      "6": "Junio",
+      "7": "Julio",
+      "8": "Agosto",
+      "9": "Septiembre",
+      "10": "Octubre",
+      "11": "Noviembre",
+      "12": "Diciembre"
+    };
+    
+    return (
+      <div className="custom-tooltip" style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
+        <p className="label">{`${fullMonthNames[label]}`}</p>
+        {payload.map((entry, index) => (
+          <p key={`item-${index}`} style={{ color: entry.color }}>
+            {`${entry.name}: ${entry.value}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+};
+
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userStats, setUserStats] = useState({
@@ -86,18 +134,27 @@ const Dashboard = () => {
     const monthsData = {};
     
     for (let i = 1; i <= 12; i++) {
-      monthsData[i] = { mes: i.toString(), [dataKey]: 0 };
+      monthsData[i] = { 
+        mes: i.toString(), 
+        mesNombre: monthNames[i.toString()],
+        [dataKey]: 0 
+      };
     }
 
     monthlyStats.forEach(stat => {
       const month = stat._id.month;
       monthsData[month] = {
         mes: month.toString(),
+        mesNombre: monthNames[month.toString()],
         [dataKey]: stat.total
       };
     });
 
     return Object.values(monthsData).sort((a, b) => parseInt(a.mes) - parseInt(b.mes));
+  };
+
+  const formatXAxis = (value) => {
+    return monthNames[value] || value;
   };
 
   if (isLoading) {
@@ -135,10 +192,20 @@ const Dashboard = () => {
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={userStats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
+                    <XAxis 
+                      dataKey="mes" 
+                      tickFormatter={formatXAxis}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
                     <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="usuarios" stroke="#8884d8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="usuarios" 
+                      stroke="#8884d8" 
+                      name="Usuarios"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </Card.Body>
@@ -162,10 +229,20 @@ const Dashboard = () => {
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={messageStats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
+                    <XAxis 
+                      dataKey="mes" 
+                      tickFormatter={formatXAxis}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
                     <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="mensajes" stroke="#82ca9d" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="mensajes" 
+                      stroke="#82ca9d" 
+                      name="Mensajes"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </Card.Body>
@@ -189,10 +266,20 @@ const Dashboard = () => {
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={commentStats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
+                    <XAxis 
+                      dataKey="mes" 
+                      tickFormatter={formatXAxis}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
                     <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="comentarios" stroke="#d62728" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="comentarios" 
+                      stroke="#d62728" 
+                      name="Comentarios"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </Card.Body>
@@ -216,13 +303,24 @@ const Dashboard = () => {
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={messageStats.monthlyData.map(item => ({
                     mes: item.mes,
+                    mesNombre: item.mesNombre,
                     reportes: Math.round(item.mensajes * (messageStats.reported / messageStats.total || 0))
                   }))}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
+                    <XAxis 
+                      dataKey="mes" 
+                      tickFormatter={formatXAxis}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
                     <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="reportes" stroke="#ff7300" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="reportes" 
+                      stroke="#ff7300" 
+                      name="Reportes"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </Card.Body>
