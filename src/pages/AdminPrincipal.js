@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
-import { FaUsers, FaEnvelope, FaExclamationTriangle, FaCommentDots } from "react-icons/fa";
+import { Container, Row, Col, Card, Spinner, Button } from "react-bootstrap";
+import { FaUsers, FaEnvelope, FaExclamationTriangle, FaCommentDots, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomAdminNavbar from "../components/CustomNavbarAdmin";
@@ -58,7 +58,52 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const YearSelector = ({ currentYear, minYear, maxYear, onYearChange }) => {
+  const handlePrevYear = () => {
+    if (currentYear > minYear) {
+      onYearChange(currentYear - 1);
+    }
+  };
+
+  const handleNextYear = () => {
+    if (currentYear < maxYear) {
+      onYearChange(currentYear + 1);
+    }
+  };
+
+  return (
+    <div className="d-flex justify-content-center align-items-center my-3">
+      <Button 
+        variant="outline-secondary" 
+        size="sm" 
+        onClick={handlePrevYear}
+        disabled={currentYear <= minYear}
+        className="d-flex align-items-center"
+      >
+        <FaChevronLeft />
+      </Button>
+      <div className="mx-3">
+        <h4 className="m-0">Estadísticas {currentYear}</h4>
+      </div>
+      <Button 
+        variant="outline-secondary" 
+        size="sm" 
+        onClick={handleNextYear}
+        disabled={currentYear >= maxYear}
+        className="d-flex align-items-center"
+      >
+        <FaChevronRight />
+      </Button>
+    </div>
+  );
+};
+
 const Dashboard = () => {
+  const currentDate = new Date();
+  const maxYear = currentDate.getFullYear();
+  const minYear = 2024;
+  const [selectedYear, setSelectedYear] = useState(maxYear);
+
   const [isLoading, setIsLoading] = useState(true);
   const [userStats, setUserStats] = useState({
     total: 0,
@@ -95,26 +140,27 @@ const Dashboard = () => {
 
         // Procesar datos de usuarios
         const userData = usersResponse.data;
-        console.log(userData)
         setUserStats({
-          total: userData.totalStats[0]?.total || 0,
-          monthlyData: processMonthlyData(userData.monthlyStats, 'usuarios')
+          total: calculateYearlyTotal(userData.totalStats[0]?.total || 0, userData.monthlyStats, selectedYear),
+          monthlyData: processMonthlyData(filterDataByYear(userData.monthlyStats, selectedYear), 'usuarios')
         });
 
         // Procesar datos de mensajes
         const messageData = messagesResponse.data;
-        const reportedCount = messageData.totalStats[0]?.byStatus.find(item => item.status === 'Reported')?.count || 0;
+        const yearlyMessageStats = filterDataByYear(messageData.monthlyStats, selectedYear);
+        const reportedCount = calculateYearlyReportedCount(messageData.totalStats[0]?.byStatus, yearlyMessageStats, selectedYear);
+        
         setMessageStats({
-          total: messageData.totalStats[0]?.total || 0,
+          total: calculateYearlyTotal(messageData.totalStats[0]?.total || 0, messageData.monthlyStats, selectedYear),
           reported: reportedCount,
-          monthlyData: processMonthlyData(messageData.monthlyStats, 'mensajes')
+          monthlyData: processMonthlyData(yearlyMessageStats, 'mensajes')
         });
 
         // Procesar datos de comentarios
         const commentData = commentsResponse.data;
         setCommentStats({
-          total: commentData.totalStats[0]?.total || 0,
-          monthlyData: processMonthlyData(commentData.monthlyStats, 'comentarios')
+          total: calculateYearlyTotal(commentData.totalStats[0]?.total || 0, commentData.monthlyStats, selectedYear),
+          monthlyData: processMonthlyData(filterDataByYear(commentData.monthlyStats, selectedYear), 'comentarios')
         });
 
       } catch (error) {
@@ -125,7 +171,37 @@ const Dashboard = () => {
     };
 
     fetchAllStats();
-  }, [token]);
+  }, [token, selectedYear]);
+
+  // Función para filtrar datos por año
+  const filterDataByYear = (monthlyStats, year) => {
+    if (!monthlyStats || !Array.isArray(monthlyStats)) return [];
+    return monthlyStats.filter(stat => stat._id.year === year);
+  };
+
+  // Función para calcular el total anual
+  const calculateYearlyTotal = (totalAll, monthlyStats, year) => {
+    if (!monthlyStats || !Array.isArray(monthlyStats)) return 0;
+    
+    const yearData = monthlyStats.filter(stat => stat._id.year === year);
+    if (yearData.length === 0) return 0;
+    
+    return yearData.reduce((acc, curr) => acc + curr.total, 0);
+  };
+
+  // Función para calcular el número de reportes por año
+  const calculateYearlyReportedCount = (byStatus, yearlyStats, year) => {
+    if (!yearlyStats || yearlyStats.length === 0) return 0;
+    
+    // Encontrar el porcentaje de reportados del total
+    const totalReported = byStatus?.find(item => item.status === 'Reported')?.count || 0;
+    const allData = byStatus?.reduce((acc, item) => acc + item.count, 0) || 1;
+    const reportRatio = totalReported / allData;
+    
+    // Aplicar ese porcentaje al total del año
+    const yearTotal = yearlyStats.reduce((acc, curr) => acc + curr.total, 0);
+    return Math.round(yearTotal * reportRatio);
+  };
 
   // Función para procesar datos mensuales
   const processMonthlyData = (monthlyStats, dataKey) => {
@@ -173,9 +249,15 @@ const Dashboard = () => {
   return (
     <div className="App">
       <CustomAdminNavbar />
-      <Container fluid className="mt-4">
+      <Container fluid>
+        <YearSelector 
+          currentYear={selectedYear} 
+          minYear={minYear} 
+          maxYear={maxYear} 
+          onYearChange={setSelectedYear} 
+        />
         <Row>
-          <Col md={6} lg={6} className="mb-4">
+          <Col md={6} lg={6} className="mb-2">
             <Card className="shadow-sm p-2">
               <Card.Header 
                 as={Link} 
@@ -183,14 +265,14 @@ const Dashboard = () => {
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Usuarios Totales <span className="fs-4 fw-bold align-self-center">{userStats.total.toLocaleString()}</span></span>
-                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                <span> Usuarios Totales <span className="fs-5 fw-bold align-self-center">{userStats.total.toLocaleString()}</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "31px" }}>
                     <FaUsers className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={userStats.monthlyData} margin={{ right: 35, top: 10  }}>
+                <ResponsiveContainer width="100%" height={190}>
+                  <LineChart data={userStats.monthlyData} margin={{ right: 35, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -212,7 +294,7 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          <Col md={6} lg={6} className="mb-4">
+          <Col md={6} lg={6} className="mb-2">
             <Card className="shadow-sm p-2">
               <Card.Header 
                 as={Link} 
@@ -220,14 +302,14 @@ const Dashboard = () => {
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Mensajes Totales <span className="fs-4 fw-bold align-self-center">{messageStats.total.toLocaleString()}</span></span>
-                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                <span> Mensajes Totales <span className="fs-5 fw-bold align-self-center">{messageStats.total.toLocaleString()}</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "31px" }}>
                     <FaEnvelope className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={messageStats.monthlyData} margin={{ right: 35, top: 10  }}>
+                <ResponsiveContainer width="100%" height={190}>
+                  <LineChart data={messageStats.monthlyData} margin={{ right: 35, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -249,7 +331,7 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          <Col md={6} lg={6} className="mb-4">
+          <Col md={6} lg={6} className="mb-2">
             <Card className="shadow-sm p-2">
                 <Card.Header 
                   as={Link} 
@@ -257,14 +339,14 @@ const Dashboard = () => {
                   className="d-flex justify-content-between align-items-center"
                   style={{ textDecoration: 'none', cursor: 'pointer' }}
                 >
-                <span> Comentarios Totales <span className="fs-4 fw-bold align-self-center">{commentStats.total.toLocaleString()}</span></span>
-                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                <span> Comentarios Totales <span className="fs-5 fw-bold align-self-center">{commentStats.total.toLocaleString()}</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "31px" }}>
                     <FaCommentDots className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={commentStats.monthlyData} margin={{ right: 35, top: 10  }}>
+                <ResponsiveContainer width="100%" height={190}>
+                  <LineChart data={commentStats.monthlyData} margin={{ right: 35, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -286,7 +368,7 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          <Col md={6} lg={6} className="mb-4">
+          <Col md={6} lg={6} className="mb-2">
             <Card className="shadow-sm p-2">
               <Card.Header 
                 as={Link} 
@@ -294,18 +376,18 @@ const Dashboard = () => {
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Mensajes Reportados <span className="fs-4 fw-bold align-self-center">{messageStats.reported.toLocaleString()}</span></span>
-                <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
+                <span> Mensajes Reportados <span className="fs-5 fw-bold align-self-center">{messageStats.reported.toLocaleString()}</span></span>
+                <span className="icon-container d-flex align-items-center" style={{ fontSize: "31px" }}>
                     <FaExclamationTriangle className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={190}>
                   <LineChart data={messageStats.monthlyData.map(item => ({
                     mes: item.mes,
                     mesNombre: item.mesNombre,
                     reportes: Math.round(item.mensajes * (messageStats.reported / messageStats.total || 0))
-                  }))} margin={{ right: 35, top: 10 }}>
+                  }))} margin={{ right: 35, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -326,7 +408,6 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-          
         </Row>
       </Container>
     </div>
