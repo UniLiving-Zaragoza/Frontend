@@ -340,8 +340,13 @@ const Principal = () => {
                     min={0}
                     max={MAX_PRICE}
                     step={50}
-                    defaultValue={[filters.precioMin || 0, filters.precio || MAX_PRICE]}
-                    onChange={([min, max]) => setFilters({ ...filters, precioMin: min, precio: max })}
+                    value={[
+                      filters.precioMin !== '' ? parseInt(filters.precioMin) : 0,
+                      filters.precio !== '' ? parseInt(filters.precio) : MAX_PRICE
+                    ]}
+                    onChange={([min, max]) =>
+                      setFilters({ ...filters, precioMin: min.toString(), precio: max.toString() })
+                    }
                   />
                   <div className="d-flex justify-content-between mt-1">
                     <small className="text-muted">0€</small>
