@@ -188,7 +188,9 @@ const Principal = () => {
         return (
           (!filters.habitaciones || transformedApartment.habitaciones === parseInt(filters.habitaciones)) &&
           (!filters.baños || apartment.numBathrooms === parseInt(filters.baños)) &&
-          (!filters.barrio || transformedApartment.barrio === filters.barrio) &&
+          (!filters.barrio || 
+            transformedApartment.barrio.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === 
+            filters.barrio.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()) &&
           (!filters.precio || filters.precio === MAX_PRICE || transformedApartment.precio <= parseInt(filters.precio)) &&
           (!filters.precioMin || transformedApartment.precio >= parseInt(filters.precioMin)) &&
           (!filters.tamaño || transformedApartment.metros >= parseInt(filters.tamaño)) &&
