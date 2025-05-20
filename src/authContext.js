@@ -23,17 +23,12 @@ const isTokenExpired = (token) => {
 };
 
 export function AuthProvider({ children }) {
-
-  const initialToken = localStorage.getItem('authToken');
-  const initialIsAuthenticated = initialToken && !isTokenExpired(initialToken);
-  const initialIsAdmin = localStorage.getItem('isAdmin') === 'true';
-
-  const [isAuthenticated, setIsAuthenticated] = useState(initialIsAuthenticated);
-  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState(initialToken);
-  
+  const [token, setToken] = useState(null);
+
   const axiosInterceptorId = useRef(null);
   
   // Configurar interceptor de Axios
@@ -57,31 +52,36 @@ export function AuthProvider({ children }) {
   // Función para obtener datos del usuario actual
   const fetchUserData = useCallback(async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
+      const currentToken = localStorage.getItem('authToken');
+      if (!currentToken) {
         setIsLoading(false);
         return;
       }
-  
-      const userData = parseJwt(token);
+
+      const userData = parseJwt(currentToken);
       if (!userData || !userData.id) {
         setIsLoading(false);
         return;
       }
   
       setUser(userData);
-      setToken(token);
-      setIsLoading(false);
+      setToken(currentToken);
+      setIsAuthenticated(true);
+      setIsAdmin(localStorage.getItem('isAdmin') === 'true');
     } catch (error) {
       console.error('Error al obtener datos del usuario:', error);
+    } finally {
       setIsLoading(false);
     }
   }, []);
   
   // Efecto de inicialización
   useEffect(() => {
-    if (initialIsAuthenticated) {
-      setupAxiosInterceptors(initialToken);
+    const currentToken = localStorage.getItem('authToken');
+    const isValid = currentToken && !isTokenExpired(currentToken);
+
+    if (isValid) {
+      setupAxiosInterceptors(currentToken);
       fetchUserData();
     } else {
       logout();
@@ -90,8 +90,8 @@ export function AuthProvider({ children }) {
     
     // Configurar un intervalo para revisar la expiración periódicamente
     const checkTokenInterval = setInterval(() => {
-      const currentToken = localStorage.getItem('authToken');
-      if (currentToken && isTokenExpired(currentToken)) {
+      const token = localStorage.getItem('authToken');
+      if (token && isTokenExpired(token)) {
         logout();
         alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       }
@@ -103,7 +103,7 @@ export function AuthProvider({ children }) {
         axios.interceptors.request.eject(axiosInterceptorId.current);
       }
     };
-  }, [fetchUserData, initialToken, initialIsAuthenticated]);
+  }, [fetchUserData]);
 
   // Método para guardar el token y establecer estado de autenticación
   const setAuthToken = useCallback((token, isAdminUser = false) => {
