@@ -290,8 +290,10 @@ function DetallePiso() {
                                 <ListGroup className="h-100">
                                     {sitiosInteres.map((sitio, index) => (
                                         <ListGroup.Item key={index} className="d-flex align-items-center p-3 border-bottom">
-                                            <FontAwesomeIcon icon={getCategoryIcon(sitio.categoria)} size="2x" className="me-3" />
-                                            <div className="w-100 d-flex justify-content-between align-items-center">
+                                            <div className="icon-container" style={{ width: '40px', display: 'flex', justifyContent: 'center' }}>
+                                                <FontAwesomeIcon icon={getCategoryIcon(sitio.categoria)} size="2x" />
+                                            </div>
+                                            <div className="w-100 ms-3 d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <p className="fs-5 fw-bold mb-0">{sitio.nombre}</p>
                                                     {sitio.enlace && (
