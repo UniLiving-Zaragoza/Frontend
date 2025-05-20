@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Button, Card, Row, Col, Form, Spinner, Modal } from 'react-bootstrap';
-import {  FaChartLine, FaComments,FaQuestionCircle  } from 'react-icons/fa';
-import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip,LineChart, Line, Cell } from 'recharts';
+import { FaComments, FaQuestionCircle } from 'react-icons/fa';
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line, Cell, PieChart, Pie } from 'recharts';
 import { useNavigate, useLocation } from 'react-router-dom';
 import CustomNavbar from '../components/CustomNavbar';
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -64,13 +64,23 @@ const AnalyticsGraphicsPage = () => {
         `Buscar piso en ${selectedBarrio}` : 
         'Buscar piso en toda Zaragoza';
 
-    const resumenData = barrioData ? [
+    const edadYHogarData = barrioData ? [
         { name: 'Edad Media', value: barrioData.edadMedia },
         { name: 'Personas/Hogar', value: barrioData.personasPorHogar },
         { name: '% Extranjera', value: barrioData.porcentajeExtranjera },
-        { name: '% Mayores 65', value: barrioData.porcentajeMayores },
-        { name: '% Menores 18', value: barrioData.porcentajeJovenes },
     ] : [];
+
+    const pieData = barrioData ? [
+        { name: 'Mayores 65', value: barrioData.porcentajeMayores, fill: '#83a6ed' },
+        { name: 'Menores 18', value: barrioData.porcentajeJovenes, fill: '#8dd1e1' },
+        { 
+          name: 'Adultos 18-65', 
+          value: 100 - (barrioData.porcentajeMayores + barrioData.porcentajeJovenes), 
+          fill: '#82ca9d' 
+        },
+    ] : [];
+
+    const COLORS = ['#83a6ed', '#8dd1e1', '#82ca9d'];
 
     const indicesData = barrioData ? [
         { name: 'Envejecimiento', value: barrioData.indiceEnvejecimiento },
@@ -200,44 +210,72 @@ const AnalyticsGraphicsPage = () => {
                                     ) : (
                                         <>
                                             {/* Gráfico 1: Indicadores básicos */}
-                                            <div className="mb-5">
-                                                <h6 className="fw-bold text-center mb-3">Indicadores de población</h6>
-                                                <ResponsiveContainer width="100%" height={300}>
-                                                    <BarChart data={resumenData}>
-                                                        <CartesianGrid stroke="#e6e6e6" strokeDasharray="3 3" />
-                                                        <XAxis 
-                                                            dataKey="name" 
-                                                            tick={{ fill: '#444', fontSize: 20, fontWeight: 'bold' }} 
-                                                            axisLine={false} 
-                                                            tickLine={false} 
-                                                        />
-                                                        <YAxis 
-                                                            tick={{ fill: '#444', fontSize: 12 }} 
-                                                            axisLine={false} 
-                                                            tickLine={false} 
-                                                        />
-                                                        <Tooltip 
-                                                            contentStyle={{ 
-                                                                backgroundColor: '#fff', 
-                                                                border: '1px solid #ccc', 
-                                                                borderRadius: 6, 
-                                                                fontSize: 12 
-                                                            }} 
-                                                        />
-                                                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                                                        {resumenData.map((entry, index) => (
-                                                            <Cell 
-                                                            key={`cell-${index}`} 
-                                                            fill="#000842" 
+                                            <Row className="mb-5">
+                                                <h5 className="fw-bold text-center mb-3">Indicadores de población</h5>
+                                                
+                                                {/* Gráfico de barras para edad media y personas por hogar */}
+                                                <Col md={6}>
+                                                    <ResponsiveContainer width="100%" height={300}>
+                                                        <BarChart data={edadYHogarData}>
+                                                            <CartesianGrid stroke="#e6e6e6" strokeDasharray="3 3" />
+                                                            <XAxis 
+                                                                dataKey="name" 
+                                                                tick={{ fill: '#444', fontSize: 16, fontWeight: 'bold' }} 
+                                                                axisLine={false} 
+                                                                tickLine={false} 
                                                             />
-                                                        ))}
-                                                        </Bar>
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </div>
+                                                            <YAxis 
+                                                                tick={{ fill: '#444', fontSize: 12 }} 
+                                                                axisLine={false} 
+                                                                tickLine={false} 
+                                                            />
+                                                            <Tooltip 
+                                                                contentStyle={{ 
+                                                                    backgroundColor: '#fff', 
+                                                                    border: '1px solid #ccc', 
+                                                                    borderRadius: 6, 
+                                                                    fontSize: 12 
+                                                                }} 
+                                                            />
+                                                            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                                                                {edadYHogarData.map((entry, index) => (
+                                                                    <Cell 
+                                                                        key={`cell-${index}`} 
+                                                                        fill="#000842" 
+                                                                    />
+                                                                ))}
+                                                            </Bar>
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </Col>
+                                                
+                                                {/* Gráfico de quesito para porcentajes de población */}
+                                                <Col md={6}>
+                                                    <ResponsiveContainer width="100%" height={300}>
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={pieData}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                labelLine={false}
+                                                                outerRadius={100}
+                                                                fill="#8884d8"
+                                                                dataKey="value"
+                                                                label={({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                                                            >
+                                                                {pieData.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                                ))}
+                                                            </Pie>
+                                                            <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </Col>
+                                            </Row>
+
                                             {/* Gráfico 2: Índices relacionados */}
                                             <div>
-                                            <h6 className="fw-bold text-center mb-3">Índices de envejecimiento y dependencia</h6>
+                                            <h5 className="fw-bold text-center mb-3">Índices de envejecimiento y dependencia</h5>
                                             <ResponsiveContainer width="100%" height={300}>
                                                 <LineChart data={indicesData}>
                                                 <defs>
