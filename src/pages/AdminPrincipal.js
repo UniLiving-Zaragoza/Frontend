@@ -1,72 +1,118 @@
-import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Row, Col, Card } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import { FaUsers, FaEnvelope, FaExclamationTriangle, FaCommentDots } from "react-icons/fa";
 import { Link } from 'react-router-dom';
+import { useAuth } from '../authContext';
 import CustomAdminNavbar from "../components/CustomNavbarAdmin";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const dataUsers = [
-  { mes: "1", usuarios: 200 },
-  { mes: "2", usuarios: 300 },
-  { mes: "3", usuarios: 250 },
-  { mes: "4", usuarios: 400 },
-  { mes: "5", usuarios: 450 },
-  { mes: "6", usuarios: 500 },
-  { mes: "7", usuarios: 600 },
-  { mes: "8", usuarios: 550 },
-  { mes: "9", usuarios: 700 },
-  { mes: "10", usuarios: 620 },
-  { mes: "11", usuarios: 620 },
-  { mes: "12", usuarios: 620 },
-];
-
-const dataMessages = [
-  { mes: "1", mensajes: 200 },
-  { mes: "2", mensajes: 300 },
-  { mes: "3", mensajes: 250 },
-  { mes: "4", mensajes: 400 },
-  { mes: "5", mensajes: 450 },
-  { mes: "6", mensajes: 500 },
-  { mes: "7", mensajes: 600 },
-  { mes: "8", mensajes: 550 },
-  { mes: "9", mensajes: 700 },
-  { mes: "10", mensajes: 620 },
-  { mes: "11", mensajes: 620 },
-  { mes: "12", mensajes: 620 },
-];
-
-const dataReports = [
-  { mes: "1", reportes: 200 },
-  { mes: "2", reportes: 300 },
-  { mes: "3", reportes: 250 },
-  { mes: "4", reportes: 400 },
-  { mes: "5", reportes: 450 },
-  { mes: "6", reportes: 500 },
-  { mes: "7", reportes: 600 },
-  { mes: "8", reportes: 550 },
-  { mes: "9", reportes: 700 },
-  { mes: "10", reportes: 620 },
-  { mes: "11", reportes: 620 },
-  { mes: "12", reportes: 620 },
-];
-
-const dataComments = [
-  { mes: "1", comentarios: 200 },
-  { mes: "2", comentarios: 300 },
-  { mes: "3", comentarios: 250 },
-  { mes: "4", comentarios: 400 },
-  { mes: "5", comentarios: 450 },
-  { mes: "6", comentarios: 500 },
-  { mes: "7", comentarios: 600 },
-  { mes: "8", comentarios: 550 },
-  { mes: "9", comentarios: 700 },
-  { mes: "10", comentarios: 620 },
-  { mes: "11", comentarios: 620 },
-  { mes: "12", comentarios: 620 },
-];
+const API_URL = 'https://uniliving-backend.onrender.com';
 
 const Dashboard = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [userStats, setUserStats] = useState({
+    total: 0,
+    monthlyData: []
+  });
+  const [messageStats, setMessageStats] = useState({
+    total: 0,
+    reported: 0,
+    monthlyData: []
+  });
+  const [commentStats, setCommentStats] = useState({
+    total: 0,
+    monthlyData: []
+  });
+
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchAllStats = async () => {
+      setIsLoading(true);
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
+        // Extraer las estadísticas de la API
+        const [usersResponse, messagesResponse, commentsResponse] = await Promise.all([
+          axios.get(`${API_URL}/admin/stats/users`, config),
+          axios.get(`${API_URL}/admin/stats/messages`, config),
+          axios.get(`${API_URL}/admin/stats/zone-comments`, config)
+        ]);
+
+        // Procesar datos de usuarios
+        const userData = usersResponse.data;
+        console.log(userData)
+        setUserStats({
+          total: userData.totalStats[0]?.total || 0,
+          monthlyData: processMonthlyData(userData.monthlyStats, 'usuarios')
+        });
+
+        // Procesar datos de mensajes
+        const messageData = messagesResponse.data;
+        const reportedCount = messageData.totalStats[0]?.byStatus.find(item => item.status === 'Reported')?.count || 0;
+        setMessageStats({
+          total: messageData.totalStats[0]?.total || 0,
+          reported: reportedCount,
+          monthlyData: processMonthlyData(messageData.monthlyStats, 'mensajes')
+        });
+
+        // Procesar datos de comentarios
+        const commentData = commentsResponse.data;
+        setCommentStats({
+          total: commentData.totalStats[0]?.total || 0,
+          monthlyData: processMonthlyData(commentData.monthlyStats, 'comentarios')
+        });
+
+      } catch (error) {
+        console.error("Error al cargar estadísticas:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllStats();
+  }, [token]);
+
+  // Función para procesar datos mensuales
+  const processMonthlyData = (monthlyStats, dataKey) => {
+    if (!monthlyStats || !Array.isArray(monthlyStats)) return [];
+
+    const monthsData = {};
+    
+    for (let i = 1; i <= 12; i++) {
+      monthsData[i] = { mes: i.toString(), [dataKey]: 0 };
+    }
+
+    monthlyStats.forEach(stat => {
+      const month = stat._id.month;
+      monthsData[month] = {
+        mes: month.toString(),
+        [dataKey]: stat.total
+      };
+    });
+
+    return Object.values(monthsData).sort((a, b) => parseInt(a.mes) - parseInt(b.mes));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="App">
+        <CustomAdminNavbar />
+        <Container className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </Spinner>
+        </Container>
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       <CustomAdminNavbar />
@@ -80,14 +126,14 @@ const Dashboard = () => {
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Usuarios Totales <span  className="fs-4 fw-bold align-self-center">40,689</span></span>
+                <span> Usuarios Totales <span className="fs-4 fw-bold align-self-center">{userStats.total.toLocaleString()}</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaUsers className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={dataUsers}>
+                  <LineChart data={userStats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
                     <YAxis />
@@ -107,14 +153,14 @@ const Dashboard = () => {
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Mensajes Totales <span  className="fs-4 fw-bold align-self-center">10,293</span></span>
+                <span> Mensajes Totales <span className="fs-4 fw-bold align-self-center">{messageStats.total.toLocaleString()}</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaEnvelope className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={dataMessages}>
+                  <LineChart data={messageStats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
                     <YAxis />
@@ -134,14 +180,17 @@ const Dashboard = () => {
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Mensajes Reportados <span  className="fs-4 fw-bold align-self-center">936</span></span>
+                <span> Mensajes Reportados <span className="fs-4 fw-bold align-self-center">{messageStats.reported.toLocaleString()}</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaExclamationTriangle className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={dataReports}>
+                  <LineChart data={messageStats.monthlyData.map(item => ({
+                    mes: item.mes,
+                    reportes: Math.round(item.mensajes * (messageStats.reported / messageStats.total || 0))
+                  }))}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
                     <YAxis />
@@ -161,14 +210,14 @@ const Dashboard = () => {
                   className="d-flex justify-content-between align-items-center"
                   style={{ textDecoration: 'none', cursor: 'pointer' }}
                 >
-                <span> Comentarios Totales <span  className="fs-4 fw-bold align-self-center">2,040</span></span>
+                <span> Comentarios Totales <span className="fs-4 fw-bold align-self-center">{commentStats.total.toLocaleString()}</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "35px" }}>
                     <FaCommentDots className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={dataComments}>
+                  <LineChart data={commentStats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
                     <YAxis />
