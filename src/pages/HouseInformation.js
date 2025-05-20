@@ -52,7 +52,7 @@ function DetallePiso() {
                             
                             allPOIs.push({
                                 nombre: closestPOI.title,
-                                distancia: `${(closestPOI.distance).toFixed(2)} km`,
+                                distancia: `${(closestPOI.distance*6371).toFixed(2)} km`, // Se multiplica por 6371 porque es una distancia harvesiana
                                 enlace: closestPOI.link || closestPOI.url,
                                 categoria: category,
                                 coordenadas: closestPOI.geometry ? closestPOI.geometry.coordinates : null
