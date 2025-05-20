@@ -1,5 +1,5 @@
 import React, { useState, useEffect,useRef  } from 'react';
-import { Container, Row, Col, Button, Form, InputGroup, Spinner  } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, InputGroup, Spinner, Dropdown  } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import { useNavigate, Link, useLocation} from 'react-router-dom';
 import { useAuth } from '../authContext';
@@ -443,24 +443,29 @@ const AnalyticsCommentsPage = () => {
                                             </span>
                                             {/* Botón Reportar a la derecha */}
                                         </div>
-                                            {isAuthenticated && !isAdmin && (
-                                                        <Button 
-                                                            variant="outline-danger" 
-                                                            size="sm"
-                                                            className="ms-2"
+                                            {isAuthenticated && !isAdmin && comment.user?._id !== user?.id && !comment.isLive && (
+                                                    <Dropdown align="end" className="ms-2 mt-3">
+                                                        <Dropdown.Toggle
+                                                            as="button"
                                                             style={{
-                                                                height: '25px',
-                                                                fontSize: '0.75rem',
-                                                                padding: '2px 8px',
-                                                                whiteSpace: 'nowrap',
-                                                                alignSelf: 'start',
-                                                                marginTop: '18px' // puedes ajustar este valor
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                fontSize: '1.5rem',
+                                                                padding: 0,
+                                                                color: '#555',
+                                                                cursor: 'pointer',
                                                             }}
-                                                            onClick={() => handleReportComment(comment._id)}
                                                         >
-                                                            Reportar
-                                                        </Button>
-                                            )}
+                                                            &#x22EE; {/* tres puntos verticales */}
+                                                        </Dropdown.Toggle>
+
+                                                        <Dropdown.Menu>
+                                                            <Dropdown.Item onClick={() => handleReportComment(comment._id)}>
+                                                                Reportar comentario
+                                                            </Dropdown.Item>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                )}
                                            {isAdmin && (
                                             <div className="d-flex ms-2 mt-3" style={{ gap: '32px' }}>
                                                 <Button
