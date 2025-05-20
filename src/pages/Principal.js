@@ -23,6 +23,8 @@ const barriosZaragoza = [
   "Casablanca", "Torrero-La Paz", "Sur"
 ];
 
+const MAX_PRICE = 2500;
+
 const createIcon = (price) => {
   return L.divIcon({
     className: 'custom-icon',
@@ -187,7 +189,7 @@ const Principal = () => {
           (!filters.habitaciones || transformedApartment.habitaciones === parseInt(filters.habitaciones)) &&
           (!filters.baños || apartment.numBathrooms === parseInt(filters.baños)) &&
           (!filters.barrio || transformedApartment.barrio === filters.barrio) &&
-          (!filters.precio || transformedApartment.precio <= parseInt(filters.precio)) &&
+          (!filters.precio || filters.precio === MAX_PRICE || transformedApartment.precio <= parseInt(filters.precio)) &&
           (!filters.precioMin || transformedApartment.precio >= parseInt(filters.precioMin)) &&
           (!filters.tamaño || transformedApartment.metros >= parseInt(filters.tamaño)) &&
           (!filters.tamañoMax || transformedApartment.metros <= parseInt(filters.tamañoMax)) &&
@@ -214,6 +216,19 @@ const Principal = () => {
       shared: ''
     });
     setFilteredApartments(apartments);
+  };
+
+  const getPriceRangeText = () => {
+    const minPrice = filters.precioMin || 0;
+    const maxPrice = filters.precio;
+    
+    if (maxPrice === '' || maxPrice === 0) {
+      return `${minPrice}€ - Max`;
+    } else if (maxPrice === MAX_PRICE) {
+      return `${minPrice}€ - Max`;
+    } else {
+      return `${minPrice}€ - ${maxPrice}€`;
+    }
   };
 
   return (
@@ -319,15 +334,19 @@ const Principal = () => {
               </Accordion.Header>
               <Accordion.Body>
                 <Form.Group className="mb-3">
-                  <Form.Label>Rango de precio: {filters.precioMin || 0}€ - {filters.precio || 2500}€</Form.Label>
+                  <Form.Label>Rango de precio: {getPriceRangeText()}</Form.Label>
                   <Slider
                     range
                     min={0}
-                    max={2500}
+                    max={MAX_PRICE}
                     step={50}
-                    defaultValue={[filters.precioMin || 0, filters.precio || 2500]}
+                    defaultValue={[filters.precioMin || 0, filters.precio || MAX_PRICE]}
                     onChange={([min, max]) => setFilters({ ...filters, precioMin: min, precio: max })}
                   />
+                  <div className="d-flex justify-content-between mt-1">
+                    <small className="text-muted">0€</small>
+                    <small className="text-muted">Max</small>
+                  </div>
                 </Form.Group>
 
                 <Row>
