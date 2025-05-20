@@ -190,7 +190,7 @@ const Dashboard = () => {
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={userStats.monthlyData}>
+                  <LineChart data={userStats.monthlyData} margin={{ right: 35, top: 10  }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -227,7 +227,7 @@ const Dashboard = () => {
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={messageStats.monthlyData}>
+                  <LineChart data={messageStats.monthlyData} margin={{ right: 35, top: 10  }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -264,7 +264,7 @@ const Dashboard = () => {
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={commentStats.monthlyData}>
+                  <LineChart data={commentStats.monthlyData} margin={{ right: 35, top: 10  }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
@@ -305,7 +305,7 @@ const Dashboard = () => {
                     mes: item.mes,
                     mesNombre: item.mesNombre,
                     reportes: Math.round(item.mensajes * (messageStats.reported / messageStats.total || 0))
-                  }))}>
+                  }))} margin={{ right: 35, top: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="mes" 
