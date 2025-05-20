@@ -1,6 +1,11 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGraduationCap, faTrain, faShoppingCart, faGlassCheers, faHospital, faHome, faCheck, faTimes, faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
+import { 
+    faGraduationCap, faTrain, faShoppingCart, faGlassCheers, faHospital, faHome, 
+    faCheck, faTimes, faExternalLinkAlt, faChild, faSchool, faBook, 
+    faNotesMedical, faPrescriptionBottleAlt, faBus, faPlane, faShoppingBag,
+    faDumbbell, faUtensils, faTree, faFilm, faLandmark, faMapMarkerAlt 
+} from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
 import { Card, ListGroup, Badge, Spinner } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
@@ -97,17 +102,67 @@ function DetallePiso() {
             thumbnail: 'https://via.placeholder.com/100x67?text=No+hay+imagen+disponible'
         }];
 
-    
-    const getCategoryIcon = (index) => {
-        const icons = [
-            faGraduationCap,
-            faHospital,
-            faShoppingCart,
-            faGlassCheers,
-            faTrain
-        ];
+    // Función para obtener el icono según la categoría
+    const getCategoryIcon = (category) => {
+
+        if (category === 'Universitaria' || category.includes('Universidad')) {
+            return faGraduationCap;
+        }
+        if (category === 'Educación Infantil' || category.includes('Infantil')) {
+            return faChild;
+        }
+        if (category === 'Educación Secundaria' || category.includes('Secundaria') || category.includes('Instituto')) {
+            return faSchool;
+        }
+        if (category === 'Bibliotecas' || category.includes('Biblioteca')) {
+            return faBook;
+        }
+        if (category === 'Hospitales' || category.includes('Hospital')) {
+            return faHospital;
+        }
+        if (category === 'Centros de Salud' || category.includes('Salud') || category.includes('Médico')) {
+            return faNotesMedical;
+        }
+        if (category === 'Farmacias' || category.includes('Farmacia')) {
+            return faPrescriptionBottleAlt;
+        }
+        if (category === 'Transporte Urbano' || category.includes('Bus') || category.includes('Autobús')) {
+            return faBus;
+        }
+        if (category.includes('Metro') || category.includes('Tren') || category.includes('Cercanías')) {
+            return faTrain;
+        }
+        if (category.includes('Aeropuerto')) {
+            return faPlane;
+        }
+        if (category === 'Supermercados Pequeños' || category === 'Supermercados Medianos' || 
+            category.includes('Supermercado') || category.includes('Tienda')) {
+            return faShoppingCart;
+        }
+        if (category.includes('Centro Comercial') || category.includes('Mall')) {
+            return faShoppingBag;
+        }
+        if (category === 'Fitness' || category.includes('Gimnasio') || category.includes('Deporte')) {
+            return faDumbbell;
+        }
+        if (category.includes('Restaurante') || category.includes('Bar') || category.includes('Café')) {
+            return faUtensils;
+        }
+        if (category.includes('Parque') || category.includes('Jardín')) {
+            return faTree;
+        }
+        if (category.includes('Cine') || category.includes('Teatro')) {
+            return faFilm;
+        }
+        if (category.includes('Museo') || category.includes('Galería')) {
+            return faLandmark;
+        }
+        if (category.includes('Ocio') || category.includes('Entretenimiento')) {
+            return faGlassCheers;
+        }
         
-        return icons[index % icons.length];
+        // Icono por defecto para categorías no especificadas
+        return faMapMarkerAlt;
     };
 
     return (
@@ -235,7 +290,7 @@ function DetallePiso() {
                                 <ListGroup className="h-100">
                                     {sitiosInteres.map((sitio, index) => (
                                         <ListGroup.Item key={index} className="d-flex align-items-center p-3 border-bottom">
-                                            <FontAwesomeIcon icon={getCategoryIcon(index)} size="2x" className="me-3" />
+                                            <FontAwesomeIcon icon={getCategoryIcon(sitio.categoria)} size="2x" className="me-3" />
                                             <div className="w-100 d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <p className="fs-5 fw-bold mb-0">{sitio.nombre}</p>
@@ -280,7 +335,7 @@ function DetallePiso() {
                 </div>
             </div>
 
-            
+
         </div>
     );
 }
