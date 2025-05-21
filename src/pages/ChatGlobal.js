@@ -46,7 +46,7 @@ const ChatGlobal = () => {
                 }
                 const newMsg = {
                     id: newMessage._id,
-                    sender: newMessage.user.firstName || 'Recién Enviado',
+                    sender: (newMessage.user.firstName + ' ' + newMessage.user.lastName) ,
                     text: newMessage.content,
                     sentDate: newMessage.sentDate,
                     userId: newMessage.user,

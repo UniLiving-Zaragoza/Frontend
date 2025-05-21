@@ -32,7 +32,7 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
     console.log("Is live", lastMsg?.isLive);
 
     const isOwnLiveMessage =
-        lastMsg?.isLive && lastMsg.userId === user.id && lastMsg.id !== prevLastMsgId.current;
+        lastMsg?.isLive && lastMsg.userId._id === user.id && lastMsg.id !== prevLastMsgId.current;
     if (isFirstLoad || isOwnLiveMessage) {
         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         hasScrolledInitially.current = true;
@@ -83,17 +83,26 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                                         {msg.sender}
                                     </div>
                                     <Card
-                                        className="p-2"
-                                        style={{
-                                            borderRadius: "15px",
-                                            maxWidth: "75%",
-                                            minWidth: "10ch",
-                                            backgroundColor: msg.id !== user.id ? "#D6EAFF" : "#0056b3",
-                                            color: msg.id !== user.id ? "#000" : "#fff",
-                                            position: "relative"
-                                        }}
+                                    className="p-2"
+                                    style={{
+                                        borderRadius: "15px",
+                                        maxWidth: "100%", // antes era 75%
+                                        minWidth: "20ch", // un poco más ancho por defecto
+                                        backgroundColor: msg.id !== user.id ? "#D6EAFF" : "#0056b3",
+                                        color: msg.id !== user.id ? "#000" : "#fff",
+                                        position: "relative"
+                                    }}
                                     >
-                                        <Card.Text className="mb-1">{msg.text}</Card.Text>
+                                        <Card.Text
+                                            className="mb-1"
+                                            style={{
+                                                whiteSpace: 'pre-wrap',
+                                                wordBreak: 'break-word',
+                                                overflowWrap: 'break-word'
+                                            }}
+                                            >
+                                            {msg.text}
+                                            </Card.Text>
                                         <small className="d-block text-start" style={{ color: msg.id !== user.id ? "black" : "white", opacity: 0.7 }}>
                                             {formatDateTime(msg.sentDate)}
                                         </small>
