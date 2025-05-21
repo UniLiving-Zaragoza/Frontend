@@ -30,6 +30,7 @@ const ProfilePage = () => {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
     
     // Determinar qué ID de usuario mostrar
     const userId = urlUserId || (user && user.id);
@@ -87,17 +88,57 @@ const ProfilePage = () => {
     }
 
     // Deshabilitar usuario (para admin)
-    const handleDissableUser = () => {
-        console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
-        navigate(-1); // Volver a la página anterior
-        handleCloseModal();
+    const handleDissableUser = async () => {
+        try {
+            setStatusUpdateLoading(true);
+            
+            await axios.put(
+                `${API_URL}/user/${userId}`,
+                { userId: userId, status: 'Disabled' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            setUserData({...userData, status: 'Disabled'});
+                        
+            navigate(-1);
+        } catch (error) {
+            console.error("Error al deshabilitar usuario:", error);
+            alert("Error al deshabilitar el usuario");
+        } finally {
+            setStatusUpdateLoading(false);
+            handleCloseDissable();
+        }
     }
 
     // Habilitar usuario (para admin)
-    const handleEnableUser = () => {
-        console.log("Habilitar cuenta de usuario"); // Cambiar a habilitar en el backend
-        navigate(-1); // Volver a la página anterior
-        handleCloseModal();
+    const handleEnableUser = async () => {
+        try {
+            setStatusUpdateLoading(true);
+            
+            await axios.put(
+                `${API_URL}/user/${userId}`,
+                { userId: userId, status: 'Enabled' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            setUserData({...userData, status: 'Enabled'});
+                        
+            navigate(-1);
+        } catch (error) {
+            console.error("Error al habilitar usuario:", error);
+            alert("Error al habilitar el usuario");
+        } finally {
+            setStatusUpdateLoading(false);
+            handleCloseEnable();
+        }
     }
 
     // Navegar a la página de edición de perfil
@@ -171,6 +212,12 @@ const ProfilePage = () => {
                             <p>
                                 Género: {userData?.gender === "Male" ? "Masculino" : userData?.gender === "Female" ? "Femenino" : "Otro"} | Edad: {userData?.age}
                             </p>
+                            {/* Mostrar el estado del usuario si el admin está viendo el perfil */}
+                            {isAdmin && !isOwnProfile && (
+                                <p className={`badge ${userData?.status === "Enabled" ? "bg-success" : "bg-danger"}`}>
+                                    Estado: {userData?.status === "Enabled" ? "Habilitado" : "Deshabilitado"}
+                                </p>
+                            )}
                         </div>
                         </div>
                     </Col>
@@ -330,8 +377,9 @@ const ProfilePage = () => {
                                     className="rounded-pill px-4 mx-2"
                                     style={{ width: '200px' }}
                                     onClick={handleShowDissable}
+                                    disabled={statusUpdateLoading}
                                 >
-                                    Deshabilitar cuenta
+                                    {statusUpdateLoading ? 'Procesando...' : 'Deshabilitar cuenta'}
                                 </Button>
                             ) : (
                                 <Button
@@ -339,8 +387,9 @@ const ProfilePage = () => {
                                     className="rounded-pill px-4 mx-2"
                                     style={{ width: '200px', backgroundColor: "#000842" }}
                                     onClick={handleShowEnable}
+                                    disabled={statusUpdateLoading}
                                 >
-                                    Habilitar cuenta
+                                    {statusUpdateLoading ? 'Procesando...' : 'Habilitar cuenta'}
                                 </Button>
                             )}
                         </Col>
