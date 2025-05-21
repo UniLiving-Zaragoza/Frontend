@@ -1,110 +1,119 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Container, Card, Row, Col, Form, Button } from "react-bootstrap";
+import React, { useRef, useEffect } from "react";
+import { Container, Card, Row, Col, Form, Button, Spinner } from "react-bootstrap";
 import { useAuth } from "../authContext";
+import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-function ChatComponent({ dataMessages, icon, onIconClick }) {
-    const [messages, setMessages] = useState(dataMessages);
-    const [newMessage, setNewMessage] = useState("");
-    const bottomRef = useRef(null);
+function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMessage, setNewMessage, loadMoreMessages, hasMore }) {
+    const chatContainerRef = useRef(null);
+    const { isAdmin, user } = useAuth();
 
-    const { isAdmin } = useAuth();
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
-    const handleSendMessage = () => {
-        if (newMessage.trim() === "") return;
-
-        const newMsg = {
-            id: 1,
-            sender: "Laura",
-            text: newMessage,
-            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png"
-        };
-
-        setMessages(prevMessages => [...prevMessages, newMsg]);
-        setNewMessage("");
+    const formatDateTime = (dateString) => {
+        const messageDate = new Date(dateString);
+        const today = new Date();
+        const isToday = messageDate.toDateString() === today.toDateString();
+        return isToday
+            ? messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : messageDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
+
+    // Solo hacemos scroll abajo si es el primer render o se añade un nuevo mensaje propio
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [dataMessages.length]);
 
     return (
         <Container className="mt-4">
-            <Card className="p-3" style={{ height: isAdmin ? "65vh" : "57vh", overflowY: "auto" }}>
-                {messages.map((msg, index) => (
-                    <Row
-                        key={index}
-                        className={`d-flex ${msg.id !== 1 ? "justify-content-start" : "justify-content-end"} mb-2`}
-                    >
-                        <Col xs="auto" className="d-flex align-items-center">
-                            {msg.id !== 1 && (
-                                <img
-                                    src={msg.fotoPerfil}
-                                    alt={msg.sender}
-                                    className="rounded-circle me-2"
-                                    width={40}
-                                    height={40}
-                                />
-                            )}
-                            <div>
-                                <div className={`text-${msg.id !== 1 ? "start" : "end"} text-muted`} style={{ fontSize: "0.8rem" }}>
-                                    {msg.sender}
+            <div
+                id="scrollableDiv"
+                ref={chatContainerRef}
+                style={{
+                    height: isAdmin ? "65vh" : "57vh",
+                    overflow: "auto",
+                    display: "flex",
+                    flexDirection: "column-reverse" // Mostrar el último mensaje abajo
+                }}
+            >
+                <InfiniteScroll
+                    dataLength={dataMessages.length}
+                    next={loadMoreMessages}
+                    hasMore={hasMore}
+                    loader={
+                        <div className="d-flex justify-content-center my-3">
+                            <Spinner animation="border" variant="primary" />
+                        </div>
+                    }
+                    scrollableTarget="scrollableDiv"
+                    inverse={true} // IMPORTANTE: permite cargar más al llegar arriba
+                >
+                    {dataMessages.map((msg) => (
+                        <Row
+                            key={msg.id}
+                            className={`d-flex ${msg.id === user._id ? "justify-content-end" : "justify-content-start"} mb-2`}
+                        >
+                            <Col xs="auto" className="d-flex align-items-center">
+                                {msg.id !== user._id && (
+                                    <img
+                                        src={msg.fotoPerfil}
+                                        alt={msg.sender}
+                                        className="rounded-circle me-2"
+                                        width={40}
+                                        height={40}
+                                    />
+                                )}
+                                <div>
+                                    <div className={`text-${msg.id !== user._id ? "start" : "end"} text-muted`} style={{ fontSize: "0.8rem" }}>
+                                        {msg.sender}
+                                    </div>
+                                    <Card
+                                        className="p-2"
+                                        style={{
+                                            borderRadius: "15px",
+                                            maxWidth: "75%",
+                                            minWidth: "10ch",
+                                            backgroundColor: msg.id !== user._id ? "#D6EAFF" : "#0056b3",
+                                            color: msg.id !== user._id ? "#000" : "#fff",
+                                            position: "relative"
+                                        }}
+                                    >
+                                        <Card.Text className="mb-1">{msg.text}</Card.Text>
+                                        <small className="d-block text-start" style={{ color: msg.id !== user._id ? "black" : "white", opacity: 0.7 }}>
+                                            {formatDateTime(msg.sentDate)}
+                                        </small>
+                                        {icon && msg.id !== user._id && (
+                                            <div
+                                                onClick={(e) => onIconClick(e, msg.id, msg.sender, msg.text)}
+                                                style={{
+                                                    position: "absolute",
+                                                    right: "10px",
+                                                    bottom: "10px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                {icon}
+                                            </div>
+                                        )}
+                                    </Card>
                                 </div>
-                                <Card
-                                    className={`p-2 `}
-                                    style={{
-                                        borderRadius: "15px",
-                                        maxWidth: "75%",
-                                        minWidth: "10ch",
-                                        display: "inline-block",
-                                        whiteSpace: "normal",
-                                        wordWrap: "break-word",
-                                        overflowWrap: "break-word",
-                                        wordBreak: "break-word",
-                                        hyphens: "auto",
-                                        position: "relative",
-                                        backgroundColor: msg.id !== 1 ? "#D6EAFF" : "#0056b3",
-                                        color: msg.id !== 1 ? "#000" : "#fff"
-                                    }}
-                                >
-                                    <Card.Text className="mb-1">{msg.text}</Card.Text>
-                                    <small className=" d-block text-start" style={{ color: msg.id !== 1 ? "black" : "white", opacity: 0.7 }}>{msg.time}</small>
+                                {msg.id === user._id && (
+                                    <img
+                                        src={msg.fotoPerfil}
+                                        alt={msg.sender}
+                                        className="rounded-circle"
+                                        width={40}
+                                        height={40}
+                                    />
+                                )}
+                            </Col>
+                        </Row>
+                    ))}
+                </InfiniteScroll>
+            </div>
 
-                                    {/* Icono de tres puntos */}
-                                    {icon && msg.id !== 1 && (
-                                        <div
-                                            onClick={(e) => onIconClick(e, msg.id, msg.sender, msg.text)}
-                                            style={{
-                                                position: "absolute",
-                                                right: "10px",
-                                                bottom: "10px",
-                                                cursor: "pointer"
-                                            }}
-                                        >
-                                            {icon}
-                                        </div>
-                                    )}
-                                </Card>
-                            </div>
-                            {msg.id === 1 && (
-                                <img
-                                    src={msg.fotoPerfil}
-                                    alt={msg.sender}
-                                    className="rounded-circle"
-                                    width={40}
-                                    height={40}
-                                />
-                            )}
-                        </Col>
-                    </Row>
-                ))}
-                <div ref={bottomRef}></div>
-            </Card>
-
-            {/* Campo de texto para enviar mensajes, admin no envia mensajes asi que no le aparece este campo */}
             {!isAdmin && (
-                <Form className="mt-3 d-flex" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
+                <Form className="mt-3 d-flex" onSubmit={(e) => { e.preventDefault(); onSendMessage(); }}>
                     <Form.Control
                         type="text"
                         placeholder="Escribe un mensaje..."
@@ -112,7 +121,9 @@ function ChatComponent({ dataMessages, icon, onIconClick }) {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                     />
-                    <Button variant="primary" type="submit" style={{ backgroundColor: "#000842" }}>Enviar</Button>
+                    <Button variant="primary" type="submit" style={{ backgroundColor: "#000842" }}>
+                        Enviar
+                    </Button>
                 </Form>
             )}
         </Container>
