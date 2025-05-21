@@ -1,120 +1,171 @@
-import React, { useState } from "react";
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import { Container, Button, Row, Col, Spinner } from 'react-bootstrap';
 import { useAuth } from '../authContext';
 import { BsThreeDotsVertical, BsTrash3Fill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import io from 'socket.io-client';
 import CustomNavbar from '../components/CustomNavbar';
 import ChatComponent from "../components/ChatComponent";
 import CustomModal from "../components/CustomModal";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const API_URL = 'https://uniliving-backend.onrender.com';
+const socket = io(API_URL, { autoConnect: false });
+
 const ChatGlobal = () => {
     const navigate = useNavigate();
-    const [selectedUser, setSelectedUser] = useState(null);
+    const { isAdmin, user } = useAuth();
+    const [messages, setMessages] = useState([]);
+    const [selectedMessageId, setSelectedMessageId] = useState(null);
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [selectedUserName, setSelectedUserName] = useState(null);
     const [showMenu, setShowMenu] = useState(false);
     const [show, setShow] = useState(false);
-    const [modalType, setModalType] = useState(null); // 'reporte' o 'borrar'
+    const [modalType, setModalType] = useState(null);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+    const [newMessage, setNewMessage] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [fetchingData, setFetchingData] = useState(false);
+    const limit = 10;
 
-    const { isAdmin } = useAuth();
+    const sortMessages = (msgs) => {
+        return [...msgs].sort((a, b) => new Date(a.sentDate) - new Date(b.sentDate));
+    };
 
-    let messages = [
-        {
-            id: 1,
-            sender: "Laura",
-            text: "Hola, ¿cómo estás?",
-            time: "10:30 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png"
-        },
-        {
-            id: 2,
-            sender: "Pablo",
-            text: "¡Hola! Estoy bien, gracias. ¿Y tú?",
-            time: "10:32 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png"
-        },
-        {
-            id: 3,
-            sender: "Juan",
-            text: "Bien también, ¿qué haces?",
-            time: "10:35 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/8068/8068125.png"
-        },
-        {
-            id: 1,
-            sender: "Laura",
-            text: "Bien también, ¿qué haces?",
-            time: "10:35 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png"
-        },
-        {
-            id: 2,
-            sender: "Pablo",
-            text: "Bien también, ¿qué haces?",
-            time: "10:35 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png"
-        },
-        {
-            id: 4,
-            sender: "Ana",
-            text: "¿Alguien conoce un piso económico cerca de la universidad?",
-            time: "10:40 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/706/706830.png"
-        },
-        {
-            id: 5,
-            sender: "Diego",
-            text: "Estoy buscando compañeros para compartir un piso de 3 habitaciones.",
-            time: "10:42 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/219/219969.png"
-        },
-        {
-            id: 6,
-            sender: "Marina",
-            text: "Yo vi uno por el centro, pero está un poco caro. ¿Alguna recomendación?",
-            time: "10:45 AM",
-            fotoPerfil: "https://cdn-icons-png.flaticon.com/512/219/219983.png"
+    useEffect(() => {
+        socket.connect();
+        socket.emit('joinChat', 'generalChat');
+
+        socket.on('messageReceived', (newMessage) => {
+            setMessages((prevMessages) => {
+                if (prevMessages.some(msg => msg.id === newMessage._id)) {
+                    return prevMessages;
+                }
+                const newMsg = {
+                    id: newMessage._id,
+                    sender: (newMessage.user.firstName + ' ' + newMessage.user.lastName) ,
+                    text: newMessage.content,
+                    sentDate: newMessage.sentDate,
+                    userId: newMessage.user,
+                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    isLive: true
+                };
+                return sortMessages([...prevMessages, newMsg]);
+            });
+        });
+
+        return () => {
+            socket.off('messageReceived');
+            socket.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            setFetchingData(true);
+            try {
+                const response = await axios.get(`${API_URL}/general/messages/paginated`, {
+                    params: { page, limit },
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                const fetchedMessages = response.data.map(msg => ({
+                    id: msg._id,
+                    sender: msg.user.firstName || 'Unknown',
+                    text: msg.content,
+                    sentDate: msg.sentDate,
+                    fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    userId: msg.user._id,
+                    isLive: false
+                }));
+                setFetchingData(false);
+                setMessages((prevMessages) => {
+                    const newMessages = fetchedMessages.filter(
+                        newMsg => !prevMessages.some(prevMsg => prevMsg.id === newMsg.id)
+                    );
+                    return sortMessages([...prevMessages, ...newMessages]);
+                });
+                setHasMore(response.data.length === limit);
+            } catch (error) {
+                console.error('Error al obtener mensajes:', error);
+            }
+        };
+
+        fetchMessages();
+    }, [page, user.token]);
+
+    const handleSendMessage = async () => {
+        if (!newMessage.trim()) return;
+
+        try {
+            await axios.post(`${API_URL}/messages`, {
+                content: newMessage,
+                userId: user.id,
+                generalChat: true
+            }, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setNewMessage('');
+        } catch (error) {
+            console.error('Error al enviar mensaje:', error);
         }
-    ];
-
-    // Modificar los ids directamente si el usuario es admin
-    if (isAdmin) {
-        console.log("entro");
-        messages = messages.map(msg => msg.id === 1 ? { ...msg, id: 999 } : msg);
-    }
+    };
 
     const handleReportUser = (e, id, sender, text) => {
-        setSelectedUser(id);
+        setSelectedMessageId(id);
         setSelectedMessage(text);
         setSelectedUserName(sender);
         setShowMenu(!showMenu);
-
         const { clientX, clientY } = e;
         setMenuPosition({ x: clientX, y: clientY });
     };
 
     const openDeleteModal = () => {
         setShowMenu(false);
-        setModalType("borrar");
+        setModalType('borrar');
         setShow(true);
     };
 
     const openReportModal = () => {
         setShowMenu(false);
-        setModalType("reporte");
+        setModalType('reporte');
         setShow(true);
     };
 
-    const handleModalConfirm = () => {
-        if (modalType === "reporte") {
-            console.log(`Reportar mensaje de ${selectedUser} con el texto: "${selectedMessage}"`);
-        } else if (modalType === "borrar") {
-            console.log(`Comentario de ${selectedUserName} eliminado por admin`);
+    const handleModalConfirm = async () => {
+        if (modalType === 'reporte') {
+            try {
+                await axios.post(`${API_URL}/reports`, {
+                    messageId: selectedMessageId,
+                    userId: user._id,
+                    reason: 'Contenido inapropiado'
+                }, {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                console.log(`Reporte enviado para el mensaje: "${selectedMessage}"`);
+            } catch (error) {
+                console.error('Error al enviar reporte:', error);
+            }
+        } else if (modalType === 'borrar') {
+            try {
+                await axios.delete(`${API_URL}/messages/${selectedMessageId}`, {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                setMessages(prevMessages => prevMessages.filter(msg => msg.id !== selectedMessageId));
+                console.log(`Comentario de ${selectedUserName} eliminado por admin`);
+            } catch (error) {
+                console.error('Error al eliminar mensaje:', error);
+            }
         }
         setShow(false);
+    };
+
+    const loadMoreMessages = () => {
+        if (hasMore) {
+            setPage(prevPage => prevPage + 1);
+        }
     };
 
     return (
@@ -143,20 +194,23 @@ const ChatGlobal = () => {
                         </Col>
                     </Row>
                 )}
-
                 <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
                     <strong>Chat general</strong>
                 </div>
+                {fetchingData && (
+                    <div className="d-flex justify-content-center py-2">
+                        <Spinner animation="border" variant="primary" size="sm" />
+                    </div>
+                )}
                 <ChatComponent
                     dataMessages={messages}
-                    icon={
-                        isAdmin ? (
-                            <BsTrash3Fill size={25} color="red" />
-                        ) : (
-                            <BsThreeDotsVertical size={25} />
-                        )
-                    }
+                    icon={isAdmin ? <BsTrash3Fill size={25} color="red" /> : <BsThreeDotsVertical size={25} />}
                     onIconClick={handleReportUser}
+                    onSendMessage={handleSendMessage}
+                    newMessage={newMessage}
+                    setNewMessage={setNewMessage}
+                    loadMoreMessages={loadMoreMessages}
+                    hasMore={hasMore}
                 />
                 {showMenu && (
                     <div
@@ -186,18 +240,16 @@ const ChatGlobal = () => {
                 show={show}
                 onHide={() => setShow(false)}
                 title={
-                    modalType === "reporte"
+                    modalType === 'reporte'
                         ? `Reportar usuario ${selectedUserName}`
                         : `Eliminar comentario de ${selectedUserName}`
                 }
                 bodyText={
-                    modalType === "reporte"
+                    modalType === 'reporte'
                         ? `Vas a reportar a ${selectedUserName} debido al siguiente mensaje: "${selectedMessage}". ¿Continuar?`
                         : `Vas a eliminar el siguiente mensaje de ${selectedUserName}: "${selectedMessage}". ¿Deseas continuar?`
                 }
-                confirmButtonText={
-                    modalType === "reporte" ? "Reportar" : "Eliminar"
-                }
+                confirmButtonText={modalType === 'reporte' ? 'Reportar' : 'Eliminar'}
                 onSave={handleModalConfirm}
             />
         </div>
