@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import { Container, Button, Row, Col, Spinner } from 'react-bootstrap';
 import { useAuth } from '../authContext';
 import { BsThreeDotsVertical, BsTrash3Fill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +28,8 @@ const ChatGlobal = () => {
     const [newMessage, setNewMessage] = useState('');
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    const limit = 5;
+    const [fetchingData, setFetchingData] = useState(false);
+    const limit = 10;
 
     const sortMessages = (msgs) => {
         return [...msgs].sort((a, b) => new Date(a.sentDate) - new Date(b.sentDate));
@@ -62,6 +63,7 @@ const ChatGlobal = () => {
 
     useEffect(() => {
         const fetchMessages = async () => {
+            setFetchingData(true);
             try {
                 const response = await axios.get(`${API_URL}/general/messages/paginated`, {
                     params: { page, limit },
@@ -74,6 +76,7 @@ const ChatGlobal = () => {
                     sentDate: msg.sentDate,
                     fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'
                 }));
+                setFetchingData(false);
                 setMessages((prevMessages) => {
                     const newMessages = fetchedMessages.filter(
                         newMsg => !prevMessages.some(prevMsg => prevMsg.id === newMsg.id)
@@ -158,7 +161,6 @@ const ChatGlobal = () => {
     const loadMoreMessages = () => {
         if (hasMore) {
             setPage(prevPage => prevPage + 1);
-
         }
     };
 
@@ -191,6 +193,11 @@ const ChatGlobal = () => {
                 <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
                     <strong>Chat general</strong>
                 </div>
+                {fetchingData && (
+                    <div className="d-flex justify-content-center py-2">
+                        <Spinner animation="border" variant="primary" size="sm" />
+                    </div>
+                )}
                 <ChatComponent
                     dataMessages={messages}
                     icon={isAdmin ? <BsTrash3Fill size={25} color="red" /> : <BsThreeDotsVertical size={25} />}

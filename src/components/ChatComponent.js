@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect} from "react";
 import { Container, Card, Row, Col, Form, Button, Spinner } from "react-bootstrap";
 import { useAuth } from "../authContext";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -33,20 +33,17 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                     height: isAdmin ? "65vh" : "57vh",
                     overflow: "auto",
                     display: "flex",
-                    flexDirection: "column-reverse" // Mostrar el último mensaje abajo
+                    flexDirection: "column-reverse", // Mostrar el último mensaje abajo
+                    position: "relative"
                 }}
             >
                 <InfiniteScroll
                     dataLength={dataMessages.length}
                     next={loadMoreMessages}
                     hasMore={hasMore}
-                    loader={
-                        <div className="d-flex justify-content-center py-2">
-                            <Spinner animation="border" variant="primary" size="sm" />
-                        </div>
-                    }
                     scrollableTarget="scrollableDiv"
                     inverse={true} // IMPORTANTE: permite cargar más al llegar arriba
+                    
                 >
                     {dataMessages.map((msg) => (
                         <Row
