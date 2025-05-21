@@ -25,16 +25,20 @@ const ProfilePage = () => {
     const [showDissable, setShowDissable] = useState(false);
     const [showEnable, setShowEnable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
+    const [showBlockModal, setShowBlockModal] = useState(false);
+    const [showUnblockModal, setShowUnblockModal] = useState(false);
 
     // Estados para gestionar los datos del usuario y la carga
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+    const [isUserBlocked, setIsUserBlocked] = useState(false);
     
     // Determinar qué ID de usuario mostrar
     const userId = urlUserId || (user && user.id);
     const isOwnProfile = user && user.id === userId;
+    const isOtherUserProfile = !isOwnProfile && !isAdmin;
 
     // Funciones para los modales
     const handleShowModal = () => setShowModal(true);
@@ -45,6 +49,10 @@ const ProfilePage = () => {
     const handleCloseEnable = () => setShowEnable(false);
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
+    const handleShowBlockModal = () => setShowBlockModal(true);
+    const handleCloseBlockModal = () => setShowBlockModal(false);
+    const handleShowUnblockModal = () => setShowUnblockModal(true);
+    const handleCloseUnblockModal = () => setShowUnblockModal(false);
 
     // Obtener datos del usuario desde la API
     useEffect(() => {
@@ -69,6 +77,22 @@ const ProfilePage = () => {
                 });
 
                 setUserData(response.data);
+                
+                // Se verifica si el usuario actual ya tiene bloqueado al usuario del perfil
+                if (!isAdmin && user && user.id && userId !== user.id) {
+                    const currentUserResponse = await axios.get(`${API_URL}/user/${user.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    
+                    const isBlocked = currentUserResponse.data.blockedUsers.some(
+                        blockedUser => blockedUser._id === userId || blockedUser === userId
+                    );
+                    
+                    setIsUserBlocked(isBlocked);
+                }
+                
                 setLoading(false);
             } catch (error) {
                 console.error("Error al obtener datos del usuario:", error);
@@ -78,7 +102,7 @@ const ProfilePage = () => {
         };
 
         fetchUserData();
-    }, [userId, navigate, logout, token]);
+    }, [userId, navigate, logout, token, user, isAdmin]);
 
     // Cerrar sesión
     const handleCloseSession = async () => {
@@ -138,6 +162,94 @@ const ProfilePage = () => {
         } finally {
             setStatusUpdateLoading(false);
             handleCloseEnable();
+        }
+    }
+
+    // Bloquear usuario
+    const handleBlockUser = async () => {
+        try {
+            setStatusUpdateLoading(true);
+            
+            const currentUserResponse = await axios.get(`${API_URL}/user/${user.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            
+            const currentUser = currentUserResponse.data;
+            
+            const userIsAlreadyBlocked = currentUser.blockedUsers.some(
+                blockedUser => (typeof blockedUser === 'object' ? blockedUser._id === userId : blockedUser === userId)
+            );
+            
+            if (!userIsAlreadyBlocked) {
+
+                await axios.put(
+                    `${API_URL}/user/${user.id}`,
+                    { 
+                        userId: user.id, 
+                        blockedUsers: [...currentUser.blockedUsers, userId]
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+                
+                setIsUserBlocked(true);
+            }
+            
+            navigate(-1);
+            
+        } catch (error) {
+            console.error("Error al bloquear usuario:", error);
+            alert("Error al bloquear el usuario");
+        } finally {
+            setStatusUpdateLoading(false);
+            handleCloseBlockModal();
+        }
+    }
+
+    // Desbloquear usuario
+    const handleUnblockUser = async () => {
+        try {
+            setStatusUpdateLoading(true);
+            
+            const currentUserResponse = await axios.get(`${API_URL}/user/${user.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            
+            const currentUser = currentUserResponse.data;
+            
+            const updatedBlockedUsers = currentUser.blockedUsers.filter(
+                blockedUser => (typeof blockedUser === 'object' ? blockedUser._id !== userId : blockedUser !== userId)
+            );
+            
+            await axios.put(
+                `${API_URL}/user/${user.id}`,
+                { 
+                    userId: user.id, 
+                    blockedUsers: updatedBlockedUsers
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            setIsUserBlocked(false);
+            navigate(-1);
+
+        } catch (error) {
+            console.error("Error al desbloquear usuario:", error);
+            alert("Error al desbloquear el usuario");
+        } finally {
+            setStatusUpdateLoading(false);
+            handleCloseUnblockModal();
         }
     }
 
@@ -216,6 +328,11 @@ const ProfilePage = () => {
                             {isAdmin && !isOwnProfile && (
                                 <p className={`badge ${userData?.status === "Enabled" ? "bg-success" : "bg-danger"}`}>
                                     Estado: {userData?.status === "Enabled" ? "Habilitado" : "Deshabilitado"}
+                                </p>
+                            )}
+                            {!isAdmin && !isOwnProfile && isUserBlocked && (
+                                <p className={`badge bg-danger`}>
+                                    Usuario bloqueado
                                 </p>
                             )}
                         </div>
@@ -405,6 +522,45 @@ const ProfilePage = () => {
                         </Col>
                     </Row>
                 )}
+
+                {/* Botones para usuario viendo perfil de otro usuario */}
+                {isOtherUserProfile && userData && (
+                    <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            {!isUserBlocked ? (
+                                <Button
+                                    variant="danger"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px' }}
+                                    onClick={handleShowBlockModal}
+                                    disabled={statusUpdateLoading}
+                                >
+                                    {statusUpdateLoading ? 'Procesando...' : 'Bloquear usuario'}
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="danger"
+                                    className="rounded-pill px-4 mx-2"
+                                    style={{ width: '200px' }}
+                                    onClick={handleShowUnblockModal}
+                                    disabled={statusUpdateLoading}
+                                >
+                                    {statusUpdateLoading ? 'Procesando...' : 'Desbloquear usuario'}
+                                </Button>
+                            )}
+                        </Col>
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="secondary"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                                onClick={() => navigate(-1)}
+                            >
+                                Volver
+                            </Button>
+                        </Col>
+                    </Row>
+                )}
                 
                 <div style={{ marginBottom: '30px' }}></div>
                 
@@ -434,6 +590,26 @@ const ProfilePage = () => {
                     bodyText={`Vas a habilitar la cuenta de ${userData?.firstName} ${userData?.lastName}, podrá volver a acceder a ella ¿Continuar?`}
                     confirmButtonText="Habilitar"
                     onSave={handleEnableUser}
+                />
+
+                <CustomModal
+                    show={showBlockModal}
+                    onHide={handleCloseBlockModal}
+                    title={`Bloquear a ${userData?.firstName} ${userData?.lastName}`}
+                    bodyText={`¿Estás seguro que deseas bloquear a ${userData?.firstName} ${userData?.lastName}? 
+                    Este usuario ya no podrá interactuar contigo.`}
+                    confirmButtonText="Bloquear"
+                    onSave={handleBlockUser}
+                />
+
+                <CustomModal
+                    show={showUnblockModal}
+                    onHide={handleCloseUnblockModal}
+                    title={`Desbloquear a ${userData?.firstName} ${userData?.lastName}`}
+                    bodyText={`¿Estás seguro que deseas desbloquear a ${userData?.firstName} ${userData?.lastName}? 
+                    Este usuario podrá volver a interactuar contigo.`}
+                    confirmButtonText="Desbloquear"
+                    onSave={handleUnblockUser}
                 />
 
                 <Newimage
