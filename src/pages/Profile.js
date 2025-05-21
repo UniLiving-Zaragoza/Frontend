@@ -3,7 +3,7 @@ import { Container, Button, Card, Row, Col, Spinner, Alert } from "react-bootstr
 import { FaBriefcase, FaSmoking, FaPaw, FaUsers, FaMapMarkerAlt, FaHeart } from 'react-icons/fa';
 import { MdHome } from 'react-icons/md';
 import { PencilSquare } from "react-bootstrap-icons";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from "../components/CustomNavbar";
 import CustomModal from "../components/CustomModal";
@@ -18,6 +18,7 @@ const API_URL = 'https://uniliving-backend.onrender.com';
 const ProfilePage = () => {
     const { logout, isAdmin, user, token } = useAuth();
     const navigate = useNavigate();
+    const { id: urlUserId } = useParams();
 
     // Estados para los modales
     const [showModal, setShowModal] = useState(false);
@@ -29,6 +30,11 @@ const ProfilePage = () => {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+    
+    // Determinar qué ID de usuario mostrar
+    const userId = urlUserId || (user && user.id);
+    const isOwnProfile = user && user.id === userId;
 
     // Funciones para los modales
     const handleShowModal = () => setShowModal(true);
@@ -39,9 +45,6 @@ const ProfilePage = () => {
     const handleCloseEnable = () => setShowEnable(false);
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
-
-    // ID de usuario
-    const userId = user && user.id;
 
     // Obtener datos del usuario desde la API
     useEffect(() => {
@@ -85,17 +88,57 @@ const ProfilePage = () => {
     }
 
     // Deshabilitar usuario (para admin)
-    const handleDissableUser = () => {
-        console.log("Deshabilitar cuenta de usuario"); // Cambiar a deshabilitar en el backend
-        navigate(-1); // Volver a la página anterior
-        handleCloseModal();
+    const handleDissableUser = async () => {
+        try {
+            setStatusUpdateLoading(true);
+            
+            await axios.put(
+                `${API_URL}/user/${userId}`,
+                { userId: userId, status: 'Disabled' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            setUserData({...userData, status: 'Disabled'});
+                        
+            navigate(-1);
+        } catch (error) {
+            console.error("Error al deshabilitar usuario:", error);
+            alert("Error al deshabilitar el usuario");
+        } finally {
+            setStatusUpdateLoading(false);
+            handleCloseDissable();
+        }
     }
 
     // Habilitar usuario (para admin)
-    const handleEnableUser = () => {
-        console.log("Habilitar cuenta de usuario"); // Cambiar a habilitar en el backend
-        navigate(-1); // Volver a la página anterior
-        handleCloseModal();
+    const handleEnableUser = async () => {
+        try {
+            setStatusUpdateLoading(true);
+            
+            await axios.put(
+                `${API_URL}/user/${userId}`,
+                { userId: userId, status: 'Enabled' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            setUserData({...userData, status: 'Enabled'});
+                        
+            navigate(-1);
+        } catch (error) {
+            console.error("Error al habilitar usuario:", error);
+            alert("Error al habilitar el usuario");
+        } finally {
+            setStatusUpdateLoading(false);
+            handleCloseEnable();
+        }
     }
 
     // Navegar a la página de edición de perfil
@@ -136,12 +179,7 @@ const ProfilePage = () => {
     // Renderizar la página de perfil con los datos del usuario
     return (
         <div className="App">
-            {isAdmin && (
-                <CustomNavbarAdmin />
-            )}
-            {!isAdmin && (
-                <CustomNavbar />
-            )}
+            {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container className="mt-4">
                 {/* Cabecera */}
                 <Row className="justify-content-center text-center">
@@ -155,7 +193,7 @@ const ProfilePage = () => {
                                 style={{ width: "140px", height: "140px", objectFit: "cover", border: "2px solid #000842" }}
                             />
                             {/* Icono de edición */}
-                            {user && user.id === userId && (
+                            {isOwnProfile && (
                                 <PencilSquare
                                     className="position-absolute bg-light text-dark p-1 rounded-circle shadow"
                                     style={{
@@ -174,6 +212,12 @@ const ProfilePage = () => {
                             <p>
                                 Género: {userData?.gender === "Male" ? "Masculino" : userData?.gender === "Female" ? "Femenino" : "Otro"} | Edad: {userData?.age}
                             </p>
+                            {/* Mostrar el estado del usuario si el admin está viendo el perfil */}
+                            {isAdmin && !isOwnProfile && (
+                                <p className={`badge ${userData?.status === "Enabled" ? "bg-success" : "bg-danger"}`}>
+                                    Estado: {userData?.status === "Enabled" ? "Habilitado" : "Deshabilitado"}
+                                </p>
+                            )}
                         </div>
                         </div>
                     </Col>
@@ -287,46 +331,44 @@ const ProfilePage = () => {
                 </Row>
 
                 {/* Botones para usuario viendo su propio perfil */}
-                {user && user.id === userId && (
-                    <>
-                        <Row className="mt-5 d-flex justify-content-center mb-4 gap-3">
-                            <Col xs={12} md="auto" className="d-flex justify-content-center">
-                                <Button
-                                    variant="danger"
-                                    className="rounded-pill px-4 mx-2"
-                                    style={{ width: '200px' }}
-                                    onClick={handleShowModal}
-                                >
-                                    Cerrar Sesión
-                                </Button>
-                            </Col>
-                            <Col xs={12} md="auto" className="d-flex justify-content-center">
-                                <Button
-                                    variant="primary"
-                                    className="rounded-pill px-4 mx-2"
-                                    style={{ width: '200px', backgroundColor: "#000842" }}
-                                    onClick={handleEditClick}
-                                >
-                                    Modificar Perfil
-                                </Button>
-                            </Col>
-                            <Col xs={12} md="auto" className="d-flex justify-content-center">
-                                <Button
-                                    as={Link}
-                                    to="/usuarios-bloqueados"
-                                    variant="dark"
-                                    className="rounded-pill px-4 mx-2"
-                                    style={{ width: '200px' }}
-                                >
-                                    Usuarios bloqueados
-                                </Button>
-                            </Col>
-                        </Row>
-                    </>
+                {isOwnProfile && (
+                    <Row className="mt-5 d-flex justify-content-center mb-4 gap-3">
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="danger"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                                onClick={handleShowModal}
+                            >
+                                Cerrar Sesión
+                            </Button>
+                        </Col>
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="primary"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px', backgroundColor: "#000842" }}
+                                onClick={handleEditClick}
+                            >
+                                Modificar Perfil
+                            </Button>
+                        </Col>
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                as={Link}
+                                to="/usuarios-bloqueados"
+                                variant="dark"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                            >
+                                Usuarios bloqueados
+                            </Button>
+                        </Col>
+                    </Row>
                 )}
 
                 {/* Botones de admin para habilitar/deshabilitar */}
-                {isAdmin && userData && (
+                {isAdmin && !isOwnProfile && userData && (
                     <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
                         <Col xs={12} md="auto" className="d-flex justify-content-center">
                             {userData.status !== "Disabled" ? (
@@ -335,8 +377,9 @@ const ProfilePage = () => {
                                     className="rounded-pill px-4 mx-2"
                                     style={{ width: '200px' }}
                                     onClick={handleShowDissable}
+                                    disabled={statusUpdateLoading}
                                 >
-                                    Deshabilitar cuenta
+                                    {statusUpdateLoading ? 'Procesando...' : 'Deshabilitar cuenta'}
                                 </Button>
                             ) : (
                                 <Button
@@ -344,10 +387,21 @@ const ProfilePage = () => {
                                     className="rounded-pill px-4 mx-2"
                                     style={{ width: '200px', backgroundColor: "#000842" }}
                                     onClick={handleShowEnable}
+                                    disabled={statusUpdateLoading}
                                 >
-                                    Habilitar cuenta
+                                    {statusUpdateLoading ? 'Procesando...' : 'Habilitar cuenta'}
                                 </Button>
                             )}
+                        </Col>
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="secondary"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                                onClick={() => navigate(-1)}
+                            >
+                                Volver
+                            </Button>
                         </Col>
                     </Row>
                 )}
