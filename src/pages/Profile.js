@@ -25,6 +25,7 @@ const ProfilePage = () => {
     const [showDissable, setShowDissable] = useState(false);
     const [showEnable, setShowEnable] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
+    const [showBlockModal, setShowBlockModal] = useState(false);
 
     // Estados para gestionar los datos del usuario y la carga
     const [userData, setUserData] = useState(null);
@@ -35,6 +36,7 @@ const ProfilePage = () => {
     // Determinar qué ID de usuario mostrar
     const userId = urlUserId || (user && user.id);
     const isOwnProfile = user && user.id === userId;
+    const isOtherUserProfile = !isOwnProfile && !isAdmin;
 
     // Funciones para los modales
     const handleShowModal = () => setShowModal(true);
@@ -45,6 +47,8 @@ const ProfilePage = () => {
     const handleCloseEnable = () => setShowEnable(false);
     const handleShowImageModal = () => setShowImageModal(true);
     const handleCloseImageModal = () => setShowImageModal(false);
+    const handleShowBlockModal = () => setShowBlockModal(true);
+    const handleCloseBlockModal = () => setShowBlockModal(false);
 
     // Obtener datos del usuario desde la API
     useEffect(() => {
@@ -138,6 +142,18 @@ const ProfilePage = () => {
         } finally {
             setStatusUpdateLoading(false);
             handleCloseEnable();
+        }
+    }
+
+    // Bloquear usuario
+    const handleBlockUser = async () => {
+        try {
+            handleCloseBlockModal();
+            navigate(-1);
+        } catch (error) {
+            console.error("Error al bloquear usuario:", error);
+            alert("Error al bloquear el usuario");
+            handleCloseBlockModal();
         }
     }
 
@@ -405,6 +421,32 @@ const ProfilePage = () => {
                         </Col>
                     </Row>
                 )}
+
+                {/* Botones para usuario viendo perfil de otro usuario */}
+                {isOtherUserProfile && userData && (
+                    <Row className="mt-4 d-flex justify-content-center mb-4 gap-3">
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="danger"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                                onClick={handleShowBlockModal}
+                            >
+                                Bloquear usuario
+                            </Button>
+                        </Col>
+                        <Col xs={12} md="auto" className="d-flex justify-content-center">
+                            <Button
+                                variant="secondary"
+                                className="rounded-pill px-4 mx-2"
+                                style={{ width: '200px' }}
+                                onClick={() => navigate(-1)}
+                            >
+                                Volver
+                            </Button>
+                        </Col>
+                    </Row>
+                )}
                 
                 <div style={{ marginBottom: '30px' }}></div>
                 
@@ -434,6 +476,16 @@ const ProfilePage = () => {
                     bodyText={`Vas a habilitar la cuenta de ${userData?.firstName} ${userData?.lastName}, podrá volver a acceder a ella ¿Continuar?`}
                     confirmButtonText="Habilitar"
                     onSave={handleEnableUser}
+                />
+
+                <CustomModal
+                    show={showBlockModal}
+                    onHide={handleCloseBlockModal}
+                    title={`Bloquear a ${userData?.firstName} ${userData?.lastName}`}
+                    bodyText={`¿Estás seguro que deseas bloquear a ${userData?.firstName} ${userData?.lastName}? 
+                    Este usuario ya no podrá interactuar contigo.`}
+                    confirmButtonText="Bloquear"
+                    onSave={handleBlockUser}
                 />
 
                 <Newimage
