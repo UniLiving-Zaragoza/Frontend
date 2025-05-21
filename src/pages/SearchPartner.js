@@ -15,6 +15,7 @@ const BusquedaCompanero = () => {
   const [fumador, setFumador] = useState("");
   const [estadoLaboral, setEstadoLaboral] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const barriosZaragoza = [
@@ -60,6 +61,8 @@ const BusquedaCompanero = () => {
       } catch (err) {
         console.error("Error al verificar el estado del usuario:", err);
         setError("Error al cargar la información de usuario. Por favor, intenta nuevamente.");
+      } finally {
+        setInitialLoading(false);
       }
     };
 
@@ -142,6 +145,23 @@ const BusquedaCompanero = () => {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="App">
+        <CustomNavbar />
+        <Container className="my-4 d-flex justify-content-center align-items-center" style={{ minHeight: "calc(100vh - 150px)" }}>
+          <div className="text-center">
+            <Spinner
+              animation="border"
+              style={{ color: '#000842' }}
+              className="mb-3"
+            />
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
