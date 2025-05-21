@@ -22,7 +22,7 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [dataMessages.length]);
+    }, []);
 
     return (
         <Container className="mt-4">
@@ -41,8 +41,8 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                     next={loadMoreMessages}
                     hasMore={hasMore}
                     loader={
-                        <div className="d-flex justify-content-center my-3">
-                            <Spinner animation="border" variant="primary" />
+                        <div className="d-flex justify-content-center py-2">
+                            <Spinner animation="border" variant="primary" size="sm" />
                         </div>
                     }
                     scrollableTarget="scrollableDiv"
