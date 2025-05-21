@@ -49,7 +49,9 @@ const ChatGlobal = () => {
                     sender: newMessage.user.firstName || 'Recién Enviado',
                     text: newMessage.content,
                     sentDate: newMessage.sentDate,
-                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'
+                    userId: newMessage.user,
+                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    isLive: true
                 };
                 return sortMessages([...prevMessages, newMsg]);
             });
@@ -74,7 +76,9 @@ const ChatGlobal = () => {
                     sender: msg.user.firstName || 'Unknown',
                     text: msg.content,
                     sentDate: msg.sentDate,
-                    fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'
+                    fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    userId: msg.user._id,
+                    isLive: false
                 }));
                 setFetchingData(false);
                 setMessages((prevMessages) => {

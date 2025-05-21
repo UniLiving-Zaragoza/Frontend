@@ -1,5 +1,5 @@
 import React, { useRef, useEffect} from "react";
-import { Container, Card, Row, Col, Form, Button, Spinner } from "react-bootstrap";
+import { Container, Card, Row, Col, Form, Button } from "react-bootstrap";
 import { useAuth } from "../authContext";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -7,6 +7,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMessage, setNewMessage, loadMoreMessages, hasMore }) {
     const chatContainerRef = useRef(null);
     const { isAdmin, user } = useAuth();
+    const hasScrolledInitially = useRef(false);
+    const prevLastMsgId = useRef(null);
+
 
     const formatDateTime = (dateString) => {
         const messageDate = new Date(dateString);
@@ -19,10 +22,25 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
 
     // Solo hacemos scroll abajo si es el primer render o se añade un nuevo mensaje propio
     useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, []);
+    if (!chatContainerRef.current || dataMessages.length === 0) return;
+    const lastMsg = dataMessages[dataMessages.length - 1]; // recuerda: column-reverse → primero es el último
+    const isFirstLoad = !hasScrolledInitially.current;
+    console.log("Last Message:", lastMsg);
+    console.log("User ID:", user.id);
+    console.log("Last Message User ID:", lastMsg.userId);
+    console.log("Previous Last Message User ID:", prevLastMsgId.current);
+    console.log("Is live", lastMsg?.isLive);
+
+    const isOwnLiveMessage =
+        lastMsg?.isLive && lastMsg.userId === user.id && lastMsg.id !== prevLastMsgId.current;
+    if (isFirstLoad || isOwnLiveMessage) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        hasScrolledInitially.current = true;
+    }
+
+    prevLastMsgId.current = lastMsg.userId;
+}, [dataMessages, user.id]);
+
 
     return (
         <Container className="mt-4">
@@ -48,10 +66,10 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                     {dataMessages.map((msg) => (
                         <Row
                             key={msg.id}
-                            className={`d-flex ${msg.id === user._id ? "justify-content-end" : "justify-content-start"} mb-2`}
+                            className={`d-flex ${msg.id === user.id ? "justify-content-end" : "justify-content-start"} mb-2`}
                         >
                             <Col xs="auto" className="d-flex align-items-center">
-                                {msg.id !== user._id && (
+                                {msg.id !== user.id && (
                                     <img
                                         src={msg.fotoPerfil}
                                         alt={msg.sender}
@@ -61,7 +79,7 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                                     />
                                 )}
                                 <div>
-                                    <div className={`text-${msg.id !== user._id ? "start" : "end"} text-muted`} style={{ fontSize: "0.8rem" }}>
+                                    <div className={`text-${msg.id !== user.id ? "start" : "end"} text-muted`} style={{ fontSize: "0.8rem" }}>
                                         {msg.sender}
                                     </div>
                                     <Card
@@ -70,16 +88,16 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                                             borderRadius: "15px",
                                             maxWidth: "75%",
                                             minWidth: "10ch",
-                                            backgroundColor: msg.id !== user._id ? "#D6EAFF" : "#0056b3",
-                                            color: msg.id !== user._id ? "#000" : "#fff",
+                                            backgroundColor: msg.id !== user.id ? "#D6EAFF" : "#0056b3",
+                                            color: msg.id !== user.id ? "#000" : "#fff",
                                             position: "relative"
                                         }}
                                     >
                                         <Card.Text className="mb-1">{msg.text}</Card.Text>
-                                        <small className="d-block text-start" style={{ color: msg.id !== user._id ? "black" : "white", opacity: 0.7 }}>
+                                        <small className="d-block text-start" style={{ color: msg.id !== user.id ? "black" : "white", opacity: 0.7 }}>
                                             {formatDateTime(msg.sentDate)}
                                         </small>
-                                        {icon && msg.id !== user._id && (
+                                        {icon && msg.id !== user.id && (
                                             <div
                                                 onClick={(e) => onIconClick(e, msg.id, msg.sender, msg.text)}
                                                 style={{
@@ -94,7 +112,7 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                                         )}
                                     </Card>
                                 </div>
-                                {msg.id === user._id && (
+                                {msg.id === user.id && (
                                     <img
                                         src={msg.fotoPerfil}
                                         alt={msg.sender}
