@@ -49,7 +49,7 @@ const ChatGlobal = () => {
                     text: newMessage.content,
                     sentDate: newMessage.sentDate,
                     userId: newMessage.user,
-                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    fotoPerfil: newMessage.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg',
                     isLive: true
                 };
                 return sortMessages([...prevMessages, newMsg]);
@@ -75,7 +75,7 @@ const ChatGlobal = () => {
                     sender: msg.user.firstName || 'Unknown',
                     text: msg.content,
                     sentDate: msg.sentDate,
-                    fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    fotoPerfil: msg.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg',
                     userId: msg.user._id,
                     isLive: false
                 }));
