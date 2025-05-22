@@ -67,7 +67,7 @@ const ChatList = () => {
     return (
         <div className="App">
             <CustomNavbar />
-            <Container className="text-center mt-5">
+            <Container className="text-center mt-4">
                 <Row className="mb-3">
                     <Col>
                         <Button variant="primary" className="w-100 rounded-pill" style={{ backgroundColor: "#000842" }}>
@@ -114,7 +114,7 @@ const ChatList = () => {
                                         onClick={() => navigate(`/chat-individual/${chat._id}`)}
                                     >
                                         <img
-                                            src={otherParticipant?.profilePicture}
+                                            src={(otherParticipant?.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg')}
                                             alt={`${otherParticipant?.firstName} ${otherParticipant?.lastName}`}
                                             className="rounded-circle me-3"
                                             width={50}

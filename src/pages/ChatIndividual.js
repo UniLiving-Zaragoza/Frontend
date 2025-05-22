@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
+import { BsTrash } from 'react-icons/bs';
+import { useAuth } from "../authContext";
 import axios from "axios";
 import CustomNavbar from "../components/CustomNavbar";
 import ChatComponent from "../components/ChatComponent";
-import { useAuth } from "../authContext";
+import CustomModal from "../components/CustomModal";
 import socket from '../socket'; // usa la instancia compartida
 
 
@@ -21,8 +23,24 @@ const ChatIndividual = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [otherParticipant, setOtherParticipant] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingChat, setDeletingChat] = useState(false);
     const limit = 10;
 
+    // Función para obtener el otro participante
+    const fetchChatInfo = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_URL}/privateChat/${chatId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            const otherUser = res.data.participants.find(p => p._id !== user.id);
+            setOtherParticipant(otherUser);
+        } catch (err) {
+            console.error("Error obteniendo información del chat:", err);
+        }
+    }, [chatId, token, user.id]);
 
     // Join a la sala del chat y escuchar nuevos mensajes
     useEffect(() => {
@@ -45,7 +63,7 @@ const ChatIndividual = () => {
                     text: newMessage.content,
                     sentDate: newMessage.sentDate,
                     userId: newMessage.user, // Si `user` ya es el objeto completo
-                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    fotoPerfil: newMessage.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg',
                     isLive: true
                 };
 
@@ -74,7 +92,7 @@ const ChatIndividual = () => {
                 text: msg.content,
                 sentDate: msg.sentDate,
                 userId: msg.user._id,
-                fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                fotoPerfil: msg.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg',
                 sender: `${msg.user.firstName} ${msg.user.lastName}`,
                 isLive: false
             }));
@@ -116,11 +134,32 @@ const ChatIndividual = () => {
         setLoadingMore(false);
     };
 
+    // Función para eliminar el chat
+    const handleDeleteChat = async () => {
+        setDeletingChat(true);
+        try {
+            await axios.delete(`${API_URL}/privateChat/${chatId}`, {userId: user.id}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            // Desconectar del socket del chat
+            socket.emit("leaveChat", chatId);
+            
+            navigate("/lista-chats");
+        } catch (err) {
+            console.error("Error eliminando chat:", err);
+            alert("Error al eliminar el chat. Por favor, inténtalo de nuevo.");
+        } finally {
+            setDeletingChat(false);
+            setShowDeleteModal(false);
+        }
+    };
 
     useEffect(() => {
         setPage(1);
         fetchMessages(1);
-    }, [fetchMessages])
+        fetchChatInfo();
+    }, [fetchMessages, fetchChatInfo])
 
     return (
         <div className="App">
@@ -131,16 +170,46 @@ const ChatIndividual = () => {
                         <Button
                             variant="primary"
                             className="w-100 rounded-pill"
-                            style={{ backgroundColor: "#000842" }} onClick={() => navigate("/lista-chats")}>
+                            style={{ backgroundColor: "#000842" }} 
+                            onClick={() => navigate("/lista-chats")}
+                        >
                             Volver a chats
                         </Button>
                     </Col>
                     <Col>
-                        <Button variant="light" className="w-100 border border-dark rounded-pill" onClick={() => navigate("/chat-global")}>
+                        <Button 
+                            variant="light" 
+                            className="w-100 border border-dark rounded-pill" 
+                            onClick={() => navigate("/chat-global")}
+                        >
                             Chat General
                         </Button>
                     </Col>
                 </Row>
+
+                {/* Etiqueta del chat individual */}
+                <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
+                    <strong>
+                        {otherParticipant 
+                            ? `Chat con ${otherParticipant.firstName} ${otherParticipant.lastName}`
+                            : ''
+                        }
+                    </strong>
+                    <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => setShowDeleteModal(true)}
+                        disabled={deletingChat}
+                        className="d-flex align-items-center"
+                        style={{ border: 'none', backgroundColor: 'transparent' }}
+                    >
+                        {deletingChat ? (
+                            <Spinner animation="border" size="sm" />
+                        ) : (
+                            <BsTrash size={20} color="#dc3545" />
+                        )}
+                    </Button>
+                </div>
 
                 {loadingMore && (
                     <div className="d-flex justify-content-center my-3">
@@ -164,6 +233,16 @@ const ChatIndividual = () => {
                         icon={null} // Si quieres pasar icono de reporte, hazlo
                     />
                 )}
+
+                {/* Modal de confirmación para eliminar chat */}
+                <CustomModal
+                    show={showDeleteModal}
+                    onHide={() => setShowDeleteModal(false)}
+                    title="Eliminar Chat"
+                    bodyText={`¿Estás seguro de que quieres eliminar este chat con ${otherParticipant?.firstName} ${otherParticipant?.lastName}? Esta acción no se puede deshacer y se perderán todos los mensajes.`}
+                    confirmButtonText="Eliminar Chat"
+                    onSave={handleDeleteChat}
+                />
             </Container>
         </div>
     );

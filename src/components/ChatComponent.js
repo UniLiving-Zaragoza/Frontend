@@ -1,12 +1,14 @@
 import React, { useRef, useEffect} from "react";
 import { Container, Card, Row, Col, Form, Button } from "react-bootstrap";
 import { useAuth } from "../authContext";
+import { useNavigate } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMessage, setNewMessage, loadMoreMessages, hasMore }) {
     const chatContainerRef = useRef(null);
     const { isAdmin, user } = useAuth();
+    const navigate = useNavigate();
     const hasScrolledInitially = useRef(false);
     const prevLastMsgId = useRef(null);
 
@@ -18,6 +20,11 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
         return isToday
             ? messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             : messageDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const handleProfileClick = (userId) => {
+        const actualUserId = typeof userId === 'object' ? userId._id : userId;
+        navigate(`/perfil/${actualUserId}`);
     };
 
     // Solo hacemos scroll abajo si es el primer render o se añade un nuevo mensaje propio
@@ -76,6 +83,9 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                                         className="rounded-circle me-2"
                                         width={40}
                                         height={40}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => handleProfileClick(msg.userId)}
+                                        title={`Ver perfil de ${msg.sender}`}
                                     />
                                 )}
 

@@ -8,6 +8,8 @@ import CustomModal from "../components/CustomModal";
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+// FINALMENTE POR LOS IMPEDIMENTOS SURGIDOS SE HA DECIDIDO ÚNICAMENTE NO IMPLEMENTAR ESTA FUNCIONALIDAD
+
 const ChatReports = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedMessage, setSelectedMessage] = useState(null);

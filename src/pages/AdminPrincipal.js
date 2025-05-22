@@ -116,6 +116,7 @@ const Dashboard = () => {
   });
   const [commentStats, setCommentStats] = useState({
     total: 0,
+    reported: 0,
     monthlyData: []
   });
 
@@ -148,19 +149,23 @@ const Dashboard = () => {
         // Procesar datos de mensajes
         const messageData = messagesResponse.data;
         const yearlyMessageStats = filterDataByYear(messageData.monthlyStats, selectedYear);
-        const reportedCount = calculateYearlyReportedCount(messageData.totalStats[0]?.byStatus, yearlyMessageStats, selectedYear);
+        const reportedMessageCount = calculateYearlyReportedCount(messageData.totalStats[0]?.byStatus, yearlyMessageStats, selectedYear);
         
         setMessageStats({
           total: calculateYearlyTotal(messageData.totalStats[0]?.total || 0, messageData.monthlyStats, selectedYear),
-          reported: reportedCount,
+          reported: reportedMessageCount,
           monthlyData: processMonthlyData(yearlyMessageStats, 'mensajes')
         });
 
         // Procesar datos de comentarios
         const commentData = commentsResponse.data;
+        const yearlyCommentStats = filterDataByYear(commentData.monthlyStats, selectedYear);
+        const reportedCommentCount = calculateYearlyReportedCount(commentData.totalStats[0]?.byStatus, yearlyCommentStats, selectedYear);
+        
         setCommentStats({
           total: calculateYearlyTotal(commentData.totalStats[0]?.total || 0, commentData.monthlyStats, selectedYear),
-          monthlyData: processMonthlyData(filterDataByYear(commentData.monthlyStats, selectedYear), 'comentarios')
+          reported: reportedCommentCount,
+          monthlyData: processMonthlyData(yearlyCommentStats, 'comentarios')
         });
 
       } catch (error) {
@@ -372,21 +377,21 @@ const Dashboard = () => {
             <Card className="shadow-sm p-2">
               <Card.Header 
                 as={Link} 
-                to="/reportes-admin" 
+                to="/analiticas-comentarios" 
                 className="d-flex justify-content-between align-items-center"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                <span> Mensajes Reportados <span className="fs-5 fw-bold align-self-center">{messageStats.reported.toLocaleString()}</span></span>
+                <span> Comentarios Reportados <span className="fs-5 fw-bold align-self-center">{commentStats.reported.toLocaleString()}</span></span>
                 <span className="icon-container d-flex align-items-center" style={{ fontSize: "31px" }}>
                     <FaExclamationTriangle className="align-middle" />
                 </span>
               </Card.Header>
               <Card.Body>
                 <ResponsiveContainer width="100%" height={190}>
-                  <LineChart data={messageStats.monthlyData.map(item => ({
+                  <LineChart data={commentStats.monthlyData.map(item => ({
                     mes: item.mes,
                     mesNombre: item.mesNombre,
-                    reportes: Math.round(item.mensajes * (messageStats.reported / messageStats.total || 0))
+                    reportes: Math.round(item.comentarios * (commentStats.reported / commentStats.total || 0))
                   }))} margin={{ right: 35, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 

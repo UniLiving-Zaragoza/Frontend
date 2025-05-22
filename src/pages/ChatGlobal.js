@@ -49,7 +49,7 @@ const ChatGlobal = () => {
                     text: newMessage.content,
                     sentDate: newMessage.sentDate,
                     userId: newMessage.user,
-                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    fotoPerfil: newMessage.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg',
                     isLive: true
                 };
                 return sortMessages([...prevMessages, newMsg]);
@@ -75,7 +75,7 @@ const ChatGlobal = () => {
                     sender: msg.user.firstName || 'Unknown',
                     text: msg.content,
                     sentDate: msg.sentDate,
-                    fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    fotoPerfil: msg.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg',
                     userId: msg.user._id,
                     isLive: false
                 }));
@@ -170,14 +170,13 @@ const ChatGlobal = () => {
     return (
         <div className="App">
             {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
-            <Container className="text-center mt-5">
+            <Container className="mt-4">
                 {!isAdmin && (
-                    <Row className="mb-3">
+                    <Row className="mb-3 text-center">
                         <Col>
                             <Button
-                                variant="primary"
-                                className="w-100 rounded-pill"
-                                style={{ backgroundColor: "#000842" }}
+                                variant="light"
+                                className="w-100 border border-dark rounded-pill"
                                 onClick={() => navigate("/lista-chats")}
                             >
                                 Emparejamientos
@@ -185,8 +184,9 @@ const ChatGlobal = () => {
                         </Col>
                         <Col>
                             <Button
-                                variant="light"
-                                className="w-100 border border-dark rounded-pill"
+                                variant="primary"
+                                className="w-100 rounded-pill"
+                                style={{ backgroundColor: "#000842" }}
                             >
                                 Chat General
                             </Button>
