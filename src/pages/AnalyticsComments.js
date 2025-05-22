@@ -20,7 +20,7 @@ const AnalyticsCommentsPage = () => {
     const initialBarrio = location.state?.barrio || '';
     const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
     const [comments, setComments] = useState([]);
-    const usersPerPage = 5; 
+    const usersPerPage = 15; 
     const { isAuthenticated, isAdmin, user, token } = useAuth();
     const socketRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -189,10 +189,6 @@ const AnalyticsCommentsPage = () => {
             Authorization: `Bearer ${token}`,
             }
         }
-        );
-
-        setComments(prev =>
-                prev.filter(c => c._id !== commentId)
         );
 
         setReportModalOpen(true); // Mostrar modal
