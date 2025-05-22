@@ -19,7 +19,7 @@ import AnalyticsCommetsPage from './pages/AnalyticsComments'
 import SearchPartnerPage from './pages/SearchPartner'
 import ChatGlobal from './pages/ChatGlobal';
 import ChatIndividual from './pages/ChatIndividual';
-import ChatReports from './pages/AdminReports';
+//import ChatReports from './pages/AdminReports';
 import NotFound from './pages/NotFound';
 import { PrivateRoute, AdminRoute } from './protectedRoutes';
 
@@ -37,7 +37,7 @@ function IndexRoutes() {
       <Route path="/detalles-piso" element={<HouseInformation />} />
       <Route path="/analiticas" element={<AnalyticsPage />} />
       <Route path="/analiticas-graficos" element={<AnalyticsGraphicsPage />} />
-      <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} /> {/* Igual no hay que protegerla para admin ya que cambia en función del rol guardado */}
+      <Route path="/analiticas-comentarios" element={<AnalyticsCommetsPage />} />
 
       {/* Páginas con login necesario */}
       <Route path="/perfil" element={
@@ -65,9 +65,9 @@ function IndexRoutes() {
           <ChatList />
         </PrivateRoute>
       } />
-      <Route path="/chat-global/" element={ //***************
+      <Route path="/chat-global/" element={
         <PrivateRoute>
-          <ChatGlobal />  {/* Igual no hay que protegerla para admin ya que cambia en función del rol guardado */}
+          <ChatGlobal />
         </PrivateRoute>
       } />
       <Route path="/chat-individual/:id" element={ 
@@ -97,11 +97,12 @@ function IndexRoutes() {
           <AdminSearchUserPage />
         </AdminRoute>
       } />
-      <Route path="/reportes-admin" element={
+      {/*FINALMENTE POR LOS IMPEDIMENTOS SURGIDOS SE HA DECIDIDO ÚNICAMENTE NO IMPLEMENTAR ESTA FUNCIONALIDAD*/}
+      {/*<Route path="/reportes-admin" element={
         <AdminRoute>
           <ChatReports />
         </AdminRoute>
-      } />
+      } />*/}
 
       {/* Página no encontrada (404) */}
       <Route path="*" element={<NotFound />} />
