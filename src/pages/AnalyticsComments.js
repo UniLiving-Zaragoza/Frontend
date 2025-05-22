@@ -154,6 +154,27 @@ const AnalyticsCommentsPage = () => {
 
             if (!response.ok) throw new Error('Error al enviar el comentario');
 
+            const result = await response.json();
+            
+            // Emitir el comentario a través del socket para tiempo real
+            if (socketRef.current && selectedBarrio) {
+                socketRef.current.emit('newComment', {
+                    zone: selectedBarrio,
+                    comment: result.data || {
+                        _id: Date.now().toString(), // ID temporal
+                        content: newComment,
+                        user: {
+                            _id: user.id,
+                            firstName: user.firstName || 'Usuario',
+                            lastName: user.lastName || '',
+                            profilePicture: user.profilePicture
+                        },
+                        createdAt: new Date().toISOString(),
+                        isLive: true
+                    }
+                });
+            }
+
             setNewComment('');
 
         } catch (error) {
