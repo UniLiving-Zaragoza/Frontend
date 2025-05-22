@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
+import { BsTrash } from 'react-icons/bs';
+import { useAuth } from "../authContext";
 import axios from "axios";
 import CustomNavbar from "../components/CustomNavbar";
 import ChatComponent from "../components/ChatComponent";
-import { useAuth } from "../authContext";
+import CustomModal from "../components/CustomModal";
 import socket from '../socket'; // usa la instancia compartida
 
 
@@ -22,6 +24,8 @@ const ChatIndividual = () => {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [otherParticipant, setOtherParticipant] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingChat, setDeletingChat] = useState(false);
     const limit = 10;
 
     // Función para obtener el otro participante
@@ -130,6 +134,26 @@ const ChatIndividual = () => {
         setLoadingMore(false);
     };
 
+    // Función para eliminar el chat
+    const handleDeleteChat = async () => {
+        setDeletingChat(true);
+        try {
+            await axios.delete(`${API_URL}/privateChat/${chatId}`, {userId: user.id}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            // Desconectar del socket del chat
+            socket.emit("leaveChat", chatId);
+            
+            navigate("/lista-chats");
+        } catch (err) {
+            console.error("Error eliminando chat:", err);
+            alert("Error al eliminar el chat. Por favor, inténtalo de nuevo.");
+        } finally {
+            setDeletingChat(false);
+            setShowDeleteModal(false);
+        }
+    };
 
     useEffect(() => {
         setPage(1);
@@ -146,12 +170,18 @@ const ChatIndividual = () => {
                         <Button
                             variant="primary"
                             className="w-100 rounded-pill"
-                            style={{ backgroundColor: "#000842" }} onClick={() => navigate("/lista-chats")}>
+                            style={{ backgroundColor: "#000842" }} 
+                            onClick={() => navigate("/lista-chats")}
+                        >
                             Volver a chats
                         </Button>
                     </Col>
                     <Col>
-                        <Button variant="light" className="w-100 border border-dark rounded-pill" onClick={() => navigate("/chat-global")}>
+                        <Button 
+                            variant="light" 
+                            className="w-100 border border-dark rounded-pill" 
+                            onClick={() => navigate("/chat-global")}
+                        >
                             Chat General
                         </Button>
                     </Col>
@@ -165,6 +195,20 @@ const ChatIndividual = () => {
                             : ''
                         }
                     </strong>
+                    <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => setShowDeleteModal(true)}
+                        disabled={deletingChat}
+                        className="d-flex align-items-center"
+                        style={{ border: 'none', backgroundColor: 'transparent' }}
+                    >
+                        {deletingChat ? (
+                            <Spinner animation="border" size="sm" />
+                        ) : (
+                            <BsTrash size={20} color="#dc3545" />
+                        )}
+                    </Button>
                 </div>
 
                 {loadingMore && (
@@ -189,6 +233,16 @@ const ChatIndividual = () => {
                         icon={null} // Si quieres pasar icono de reporte, hazlo
                     />
                 )}
+
+                {/* Modal de confirmación para eliminar chat */}
+                <CustomModal
+                    show={showDeleteModal}
+                    onHide={() => setShowDeleteModal(false)}
+                    title="Eliminar Chat"
+                    bodyText={`¿Estás seguro de que quieres eliminar este chat con ${otherParticipant?.firstName} ${otherParticipant?.lastName}? Esta acción no se puede deshacer y se perderán todos los mensajes.`}
+                    confirmButtonText="Eliminar Chat"
+                    onSave={handleDeleteChat}
+                />
             </Container>
         </div>
     );
