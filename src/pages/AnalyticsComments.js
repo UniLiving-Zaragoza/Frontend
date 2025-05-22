@@ -275,7 +275,15 @@ const AnalyticsCommentsPage = () => {
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
             {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container fluid className="flex-grow-1 d-flex flex-column">
-                {!isAdmin && (
+                {isAdmin ? (
+                    <Container className="mt-3 mb-3">
+                        <div className="d-flex justify-content-center">
+                            <h2 className="text-center" style={{ color: '#000842', fontWeight: 'bold' }}>
+                                Comentarios reportados
+                            </h2>
+                        </div>
+                    </Container>
+                ) : (
                     <Container className="mt-3 mb-1">
                         <div className="d-flex justify-content-center">
                             <div style={{ width: '80%', maxWidth: '700px' }}>
@@ -297,7 +305,7 @@ const AnalyticsCommentsPage = () => {
                 
                 {/* Modal de reporte */}
                 {reportModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 mx-5 mb-4" >
                         <div className="bg-white p-4 rounded-xl shadow-xl w-4/5 max-w-xs text-center border border-gray-200">
                         <h2 className="text-md font-semibold text-gray-800 mb-2">Comentario reportado</h2>
                         <p className="text-gray-600 text-sm">
@@ -450,7 +458,8 @@ const AnalyticsCommentsPage = () => {
                                                     <Dropdown align="end" className="ms-2 mt-3">
                                                         <Dropdown.Toggle
                                                             as="button"
-                                                            style={{
+                                                            bsPrefix="custom-toggle"
+                                                                style={{
                                                                 background: 'none',
                                                                 border: 'none',
                                                                 fontSize: '1.5rem',
