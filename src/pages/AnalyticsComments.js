@@ -1,7 +1,7 @@
 import React, { useState, useEffect,useRef  } from 'react';
 import { Container, Row, Col, Button, Form, InputGroup, Spinner, Dropdown  } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
-import { useNavigate, Link, useLocation} from 'react-router-dom';
+import { useNavigate, useLocation} from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
@@ -20,7 +20,7 @@ const AnalyticsCommentsPage = () => {
     const initialBarrio = location.state?.barrio || '';
     const [selectedBarrio, setSelectedBarrio] = useState(initialBarrio);
     const [comments, setComments] = useState([]);
-    const usersPerPage = 5; 
+    const usersPerPage = 15; 
     const { isAuthenticated, isAdmin, user, token } = useAuth();
     const socketRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +44,15 @@ const AnalyticsCommentsPage = () => {
         "Casablanca", "Torrero-La Paz", "Sur"
     ];
 
+    // Función helper para ordenar comentarios
+    const sortCommentsByDate = (commentsArray) => {
+        return commentsArray.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB - dateA;
+        });
+    };
+
     useEffect(() => {
         setIsLoading(true);
 
@@ -64,7 +73,7 @@ const AnalyticsCommentsPage = () => {
                     return;
                 }
 
-                const sorted = res.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const sorted = sortCommentsByDate([...res.data.data]);
                 setComments(sorted);
                 setCurrentPage(1);
             } catch (err) {
@@ -91,7 +100,8 @@ const AnalyticsCommentsPage = () => {
 
             setComments(prev => {
                 if (prev.find(c => c._id === newComment._id)) return prev;
-                return [liveComment, ...prev];
+                const updatedComments = [liveComment, ...prev];
+                return sortCommentsByDate(updatedComments);
             });
         };
 
@@ -103,7 +113,26 @@ const AnalyticsCommentsPage = () => {
         };
     }, [selectedBarrio]);
 
+    // Función para manejar el clic en la foto del usuario
+    const handleUserPhotoClick = (comment) => {
 
+        if (!isAuthenticated) {
+            return;
+        }
+
+        if (comment.isLive) {
+            return;
+        }
+
+        if (user && comment.user && (comment.user._id === user.id || comment.user === user.id)) {
+            return;
+        }
+
+        if (comment.user && (comment.user._id || comment.user)) {
+            const userId = comment.user._id || comment.user;
+            navigate(`/perfil/${userId}`);
+        }
+    };
 
     const totalPages = Math.ceil(comments.length / usersPerPage);
 
@@ -134,6 +163,27 @@ const AnalyticsCommentsPage = () => {
             });
 
             if (!response.ok) throw new Error('Error al enviar el comentario');
+
+            const result = await response.json();
+            
+            // Emitir el comentario a través del socket para tiempo real
+            if (socketRef.current && selectedBarrio) {
+                socketRef.current.emit('newComment', {
+                    zone: selectedBarrio,
+                    comment: result.data || {
+                        _id: Date.now().toString(), // ID temporal
+                        content: newComment,
+                        user: {
+                            _id: user.id,
+                            firstName: user.firstName || 'Usuario',
+                            lastName: user.lastName || '',
+                            profilePicture: user.profilePicture
+                        },
+                        createdAt: new Date().toISOString(),
+                        isLive: true
+                    }
+                });
+            }
 
             setNewComment('');
 
@@ -189,10 +239,6 @@ const AnalyticsCommentsPage = () => {
             Authorization: `Bearer ${token}`,
             }
         }
-        );
-
-        setComments(prev =>
-                prev.filter(c => c._id !== commentId)
         );
 
         setReportModalOpen(true); // Mostrar modal
@@ -262,7 +308,7 @@ const AnalyticsCommentsPage = () => {
 
     const commentsContainerMaxHeight =
         isAuthenticated && isAdmin
-            ? 'calc(100vh - 200px)'
+            ? 'calc(100vh - 230px)'
             : isAuthenticated && !isAdmin
             ? 'calc(100vh - 320px)'
             : 'calc(100vh - 265px)';
@@ -275,7 +321,15 @@ const AnalyticsCommentsPage = () => {
         <div className="App position-relative d-flex flex-column" style={{ height: '100vh' }}>
             {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
             <Container fluid className="flex-grow-1 d-flex flex-column">
-                {!isAdmin && (
+                {isAdmin ? (
+                    <Container className="mt-3 mb-3">
+                        <div className="d-flex justify-content-center">
+                            <h2 className="text-center" style={{ color: '#000842', fontWeight: 'bold' }}>
+                                Comentarios reportados
+                            </h2>
+                        </div>
+                    </Container>
+                ) : (
                     <Container className="mt-3 mb-1">
                         <div className="d-flex justify-content-center">
                             <div style={{ width: '80%', maxWidth: '700px' }}>
@@ -297,7 +351,7 @@ const AnalyticsCommentsPage = () => {
                 
                 {/* Modal de reporte */}
                 {reportModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 mx-5 mb-4" >
                         <div className="bg-white p-4 rounded-xl shadow-xl w-4/5 max-w-xs text-center border border-gray-200">
                         <h2 className="text-md font-semibold text-gray-800 mb-2">Comentario reportado</h2>
                         <p className="text-gray-600 text-sm">
@@ -382,17 +436,23 @@ const AnalyticsCommentsPage = () => {
                                 <h4 className="text-muted">{comments.length} comentarios</h4>
                             </Col>
                             
-                            {[...currentComments].reverse().map(comment => (
+                            {currentComments.map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
-                                        <Link to={`/perfil/${comment.user._id || comment.user}`}>
-                                            <img
-                                                src={comment.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'}
-                                                alt={`${comment.user.firstName} ${comment.user.lastName}`}
-                                                className="rounded-circle"
-                                                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                                            />
-                                        </Link>
+                                        <img
+                                            src={comment.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg'}
+                                            alt={`${comment.user.firstName} ${comment.user.lastName}`}
+                                            className="rounded-circle"
+                                            style={{ 
+                                                width: '60px', 
+                                                height: '60px', 
+                                                objectFit: 'cover',
+                                                cursor: isAuthenticated && !comment.isLive && 
+                                                       (!user || (comment.user._id !== user.id && comment.user !== user.id)) 
+                                                       ? 'pointer' : 'default'
+                                            }}
+                                            onClick={() => handleUserPhotoClick(comment)}
+                                        />
 
                                         <div
                                             className="d-flex align-items-start justify-content-between flex-grow-1 ms-3 px-3"
@@ -407,17 +467,19 @@ const AnalyticsCommentsPage = () => {
                                             }}
                                         >
                                             <div className="d-flex flex-column">
-                                            <Link to={`/perfil/${comment.user._id || comment.user}`}
+                                            <span 
+                                                className="fw-semibold"
                                                 style={{
+                                                    cursor: isAuthenticated && !comment.isLive && 
+                                                           (!user || (comment.user._id !== user.id && comment.user !== user.id)) 
+                                                           ? 'pointer' : 'default',
                                                     textDecoration: 'none',
-                                                    color: 'inherit',
+                                                    color: 'inherit'
                                                 }}
+                                                onClick={() => handleUserPhotoClick(comment)}
                                             >
-                                                <span className="fw-semibold">
                                                 {comment.isLive ? 'Recién escrito' : `${comment.user.firstName} ${comment.user.lastName}`}
-                                                </span>
-
-                                            </Link>
+                                            </span>
 
                                             <span
                                                 className="text-muted"
@@ -450,7 +512,8 @@ const AnalyticsCommentsPage = () => {
                                                     <Dropdown align="end" className="ms-2 mt-3">
                                                         <Dropdown.Toggle
                                                             as="button"
-                                                            style={{
+                                                            bsPrefix="custom-toggle"
+                                                                style={{
                                                                 background: 'none',
                                                                 border: 'none',
                                                                 fontSize: '1.5rem',
