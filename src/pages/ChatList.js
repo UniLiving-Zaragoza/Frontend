@@ -67,7 +67,7 @@ const ChatList = () => {
     return (
         <div className="App">
             <CustomNavbar />
-            <Container className="text-center mt-5">
+            <Container className="text-center mt-4">
                 <Row className="mb-3">
                     <Col>
                         <Button variant="primary" className="w-100 rounded-pill" style={{ backgroundColor: "#000842" }}>

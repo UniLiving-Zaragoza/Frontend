@@ -170,7 +170,7 @@ const ChatGlobal = () => {
     return (
         <div className="App">
             {isAdmin ? <CustomNavbarAdmin /> : <CustomNavbar />}
-            <Container className="mt-5">
+            <Container className="mt-4">
                 {!isAdmin && (
                     <Row className="mb-3 text-center">
                         <Col>
