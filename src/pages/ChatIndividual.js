@@ -1,184 +1,187 @@
-import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Button, Row, Col } from 'react-bootstrap';
-import CustomNavbar from '../components/CustomNavbar';
+import React, { useEffect, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
+import axios from "axios";
+import CustomNavbar from "../components/CustomNavbar";
 import ChatComponent from "../components/ChatComponent";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import CustomModal from "../components/CustomModal";
-import { useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft, FaTrash, FaUserSlash } from "react-icons/fa";
+import { useAuth } from "../authContext";
+import socket from '../socket'; // usa la instancia compartida
 
 
-const messages = [
-    {
-        id: 1,
-        sender: "Laura",
-        text: "Hola, ¿cómo estás?",
-        time: "10:30 AM",
-        fotoPerfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png"
-    },
-    {
-        sender: `Usuario`,
-        text: "¡Hola! Busco piso en el actur",
-        time: "10:32 AM",
-        fotoPerfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png"
-    },
-    {
-        sender: `Usuario`,
-        text: "¿qué te parece este?",
-        time: "10:35 AM",
-        fotoPerfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png"
-    },
-    {
-        id: 1,
-        sender: "Laura",
-        text: "Se pasa un poco de precio, ¿no?",
-        time: "10:35 AM",
-        fotoPerfil: "https://cdn-icons-png.flaticon.com/512/9387/9387271.png"
-    },
-    {
-        sender: `Usuario`,
-        text: "Un poco, pero está bien ubicado",
-        time: "10:35 AM",
-        fotoPerfil: "https://cdn-icons-png.flaticon.com/512/8068/8068070.png"
-    }
-];
 
 const ChatIndividual = () => {
+    const API_URL = 'https://uniliving-backend.onrender.com';
+    const { id: chatId } = useParams();
+    const { user, token } = useAuth();
     const navigate = useNavigate();
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedMessage, setSelectedMessage] = useState(null);
-    const [selectedUserName, setSelectedUserName] = useState(null);
-    const [showMenu, setShowMenu] = useState(false);
-    const [showReport, setShowReport] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
-    const [showDissable, setShowDissable] = useState(false);
-    const handleShowReport = () => setShowReport(true);
-    const handleCloseReport = () => setShowReport(false);
-    const handleShowDelete = () => setShowDelete(true);
-    const handleCloseDelete = () => setShowDelete(false);
-    const handleShowDissable = () => setShowDissable(true);
-    const handleCloseDissable = () => setShowDissable(false);
-    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
-    const { id } = useParams();
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const limit = 10;
 
-    // Modificar directamente los mensajes
-    for (let i = 0; i < messages.length; i++) {
-        if (!messages[i].id || messages[i].id !== 1) {
-            messages[i].id = parseInt(id);
-            messages[i].sender = `Usuario${id}`;
+
+    // Join a la sala del chat y escuchar nuevos mensajes
+    useEffect(() => {
+        if (!chatId) return;
+
+        socket.connect(); // Asegúrate de conectar si aún no está
+        socket.emit("joinChat", chatId);
+
+        socket.on("messageReceived", (newMessage) => {
+            if (newMessage.privateChat !== chatId) return;
+
+            setMessages((prevMessages) => {
+                if (prevMessages.some(msg => msg.id === newMessage._id)) {
+                    return prevMessages;
+                }
+
+                const newMsg = {
+                    id: newMessage._id,
+                    sender: `${newMessage.user.firstName} ${newMessage.user.lastName}`,
+                    text: newMessage.content,
+                    sentDate: newMessage.sentDate,
+                    userId: newMessage.user, // Si `user` ya es el objeto completo
+                    fotoPerfil: newMessage.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                    isLive: true
+                };
+
+                return [...prevMessages, newMsg];
+            });
+        });
+
+        return () => {
+            socket.off("messageReceived");
+            socket.disconnect();
+        };
+    }, [chatId]);
+    
+
+    // Cargar mensajes paginados
+    const fetchMessages = useCallback(async (pageToFetch) => {
+        try {
+            const res = await axios.get(`${API_URL}/privateChat/${chatId}/messages/`, {
+                params: { page: pageToFetch, limit },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Mapeo igual...
+            const mappedMessages = res.data.messages.map(msg => ({
+                id: msg._id,
+                text: msg.content,
+                sentDate: msg.sentDate,
+                userId: msg.user._id,
+                fotoPerfil: msg.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                sender: `${msg.user.firstName} ${msg.user.lastName}`,
+                isLive: false
+            }));
+
+            setMessages(prev => {
+                const existingIds = new Set(prev.map(msg => msg.id));
+                const uniqueNew = mappedMessages.filter(msg => !existingIds.has(msg.id));
+                return [...uniqueNew.reverse(), ...prev];
+            });
+
+            setHasMore(mappedMessages.length === limit);
+            setPage(pageToFetch + 1);
+        } catch (err) {
+            console.error("Error cargando mensajes:", err);
+        } finally {
+            setLoading(false);
         }
-    }
+    }, [chatId, token]);
 
-    const handleReportUser = (e, id, sender, text) => {
-        setSelectedUser(id);
-        setSelectedMessage(text);
-        setSelectedUserName(sender);
-        setShowMenu(!showMenu);
-        // Obtener las coordenadas del clic
-        const { clientX, clientY } = e;
-        setMenuPosition({ x: clientX, y: clientY });
+    useEffect(() => {
+        fetchMessages();
+    }, [fetchMessages]);
+
+    const handleSendMessage = async () => {
+        try {
+            const res = await axios.post(`${API_URL}/messages`, {
+                content: newMessage,
+                userId: user.id,
+                privateChat: chatId,
+                generalChat: false
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Añadir localmente optimista
+            const sentMsg = res.data; // o adapta según respuesta real
+            setMessages(prev => [...prev, {
+                id: sentMsg._id,
+                text: sentMsg.content,
+                sentDate: sentMsg.sentDate,
+                userId: user.id,
+                fotoPerfil: user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                sender: `${user.firstName} ${user.lastName}`,
+                isLive: true
+            }]);
+
+            setNewMessage('');
+        } catch (err) {
+            console.error("Error enviando mensaje:", err);
+        }
     };
 
-    const reporte = () => {
-        setShowMenu(false);
-        handleShowReport();
+    const loadMoreMessages = async () => {
+        setLoadingMore(true);
+        await fetchMessages(page);
+        setLoadingMore(false);
     };
 
-    const handleReport = () => {
-        console.log(`Reportar comentario de ${selectedUser} con texto: "${selectedMessage}"`); // Cambiar a reportar en el backend
-        handleCloseReport();
-    }
 
-    const handleDelete = () => {
-        console.log(`Borrar chat con Usuario${id}`); // Cambiar a borrar en el backend
-        handleCloseDelete();
-    }
-
-    const handleBlock = () => {
-        console.log(`Bloquear a Usuario${id}`); // Cambiar a bloquear en el backend
-        handleCloseDissable();
-    }
+    useEffect(() => {
+        setPage(1);
+        fetchMessages(1);
+    }, [fetchMessages])
 
     return (
         <div className="App">
             <CustomNavbar />
-            <Container className="text-center mt-5">
+            <Container className="mt-4">
                 <Row className="mb-3">
                     <Col>
-                        <Button variant="primary" className="w-100 rounded-pill" style={{ backgroundColor: "#000842" }} onClick={() => navigate("/lista-chats")}>Emparejamientos</Button>
+                        <Button
+                            variant="primary"
+                            className="w-100 rounded-pill"
+                            style={{ backgroundColor: "#000842" }} onClick={() => navigate("/lista-chats")}>
+                            Volver a chats
+                        </Button>
                     </Col>
                     <Col>
-                        <Button variant="light" className="w-100 border border-dark rounded-pill" onClick={() => navigate("/chat-global")}> Chat General</Button>
+                        <Button variant="light" className="w-100 border border-dark rounded-pill" onClick={() => navigate("/chat-global")}>
+                            Chat General
+                        </Button>
                     </Col>
                 </Row>
-                <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
-                    <div className="d-flex align-items-center gap-2">
-                        <FaArrowLeft
-                            style={{ cursor: "pointer" }}
-                            onClick={() => navigate("/lista-chats")}
-                        />
-                        <strong>Usuario{id}</strong>
-                    </div>
-                    <div className="d-flex align-items-center gap-3">
-                        <FaTrash
-                            style={{ color: "red", cursor: "pointer" }}
-                            onClick={() => handleShowDelete()}
-                        />
-                        <FaUserSlash
-                            style={{ color: "gray", cursor: "pointer" }}
-                            onClick={() => handleShowDissable()}
-                        />
-                    </div>
-                </div>
-                <ChatComponent
-                    dataMessages={messages}
-                    icon={<BsThreeDotsVertical size={25} />}
-                    onIconClick={handleReportUser}
-                />
-                {showMenu && (
-                    <div
-                        className="dropdown-menu show"
-                        style={{
-                            position: "absolute",
-                            left: menuPosition.x + "px",
-                            top: menuPosition.y + "px"
-                        }}
-                    >
-                        <button className="dropdown-item" onClick={reporte}>
-                            Reportar Usuario
-                        </button>
+
+                {loadingMore && (
+                    <div className="d-flex justify-content-center my-3">
+                        <Spinner animation="border" variant="primary" />
                     </div>
                 )}
-                <div style={{ marginBottom: '20px' }}></div>
+
+                {loading ? (
+                    <div className="d-flex justify-content-center my-5">
+                        <Spinner animation="border" variant="primary" />
+                    </div>
+                ) : (
+                
+                    <ChatComponent
+                        dataMessages={messages}
+                        onSendMessage={handleSendMessage}
+                        newMessage={newMessage}
+                        setNewMessage={setNewMessage}
+                        loadMoreMessages={loadMoreMessages}
+                        hasMore={hasMore} 
+                        icon={null} // Si quieres pasar icono de reporte, hazlo
+                    />
+                )}
             </Container>
-            <CustomModal
-                show={showReport}
-                onHide={handleCloseReport}
-                title={`Reportar usuario ${selectedUserName}`}
-                bodyText={`Vas a reportar a ${selectedUserName} debido al siguiente mensaje "${selectedMessage}", ¿Continuar?`}
-                confirmButtonText="Reportar"
-                onSave={handleReport}
-            />
-
-            <CustomModal
-                show={showDelete}
-                onHide={handleCloseDelete}
-                title={`Eliminar chat con Usuario${id}`}
-                bodyText={`¿Estás seguro que deseas eliminar el chat con Usuario${id}? Perderás el contacto con la persona`}
-                confirmButtonText="Eliminar chat"
-                onSave={handleDelete}
-            />
-
-            <CustomModal
-                show={showDissable}
-                onHide={handleCloseDissable}
-                title={`Bloquear a Usuario${id}`}
-                bodyText={`¿Estás seguro que deseas bloquear a Usuario${id}? Se eliminará el chat y ya no se te volverá a emparejar con él al buscar un nuevo compañero`}
-                confirmButtonText="Bloquear persona"
-                onSave={handleBlock}
-            />
         </div>
     );
 };

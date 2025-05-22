@@ -4,7 +4,7 @@ import { useAuth } from '../authContext';
 import { BsThreeDotsVertical, BsTrash3Fill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import io from 'socket.io-client';
+import socket from '../socket'; // usa la instancia compartida
 import CustomNavbar from '../components/CustomNavbar';
 import ChatComponent from "../components/ChatComponent";
 import CustomModal from "../components/CustomModal";
@@ -12,7 +12,6 @@ import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const API_URL = 'https://uniliving-backend.onrender.com';
-const socket = io(API_URL, { autoConnect: false });
 
 const ChatGlobal = () => {
     const navigate = useNavigate();
@@ -133,7 +132,7 @@ const ChatGlobal = () => {
         setModalType('reporte');
         setShow(true);
     };
-
+    //TODO: Cambiar correctamente las URLs de los reportes y eliminaciones
     const handleModalConfirm = async () => {
         if (modalType === 'reporte') {
             try {
