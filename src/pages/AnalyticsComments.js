@@ -1,7 +1,7 @@
 import React, { useState, useEffect,useRef  } from 'react';
 import { Container, Row, Col, Button, Form, InputGroup, Spinner, Dropdown  } from 'react-bootstrap';
 import { FaChartBar, FaPaperPlane, FaTrash } from 'react-icons/fa';
-import { useNavigate, Link, useLocation} from 'react-router-dom';
+import { useNavigate, useLocation} from 'react-router-dom';
 import { useAuth } from '../authContext';
 import CustomNavbar from '../components/CustomNavbar';
 import CustomNavbarAdmin from "../components/CustomNavbarAdmin";
@@ -103,7 +103,26 @@ const AnalyticsCommentsPage = () => {
         };
     }, [selectedBarrio]);
 
+    // Función para manejar el clic en la foto del usuario
+    const handleUserPhotoClick = (comment) => {
 
+        if (!isAuthenticated) {
+            return;
+        }
+
+        if (comment.isLive) {
+            return;
+        }
+
+        if (user && comment.user && (comment.user._id === user.id || comment.user === user.id)) {
+            return;
+        }
+
+        if (comment.user && (comment.user._id || comment.user)) {
+            const userId = comment.user._id || comment.user;
+            navigate(`/perfil/${userId}`);
+        }
+    };
 
     const totalPages = Math.ceil(comments.length / usersPerPage);
 
@@ -389,14 +408,20 @@ const AnalyticsCommentsPage = () => {
                             {[...currentComments].reverse().map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
-                                        <Link to={`/perfil/${comment.user._id || comment.user}`}>
-                                            <img
-                                                src={comment.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg'}
-                                                alt={`${comment.user.firstName} ${comment.user.lastName}`}
-                                                className="rounded-circle"
-                                                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                                            />
-                                        </Link>
+                                        <img
+                                            src={comment.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg'}
+                                            alt={`${comment.user.firstName} ${comment.user.lastName}`}
+                                            className="rounded-circle"
+                                            style={{ 
+                                                width: '60px', 
+                                                height: '60px', 
+                                                objectFit: 'cover',
+                                                cursor: isAuthenticated && !comment.isLive && 
+                                                       (!user || (comment.user._id !== user.id && comment.user !== user.id)) 
+                                                       ? 'pointer' : 'default'
+                                            }}
+                                            onClick={() => handleUserPhotoClick(comment)}
+                                        />
 
                                         <div
                                             className="d-flex align-items-start justify-content-between flex-grow-1 ms-3 px-3"
@@ -411,17 +436,19 @@ const AnalyticsCommentsPage = () => {
                                             }}
                                         >
                                             <div className="d-flex flex-column">
-                                            <Link to={`/perfil/${comment.user._id || comment.user}`}
+                                            <span 
+                                                className="fw-semibold"
                                                 style={{
+                                                    cursor: isAuthenticated && !comment.isLive && 
+                                                           (!user || (comment.user._id !== user.id && comment.user !== user.id)) 
+                                                           ? 'pointer' : 'default',
                                                     textDecoration: 'none',
-                                                    color: 'inherit',
+                                                    color: 'inherit'
                                                 }}
+                                                onClick={() => handleUserPhotoClick(comment)}
                                             >
-                                                <span className="fw-semibold">
                                                 {comment.isLive ? 'Recién escrito' : `${comment.user.firstName} ${comment.user.lastName}`}
-                                                </span>
-
-                                            </Link>
+                                            </span>
 
                                             <span
                                                 className="text-muted"
