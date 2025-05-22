@@ -21,7 +21,7 @@ const ChatIndividual = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
-    const limit = 5;
+    const limit = 10;
 
 
     // Join a la sala del chat y escuchar nuevos mensajes
