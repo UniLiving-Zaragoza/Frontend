@@ -44,6 +44,15 @@ const AnalyticsCommentsPage = () => {
         "Casablanca", "Torrero-La Paz", "Sur"
     ];
 
+    // Función helper para ordenar comentarios
+    const sortCommentsByDate = (commentsArray) => {
+        return commentsArray.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB - dateA;
+        });
+    };
+
     useEffect(() => {
         setIsLoading(true);
 
@@ -64,7 +73,7 @@ const AnalyticsCommentsPage = () => {
                     return;
                 }
 
-                const sorted = res.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const sorted = sortCommentsByDate([...res.data.data]);
                 setComments(sorted);
                 setCurrentPage(1);
             } catch (err) {
@@ -91,7 +100,8 @@ const AnalyticsCommentsPage = () => {
 
             setComments(prev => {
                 if (prev.find(c => c._id === newComment._id)) return prev;
-                return [liveComment, ...prev];
+                const updatedComments = [liveComment, ...prev];
+                return sortCommentsByDate(updatedComments);
             });
         };
 
@@ -426,7 +436,7 @@ const AnalyticsCommentsPage = () => {
                                 <h4 className="text-muted">{comments.length} comentarios</h4>
                             </Col>
                             
-                            {[...currentComments].reverse().map(comment => (
+                            {currentComments.map(comment => (
                                 <Col xs={12} key={comment._id} className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <img
