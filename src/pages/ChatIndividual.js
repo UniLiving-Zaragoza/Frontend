@@ -21,8 +21,22 @@ const ChatIndividual = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [otherParticipant, setOtherParticipant] = useState(null);
     const limit = 10;
 
+    // Función para obtener el otro participante
+    const fetchChatInfo = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_URL}/privateChat/${chatId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            const otherUser = res.data.participants.find(p => p._id !== user.id);
+            setOtherParticipant(otherUser);
+        } catch (err) {
+            console.error("Error obteniendo información del chat:", err);
+        }
+    }, [chatId, token, user.id]);
 
     // Join a la sala del chat y escuchar nuevos mensajes
     useEffect(() => {
@@ -120,7 +134,8 @@ const ChatIndividual = () => {
     useEffect(() => {
         setPage(1);
         fetchMessages(1);
-    }, [fetchMessages])
+        fetchChatInfo();
+    }, [fetchMessages, fetchChatInfo])
 
     return (
         <div className="App">
@@ -141,6 +156,16 @@ const ChatIndividual = () => {
                         </Button>
                     </Col>
                 </Row>
+
+                {/* Etiqueta del chat individual */}
+                <div className="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-light mb-3 shadow-sm">
+                    <strong>
+                        {otherParticipant 
+                            ? `Chat con ${otherParticipant.firstName} ${otherParticipant.lastName}`
+                            : ''
+                        }
+                    </strong>
+                </div>
 
                 {loadingMore && (
                     <div className="d-flex justify-content-center my-3">
