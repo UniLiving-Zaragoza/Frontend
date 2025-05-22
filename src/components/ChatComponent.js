@@ -25,11 +25,6 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
     if (!chatContainerRef.current || dataMessages.length === 0) return;
     const lastMsg = dataMessages[dataMessages.length - 1]; // recuerda: column-reverse → primero es el último
     const isFirstLoad = !hasScrolledInitially.current;
-    console.log("Last Message:", lastMsg);
-    console.log("User ID:", user.id);
-    console.log("Last Message User ID:", lastMsg.userId);
-    console.log("Previous Last Message User ID:", prevLastMsgId.current);
-    console.log("Is live", lastMsg?.isLive);
 
     const isOwnLiveMessage =
         lastMsg?.isLive && lastMsg.userId._id === user.id && lastMsg.id !== prevLastMsgId.current;

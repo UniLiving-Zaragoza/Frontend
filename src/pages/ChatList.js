@@ -5,15 +5,17 @@ import { Container, Button, Card, Row, Col, Spinner } from 'react-bootstrap';
 import CustomNavbar from '../components/CustomNavbar';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../authContext";
+import socket from '../socket';
+
 
 const ChatList = () => {
+
     const navigate = useNavigate();
     const [chats, setChats] = useState([]);
     const [loading, setLoading] = useState(true);
     const {user, token} = useAuth();
 
     const API_URL = 'https://uniliving-backend.onrender.com';
-
     useEffect(() => {
         const fetchChats = async () => {
             try {
@@ -34,6 +36,33 @@ const ChatList = () => {
             fetchChats();
         }
     }, [user, token]);
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            try {
+                const res = await axios.get(`${API_URL}/privateChat/userChats/${user.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                const allChats = res.data.chats;
+                setChats(allChats);
+
+                allChats.forEach(chat => {
+                    console.log("Uniendo a chat_id", chat._id);
+                    socket.emit("joinChat", chat._id);
+                });
+
+            } catch (err) {
+                console.error("Error al cargar chats:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (user?.id && token) {
+            fetchChats();
+        }
+    }, [user, token, socket]);
 
     return (
         <div className="App">
