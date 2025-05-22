@@ -133,7 +133,7 @@ const ChatGlobal = () => {
         setModalType('reporte');
         setShow(true);
     };
-
+    //TODO: Cambiar correctamente las URLs de los reportes y eliminaciones
     const handleModalConfirm = async () => {
         if (modalType === 'reporte') {
             try {
