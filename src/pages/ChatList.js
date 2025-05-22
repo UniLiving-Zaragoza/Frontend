@@ -62,7 +62,7 @@ const ChatList = () => {
         if (user?.id && token) {
             fetchChats();
         }
-    }, [user, token, socket]);
+    }, [user, token]);
 
     return (
         <div className="App">
