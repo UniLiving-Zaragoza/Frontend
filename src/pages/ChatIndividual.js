@@ -94,13 +94,9 @@ const ChatIndividual = () => {
         }
     }, [chatId, token]);
 
-    useEffect(() => {
-        fetchMessages();
-    }, [fetchMessages]);
-
     const handleSendMessage = async () => {
         try {
-            const res = await axios.post(`${API_URL}/messages`, {
+             await axios.post(`${API_URL}/messages`, {
                 content: newMessage,
                 userId: user.id,
                 privateChat: chatId,
@@ -108,19 +104,6 @@ const ChatIndividual = () => {
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
-            // Añadir localmente optimista
-            const sentMsg = res.data; // o adapta según respuesta real
-            setMessages(prev => [...prev, {
-                id: sentMsg._id,
-                text: sentMsg.content,
-                sentDate: sentMsg.sentDate,
-                userId: user.id,
-                fotoPerfil: user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
-                sender: `${user.firstName} ${user.lastName}`,
-                isLive: true
-            }]);
-
             setNewMessage('');
         } catch (err) {
             console.error("Error enviando mensaje:", err);

@@ -58,13 +58,18 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                     inverse={true} // IMPORTANTE: permite cargar más al llegar arriba
                     
                 >
-                    {dataMessages.map((msg) => (
+                    {dataMessages.map((msg) => {
+                    const senderId = typeof msg.userId === 'object' ? msg.userId._id : msg.userId;
+                    const isOwnMessage = senderId === user.id;
+
+                    return (
                         <Row
                             key={msg.id}
-                            className={`d-flex ${msg.userId._id === user.id ? "justify-content-end" : "justify-content-start"} mb-2`}
+                            className={`d-flex ${isOwnMessage ? "justify-content-end" : "justify-content-start"} mb-2`}
                         >
                             <Col xs="auto" className="d-flex align-items-center">
-                                {msg.id !== user.id && (
+                                {/* Imagen de perfil al principio si NO es tu mensaje */}
+                                {!isOwnMessage && (
                                     <img
                                         src={msg.fotoPerfil}
                                         alt={msg.sender}
@@ -73,61 +78,76 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                                         height={40}
                                     />
                                 )}
+
                                 <div>
-                                    <div className={`text-${msg.id !== user.id ? "start" : "end"} text-muted`} style={{ fontSize: "0.8rem" }}>
+                                    {/* Nombre del emisor */}
+                                    <div
+                                        className={`text-${isOwnMessage ? "end" : "start"} text-muted`}
+                                        style={{ fontSize: "0.8rem" }}
+                                    >
                                         {msg.sender}
                                     </div>
+
+                                    {/* Burbuja del mensaje */}
                                     <Card
-                                    className="p-2"
-                                    style={{
-                                        borderRadius: "15px",
-                                        maxWidth: "100%", // antes era 75%
-                                        minWidth: "20ch", // un poco más ancho por defecto
-                                        backgroundColor: msg.id !== user.id ? "#D6EAFF" : "#0056b3",
-                                        color: msg.id !== user.id ? "#000" : "#fff",
-                                        position: "relative"
-                                    }}
+                                        className="p-2"
+                                        style={{
+                                            borderRadius: "15px",
+                                            maxWidth: "100%",
+                                            minWidth: "20ch",
+                                            backgroundColor: isOwnMessage ? "#0056b3" : "#D6EAFF",
+                                            color: isOwnMessage ? "#fff" : "#000",
+                                            position: "relative",
+                                        }}
                                     >
                                         <Card.Text
                                             className="mb-1"
                                             style={{
                                                 whiteSpace: 'pre-wrap',
                                                 wordBreak: 'break-word',
-                                                overflowWrap: 'break-word'
+                                                overflowWrap: 'break-word',
                                             }}
-                                            >
+                                        >
                                             {msg.text}
-                                            </Card.Text>
-                                        <small className="d-block text-start" style={{ color: msg.id !== user.id ? "black" : "white", opacity: 0.7 }}>
+                                        </Card.Text>
+                                        <small
+                                            className={`d-block ${isOwnMessage ? "text-end" : "text-start"}`}
+                                            style={{ color: isOwnMessage ? "white" : "black", opacity: 0.7 }}
+                                        >
                                             {formatDateTime(msg.sentDate)}
                                         </small>
-                                        {icon && msg.id !== user.id && (
+
+                                        {/* {icon && !isOwnMessage && (
                                             <div
-                                                onClick={(e) => onIconClick(e, msg.id, msg.sender, msg.text)}
+                                                onClick={(e) => onIconClick(e, senderId, msg.sender, msg.text)}
                                                 style={{
                                                     position: "absolute",
                                                     right: "10px",
                                                     bottom: "10px",
-                                                    cursor: "pointer"
+                                                    cursor: "pointer",
                                                 }}
                                             >
                                                 {icon}
                                             </div>
-                                        )}
+                                        )} */}
+                                        
                                     </Card>
                                 </div>
-                                {msg.id === user.id && (
+
+                                {/* Imagen de perfil al final si ES tu mensaje */}
+                                {isOwnMessage && (
                                     <img
                                         src={msg.fotoPerfil}
                                         alt={msg.sender}
-                                        className="rounded-circle"
+                                        className="rounded-circle ms-2"
                                         width={40}
                                         height={40}
                                     />
                                 )}
                             </Col>
                         </Row>
-                    ))}
+                    );
+                })}
                 </InfiniteScroll>
             </div>
 
