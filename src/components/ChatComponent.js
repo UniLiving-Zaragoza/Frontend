@@ -61,7 +61,7 @@ function ChatComponent({ dataMessages, icon, onIconClick, onSendMessage, newMess
                     {dataMessages.map((msg) => (
                         <Row
                             key={msg.id}
-                            className={`d-flex ${msg.id === user.id ? "justify-content-end" : "justify-content-start"} mb-2`}
+                            className={`d-flex ${msg.userId._id === user.id ? "justify-content-end" : "justify-content-start"} mb-2`}
                         >
                             <Col xs="auto" className="d-flex align-items-center">
                                 {msg.id !== user.id && (

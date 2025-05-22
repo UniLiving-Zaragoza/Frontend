@@ -20,8 +20,9 @@ const ChatIndividual = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(true);
-
+    const [loadingMore, setLoadingMore] = useState(false);
     const limit = 5;
+
 
     // Join a la sala del chat y escuchar nuevos mensajes
     useEffect(() => {
@@ -57,15 +58,17 @@ const ChatIndividual = () => {
             socket.disconnect();
         };
     }, [chatId]);
+    
 
     // Cargar mensajes paginados
-    const fetchMessages = useCallback(async () => {
+    const fetchMessages = useCallback(async (pageToFetch) => {
         try {
             const res = await axios.get(`${API_URL}/privateChat/${chatId}/messages/`, {
-                params: { page, limit },
+                params: { page: pageToFetch, limit },
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+            // Mapeo igual...
             const mappedMessages = res.data.messages.map(msg => ({
                 id: msg._id,
                 text: msg.content,
@@ -83,13 +86,13 @@ const ChatIndividual = () => {
             });
 
             setHasMore(mappedMessages.length === limit);
-            setPage(prev => prev + 1);
+            setPage(pageToFetch + 1);
         } catch (err) {
             console.error("Error cargando mensajes:", err);
         } finally {
             setLoading(false);
         }
-    }, [chatId, page, token]);
+    }, [chatId, token]);
 
     useEffect(() => {
         fetchMessages();
@@ -97,7 +100,7 @@ const ChatIndividual = () => {
 
     const handleSendMessage = async () => {
         try {
-            await axios.post(`${API_URL}/messages`, {
+            const res = await axios.post(`${API_URL}/messages`, {
                 content: newMessage,
                 userId: user.id,
                 privateChat: chatId,
@@ -106,12 +109,35 @@ const ChatIndividual = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+            // Añadir localmente optimista
+            const sentMsg = res.data; // o adapta según respuesta real
+            setMessages(prev => [...prev, {
+                id: sentMsg._id,
+                text: sentMsg.content,
+                sentDate: sentMsg.sentDate,
+                userId: user.id,
+                fotoPerfil: user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360',
+                sender: `${user.firstName} ${user.lastName}`,
+                isLive: true
+            }]);
+
             setNewMessage('');
-            // No añadimos aquí, lo escuchamos vía socket
         } catch (err) {
             console.error("Error enviando mensaje:", err);
         }
     };
+
+    const loadMoreMessages = async () => {
+        setLoadingMore(true);
+        await fetchMessages(page);
+        setLoadingMore(false);
+    };
+
+
+    useEffect(() => {
+        setPage(1);
+        fetchMessages(1);
+    }, [fetchMessages])
 
     return (
         <div className="App">
@@ -133,18 +159,25 @@ const ChatIndividual = () => {
                     </Col>
                 </Row>
 
+                {loadingMore && (
+                    <div className="d-flex justify-content-center my-3">
+                        <Spinner animation="border" variant="primary" />
+                    </div>
+                )}
+
                 {loading ? (
                     <div className="d-flex justify-content-center my-5">
                         <Spinner animation="border" variant="primary" />
                     </div>
                 ) : (
+                
                     <ChatComponent
                         dataMessages={messages}
                         onSendMessage={handleSendMessage}
                         newMessage={newMessage}
                         setNewMessage={setNewMessage}
-                        loadMoreMessages={fetchMessages}
-                        hasMore={hasMore}
+                        loadMoreMessages={loadMoreMessages}
+                        hasMore={hasMore} 
                         icon={null} // Si quieres pasar icono de reporte, hazlo
                     />
                 )}
