@@ -175,9 +175,8 @@ const ChatGlobal = () => {
                     <Row className="mb-3 text-center">
                         <Col>
                             <Button
-                                variant="primary"
-                                className="w-100 rounded-pill"
-                                style={{ backgroundColor: "#000842" }}
+                                variant="light"
+                                className="w-100 border border-dark rounded-pill"
                                 onClick={() => navigate("/lista-chats")}
                             >
                                 Emparejamientos
@@ -185,8 +184,9 @@ const ChatGlobal = () => {
                         </Col>
                         <Col>
                             <Button
-                                variant="light"
-                                className="w-100 border border-dark rounded-pill"
+                                variant="primary"
+                                className="w-100 rounded-pill"
+                                style={{ backgroundColor: "#000842" }}
                             >
                                 Chat General
                             </Button>
