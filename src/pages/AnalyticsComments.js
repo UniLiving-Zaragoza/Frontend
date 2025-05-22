@@ -258,7 +258,7 @@ const AnalyticsCommentsPage = () => {
 
     const commentsContainerMaxHeight =
         isAuthenticated && isAdmin
-            ? 'calc(100vh - 200px)'
+            ? 'calc(100vh - 230px)'
             : isAuthenticated && !isAdmin
             ? 'calc(100vh - 320px)'
             : 'calc(100vh - 265px)';
@@ -391,7 +391,7 @@ const AnalyticsCommentsPage = () => {
                                     <div className="d-flex align-items-center">
                                         <Link to={`/perfil/${comment.user._id || comment.user}`}>
                                             <img
-                                                src={comment.user.profilePicture || 'https://img.freepik.com/vector-premium/ilustracion-plana-vectorial-escala-gris-profilo-usuario-avatar-imagen-perfil-icono-persona-profilo-negocio-mujer-adecuado-profiles-redes-sociales-iconos-protectores-pantalla-como-plantillax9_719432-1339.jpg?w=360'}
+                                                src={comment.user.profilePicture || 'https://st2.depositphotos.com/19428878/44645/v/450/depositphotos_446453832-stock-illustration-default-avatar-profile-icon-social.jpg'}
                                                 alt={`${comment.user.firstName} ${comment.user.lastName}`}
                                                 className="rounded-circle"
                                                 style={{ width: '60px', height: '60px', objectFit: 'cover' }}
